@@ -98,7 +98,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected $_xrdsLocationHeaderUrl = '';
 
-    /*
+    /**
      * Default XRI namespaces as defined in the Yadis Specification. The xrd
      * namespace XRI should be present although its not declared a requirement.
      *
@@ -109,7 +109,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         'xrd' => 'xri://$xrd*($v*2.0)'
     );
 
-    /*
+    /**
      * Contains the current valid Yadis response type as declared in the class
      * constants. This allows the discovery process determine when the response
      * cycle described by the Yadis Specification becomes invalid, i.e. a failure
@@ -215,7 +215,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     public function addNamespace($namespace, $namespaceUrl)
     {
         if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
-            throw new Zend_Service_Yadis_Exception('Require a valid namespace id and url.');
+            throw new Zend_Service_Yadis_Exception('Requires a valid namespace id and url');
         }
         $this->_namespaces[$namespace] = $namespaceUrl;
         return $this;
@@ -264,15 +264,15 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             unset($response);
             $response = $this->_get($currentUri);
             $resourceType = $this->_getResourceType($response);
-            /*
+            /**
              * For reference, the Yadis Spec 1.0 specifies that we must use a
              * valid response-header in preference all other responses. So even
              * if we receive an XRDS Content-Type, if it also includes an
-             * X-XRDS-Location header we must follow it, and ignore the response
+             * X-XRDS-Location header we must follow it and ignore the response
              * body. Being forgiving would breach the specification.
              *
              * Note: The specifications allow a HEAD request instead of a GET
-             * request where the response might be headers-only. Here, we solely
+             * request where the response might be headers-only. Here we solely
              * use GET requests. Would using an initial HEAD make an overall
              * difference in terms of execution time? Might if the majority do
              * not have personal URLs as aliases.
@@ -300,7 +300,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
 
         if ($xrdsDocument)
         {
-            /*
+            /**
              * If we found a valid XRDS document, then we use SimpleXML to
              * parse out the Service List and data and return it to the
              * user as an object of type Zend_Service_Yadis_Xrds which will
@@ -386,7 +386,8 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         if (empty($location)) {
             return false;
         } elseif (!Zend_Uri::check($location)) {
-            throw new Zend_Service_Yadis_Exception('Invalid URI: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
+            throw new Zend_Service_Yadis_Exception('Invalid URI: '
+                . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         $this->_xrdsLocationHeaderUrl = $location;
         return true;
@@ -420,7 +421,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isMetaHttpEquiv(Zend_Http_Response $response)
     {
-        /*
+        /**
          * This is a very strict regex for <meta> elements. Might need to be
          * loosened unless specifically required to be strictly adhered to.
          */
@@ -438,11 +439,10 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         } elseif (!Zend_Uri::check($location)) {
             throw new Zend_Service_Yadis_Exception('Invalid URI: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
-        /*
+        /**
          * Should now contain the content value of the http-equiv type pointing
          * to an XRDS resource for the user's Identity Provider, as found by
-         * passing the meta regex across the response body. e.g.
-         *      http://yourname.myopenid.com/xrds
+         * passing the meta regex across the response body.
          */
         $this->_metaHttpEquivUrl = $location;
         return true;
@@ -460,6 +460,12 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     {
         try {
             $xrds = new SimpleXMLElement($xrdsDocument);
+            /**
+             * Register all namespaces as set previously for the object.
+             */
+            foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
+                $xrds->registerXPathNamespace($namespace, $namespaceUrl);
+            }
             $serviceSet = new Zend_Service_Yadis_Xrds($xrds);
         } catch (Zend_Exception $e) {
             return false;
