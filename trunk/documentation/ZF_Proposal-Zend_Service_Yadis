@@ -1,0 +1,251 @@
+Ok, since I'm aware that OpenID is likely not suitable as a single proposal I'm going to select subparts that are requirements and see what folk think. Assuming there are no immediate rejections I will then submit these as formal Proposals on the Wiki, and hopefully receive Laboratory access in due course. I recognise that these are likely outside the scope of 1.0, and just note the end goal (while supporting other generic use cases) is to implement Zend_Auth adapters (Consumers) for both OpenID and the simpler Typekey. I do have a CLA in place in case that crops up ;).
+
+This initial proposal is for Zend_Service_Yadis. I figured just adding the draft would fill the blanks better than my rambling at length (I did that on my blog instead!).
+
+Overview
+
+Zend_Service_Yadis will provide a method of Service Discovery implemented in accordance with the Yadis Specification 1.0. This describes a protocol for locating an XRD document which details Services available. The XRD is typically specific to a single user, identified by their Yadis ID.
+
+The simplest use case is decentralised authentication via OpenID. The Yadis ID is a user's OpenID URL, or a personal URL alias. The available Services are the Signon and Simple Registration versions supported. The XRD document will also contain the Service URL to which requests should be made, and the OpenID Delegate URL by which the OpenID Server knows this user. Yadis is a fundamental requirement for the current OpenID specification, and also for several other authentication schemes such as Light-Weight Identity and mIDm.
+
+References
+
+The Yadis Specification 1.0
+
+Component Requirements, Constraints, and Acceptance Criteria
+
+Zend_Service_Yadis would implement the 1.0 protocol and rules for locating a valid XRD document and parsing the XML into a list of Services and Service details. Services would be returned as an array of data objects or containers.
+Zend_Service_Yadis would adhere strictly to the Yadis Specification 1.0 as regards handling Response preferences and Service/URL priorities.
+
+Theory of Operation
+
+Fetch a valid XRD document, parse to obtain a list of Services and Service Details, return Services as an array of data objects.
+
+Milestones/Tasks
+
+1. Implement basic service using Zend dependencies
+2. Unit Tests and class refactoring
+3. Debugging and Use Case testing
+4. Documentation
+
+Class Index
+
+1. Zend_Service_Yadis (the basic class for performing Service Discovery)
+2. Zend_Service_Yadis_Exception
+3. Zend_Service_Yadis_Service (repetitive but Yadis refers to Services)
+4. Zend_Service_Yadis_XRD (XML parser for XDF documents using SimpleXML)
+
+Use Cases
+
+Retrieve an OpenID service description, and echo supported service types.
+
+require_once 'Zend/Service/Yadis.php';
+$userOpenidUrl = 'http://username.example.com';
+$yadis = new Zend_Service_Yadis($userOpenidUrl);
+$services = $yadis->discovery();
+
+foreach($services) {
+    echo $service->getUrl(), '<br />';
+    foreach($service->getTypes() as $type_url)
+    {
+        echo $type_url, '<br />';
+    }
+}
+
+Class Skeletons
+
+Only showing Zend_Service_Yadis since the rest are the possible results of future refactoring. phpDoc comments omitted, will be added back when a formal proposal on the Wiki.
+
+class Zend_Service_Yadis extends Zend_Service_Abstract
+{
+
+    const XRDS_META_HTTP_EQUIV = 2;
+
+    const XRDS_LOCATION_HEADER = 4;
+
+    const XRDS_CONTENT_TYPE = 8;
+
+    const XRDS_ERROR = 16;
+
+    protected $_identityUrl = '';
+
+    /**
+     * This is the response (if any) received when the original identity
+     * Url points to a user's personal site address. In their index page's
+     * HTML, there may be information essential as a fallback option in the
+     * event the Yadis discovery cycle fails to find a valid XRDS document.
+     *
+     * @var Zend_Http_Response
+     */
+    protected $_userUrlResponse = null;
+
+    /**
+     * A URL parsed from a HTML document's <meta> tag inserted in accordance
+     * with the Yadis Spec 1.0 and which points to a Yadis (XRDS) document.
+     *
+     * @var string
+     */
+    protected $_metaHttpEquivUrl = '';
+
+    /**
+     * A URL parsed from an X-XRDS-Location response header. Should point to
+     * a Yadis (XRDS) document.
+     *
+     * @var string
+     */
+    protected $_xrdsLocationHeaderUrl = '';
+
+    /*
+     * Default namespaces possibly present in a Yadis XRDS document.
+     * Can add additional namespaces for a specific service via the
+     * Firiba_Service_Yadis constructor.
+     */
+    protected $_namespaces = array(
+        'xrds' => 'xri://$xrds',
+        'xrd' => 'xri://$xrd*($v*2.0)'
+    );
+
+    /*
+     * Not implemented yet.
+     * Once we've issues so many requests we can assume the original
+     * Yadis ID (URL) is invalid, or does not correctly point to a
+     * Yadis document in accordance with the Yadis Specification.
+     *
+     * @var integer
+     */
+    protected $_maxRequests = 4;
+    
+
+    public function __construct($identityUrl, $namespaces = null)
+    {
+    }
+
+    /*
+     * Identity Url is the url you're suppossed to type into all those
+     * Typekey/Openid form fields you see floating around. Yadis is not
+     * service specific of course,so we'll try to keep the class generic
+     * and focus on successfully retrieving and parsing a valid XRD document.
+     */
+    public function setIdentityUrl($identityUrl)
+    {
+    }
+
+    /*
+     * Get the User's submitted Identity Url, will add provisional
+     * support for XRIs at a later stage.
+     */
+    public function getIdentityUrl()
+    {
+    }
+
+    /*
+     * Add custom namespaces from an array.
+     */
+    public function setNamespaces(array $namespaces)
+    {
+    }
+
+    /*
+     * Add a non-default namespace for use when parsing the XRD document.
+     * Openid for example uses an "openid" namespace for openid:Delegate.
+     */
+    public function addNamespace($namespace, $namespaceUrl)
+    {
+    }
+
+    /*
+     * Get a specific namespace from the namespace array used by the XML
+     * parser for XRD documents.
+     */
+    public function getNamespace($namespace)
+    {
+        if(array_key_exists($namespace, $this->_namespaces))
+        {
+            return $this->_namespaces[$namespace];
+        }
+        return null;
+    }
+
+    /*
+     * Return an array of current namespaces in use for an XRD document.
+     */
+    public function getNamespaces()
+    {
+    }
+
+    /**
+     * Performs Discovery, i.e. the requesting and parsing of a valid
+     * Yadis (XRD) document into a list of Services and Service Data. This
+     * list will be returned by this method as an array, or FALSE on failure.
+     */
+    public function discovery()
+    {
+    }
+
+    /*
+     * Return the original response to the initial GET request. This is
+     * useful where Services have a fallback solution when Yadis service
+     * discovery fails for some reason, e.g. OpenID's use of <link> elements
+     */
+    public function getUserUrlResponse()
+    {
+    }
+
+    /*
+     * Identify the Response type as detailed in the Yadis Spec 1.0
+     * and return a matching class constant for the identifier.
+     */
+    protected function _getResourceType(Zend_Http_Response $response)
+    {
+    }
+
+    /*
+     * Generic URI GETter based on Zend_Http_Client
+     * Support for HEAD requests may also be used in the primary
+     * first request in expectation of a headers-only response.
+     */
+    protected function _get($url)
+    {
+    }
+    
+    /*
+     * Checks whether the Response contains headers which detail where
+     * we can find the XRDS resource for this user. If exists, the value
+     * is set to the private $_xrdsLocationHeaderUrl property.
+     */
+    protected function _isXrdsLocationHeader(Zend_Http_Response $response)
+    {
+    }
+
+    /*
+     * Checks whether the Response contains the XRDS resource. It should, per
+     * the specifications always be served as application/xrds+xml
+     */
+    protected function _isXrdsContentType(Zend_Http_Response $response)
+    {
+    }
+
+    /*
+     * Assuming this user is hosting a third party stored identity under an alias
+     * of a personal website, we'll need to check if the website URL body (which
+     * we just fetched if this is the case) has a http-equiv meta tag pointing
+     * to where we can fetch the XRDS resource.
+     */
+    protected function _isMetaHttpEquiv(Zend_Http_Response $response)
+    {
+    }
+
+    /*
+     * Note: The Yadis Specification states that only the last XRD element is to
+     * be considered a valid Yadis Resource Descriptor. This means we must ignore
+     * all XRD elements (if more than one) except the last one. We should also
+     * ignore all other elements which are at the root level and are not XRD.
+     */
+    protected function _parseXrds($xrdsResource)
+    {  
+    }
+
+}
+
+
+Comments welcome as always - will add as a formal proposal in the absence of objections.
