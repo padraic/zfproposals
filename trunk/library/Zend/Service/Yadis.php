@@ -1,4 +1,23 @@
 <?php
+/**
+ * Zend Framework
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   Zend
+ * @package    Zend_Service
+ * @subpackage Yadis
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
 
 /** Zend_Service_Abstract */
 require_once 'Zend/Service/Abstract.php';
@@ -113,13 +132,13 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function __construct($yadisId = null, $namespaces = null)
     {
-        if(!is_null($yadisId))
-        {
+        if (!is_null($yadisId)) {
             $this->setYadisId($yadisId);
         }
-        if(is_array($namespaces) && count($namespaces) > 0)
-        {
+        if (isset($namespaces) && is_array($namespaces) && count($namespaces) > 0) {
             $this->addNamespaces($namespaces);
+        } elseif (isset($namespaces)) {
+            throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; got ' . gettype($namespaces));
         }
     }
 
@@ -142,8 +161,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     {
         $this->_yadisId = $yadisId;
         require_once 'Zend/Uri.php';
-        if (Zend_Uri::check($yadisId))
-        {
+        if (Zend_Uri::check($yadisId)) {
             $this->_yadisUrl = $yadisId;
             return $this;
         }
@@ -181,8 +199,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function addNamespaces(array $namespaces)
     {
-        foreach($namespaces as $namespace=>$namespaceUrl)
-        {
+        foreach($namespaces as $namespace=>$namespaceUrl) {
             $this->addNamespace($namespace, $namespaceUrl);
         }
         return $this;
@@ -197,8 +214,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function addNamespace($namespace, $namespaceUrl)
     {
-        if(empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl))
-        {
+        if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
             throw new Zend_Service_Yadis_Exception('Require a valid namespace id and url.');
         }
         $this->_namespaces[$namespace] = $namespaceUrl;
@@ -212,8 +228,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function getNamespace($namespace)
     {
-        if(array_key_exists($namespace, $this->_namespaces))
-        {
+        if (array_key_exists($namespace, $this->_namespaces)) {
             return $this->_namespaces[$namespace];
         }
         return null;
@@ -245,8 +260,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         $xrdsDocument = null;
         $response = null;
 
-        while($xrdsDocument === null)
-        {
+        while($xrdsDocument === null) {
             unset($response);
             $response = $this->_get($currentUri);
             $resourceType = $this->_getResourceType($response);
@@ -263,8 +277,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
              * difference in terms of execution time? Might if the majority do
              * not have personal URLs as aliases.
              */
-            switch($resourceType)
-            {
+            switch($resourceType) {
                 case self::XRDS_LOCATION_HEADER:
                     $currentUri = $this->_xrdsLocationHeaderUrl;
                     break;
@@ -281,12 +294,11 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             }
         }
 
-        if($resourceType == self::XRDS_ERROR)
-        {
+        if ($resourceType == self::XRDS_ERROR) {
             throw new Zend_Service_Yadis_Exception('Yadis service failure: Unable to locate a valid XRDS resource.');
         }
 
-        if($xrdsDocument)
+        if ($xrdsDocument)
         {
             /*
              * If we found a valid XRDS document, then we use SimpleXML to
@@ -309,7 +321,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function getInitialResponse()
     {
-        if($this->_initialResponse instanceof Zend_Http_Response)
+        if ($this->_initialResponse instanceof Zend_Http_Response)
         {
             return $this->_initialResponse;
         }
@@ -325,16 +337,11 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _getResourceType(Zend_Http_Response $response)
     {
-        if($this->_isXrdsLocationHeader($response))
-        {
+        if ($this->_isXrdsLocationHeader($response)) {
             return self::XRDS_LOCATION_HEADER;
-        }
-        elseif($this->_isXrdsContentType($response))
-        {
+        } elseif ($this->_isXrdsContentType($response)) {
             return self::XRDS_CONTENT_TYPE;
-        }
-        elseif($this->_isMetaHttpEquiv($response))
-        {
+        } elseif ($this->_isMetaHttpEquiv($response)) {
             return self::XRDS_META_HTTP_EQUIV;
         }
         return self::XRDS_ERROR;
@@ -371,20 +378,14 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isXrdsLocationHeader(Zend_Http_Response $response)
     {
-        if($response->getHeader('x-xrds-location'))
-        {
+        if ($response->getHeader('x-xrds-location')) {
             $location = $response->getHeader('x-xrds-location');
-        }
-        elseif($response->getHeader('x-yadis-location'))
-        {
+        } elseif ($response->getHeader('x-yadis-location')) {
             $location = $response->getHeader('x-yadis-location');
         }
-        if(empty($location))
-        {
+        if (empty($location)) {
             return false;
-        }
-        elseif(!Zend_Uri::check($location))
-        {
+        } elseif (!Zend_Uri::check($location)) {
             throw new Zend_Service_Yadis_Exception('Invalid URI: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         $this->_xrdsLocationHeaderUrl = $location;
@@ -400,8 +401,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isXrdsContentType(Zend_Http_Response $response)
     {
-        if(!$response->getHeader('Content-Type') || $response->getHeader('Content-Type') !== 'application/xrds+xml')
-        {
+        if (!$response->getHeader('Content-Type') || $response->getHeader('Content-Type') !== 'application/xrds+xml') {
             return false;
         }
         return true;
@@ -428,19 +428,14 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         $matches = null;
         $location = null;
         preg_match_all($metaRegex, $response->getBody(), $matches, PREG_PATTERN_ORDER);
-        for ($i=0;$i < count($matches[1]);$i++)
-        {
-            if(strtolower($matches[1][$i]) == "x-xrds-location" || strtolower($matches[1][$i]) == "x-yadis-location")
-            {
+        for ($i=0;$i < count($matches[1]);$i++) {
+            if (strtolower($matches[1][$i]) == "x-xrds-location" || strtolower($matches[1][$i]) == "x-yadis-location") {
                 $location = $matches[2][$i];
             }
         }
-        if(empty($location))
-        {
+        if (empty($location)) {
             return false;
-        }
-        if(!Zend_Uri::check($location))
-        {
+        } elseif (!Zend_Uri::check($location)) {
             throw new Zend_Service_Yadis_Exception('Invalid URI: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         /*
@@ -463,8 +458,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _parseXrds($xrdsDocument)
     {
-        try
-        {
+        try {
             $xrds = new SimpleXMLElement($xrdsDocument);
             $serviceSet = new Zend_Service_Yadis_Xrds($xrds);
         } catch (Zend_Exception $e) {
