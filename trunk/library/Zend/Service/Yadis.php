@@ -12,10 +12,15 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
+ * This class forms part of a proposal for the Zend Framework. The attached
+ * copyright will be transferred to Zend Technologies USA Inc. upon future
+ * acceptance of that proposal:
+ *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
+ *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -39,6 +44,11 @@ require_once 'Zend/Service/Yadis/Xrds.php';
  * exists, refer to the Yadis Specification 1.0 at:
  *      http://yadis.org/papers/yadis-v1.0.pdf
  *
+ * @uses       Zend_Service_Abstract
+ * @category   Zend
+ * @package    Zend_Service
+ * @subpackage Yadis
+ * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis extends Zend_Service_Abstract
@@ -50,11 +60,12 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     const XRDS_META_HTTP_EQUIV = 2;
     const XRDS_LOCATION_HEADER = 4;
     const XRDS_CONTENT_TYPE = 8;
-    const XRDS_ERROR = 16;
 
     /**
      * The current Yadis ID; this is the raw form initially submitted prior
-     * to any transformation/validation as an URL.
+     * to any transformation/validation as an URL. This *may* allow IRI support
+     * in the future given IRIs map to URIs and adoption of the IRI standard
+     * and are entering common use internationally.
      *
      * @var string
      */
@@ -78,7 +89,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      *
      * @var Zend_Http_Response
      */
-    protected $_initialResponse = null;
+    protected $_metaHttpEquivResponse = null;
 
     /**
      * A URL parsed from a HTML document's <meta> element inserted in
@@ -110,14 +121,20 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     );
 
     /**
-     * Contains the current valid Yadis response type as declared in the class
-     * constants. This allows the discovery process determine when the response
-     * cycle described by the Yadis Specification becomes invalid, i.e. a failure
-     * to obtain any URI pointing to an XRD document.
+     * Array of valid HTML Content-Types. Required since Yadis states agents
+     * must parse a document if received as the first response and with an
+     * MIME type indicating HTML or XHTML. Listed in order of prioroty, with
+     * HTML taking priority over XHTML.
      *
-     * @var integer
+     * @link http://www.w3.org/International/articles/serving-xhtml/Overview.en.php
+     * @var array
      */
-    protected $_status = null;
+    $_htmlContentTypeList = array(
+        'text/html',
+        'application/xhtml+xml',
+        'application/xml',
+        'text/xml'
+    );
     
     /**
      * Class Constructor
@@ -130,15 +147,16 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @param   string $yadisId
      * @param   array $namespaces
      */
-    public function __construct($yadisId = null, $namespaces = null)
+    public function __construct($yadisId = null, array $namespaces = null)
     {
-        if (!is_null($yadisId)) {
+        if (isset($yadisId)) {
             $this->setYadisId($yadisId);
         }
-        if (isset($namespaces) && is_array($namespaces) && count($namespaces) > 0) {
+        if (isset($namespaces) && count($namespaces) > 0) {
             $this->addNamespaces($namespaces);
         } elseif (isset($namespaces)) {
-            throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; got ' . gettype($namespaces));
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; but array appears to be empty');
         }
     }
 
@@ -215,6 +233,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     public function addNamespace($namespace, $namespaceUrl)
     {
         if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
+            require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Requires a valid namespace id and url');
         }
         $this->_namespaces[$namespace] = $namespaceUrl;
@@ -259,71 +278,72 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         $currentUri = $this->getYadisUrl();
         $xrdsDocument = null;
         $response = null;
+        $xrdStatus = false;
 
         while($xrdsDocument === null) {
-            unset($response);
             $response = $this->_get($currentUri);
-            $resourceType = $this->_getResourceType($response);
+            if (!$this->_metaHttpEquivResponse) {
+                $this->_metaHttpEquivResponse = $response;
+            }
+            $responseType = $this->_getResponseType($response);
+            
             /**
-             * For reference, the Yadis Spec 1.0 specifies that we must use a
-             * valid response-header in preference all other responses. So even
-             * if we receive an XRDS Content-Type, if it also includes an
-             * X-XRDS-Location header we must follow it and ignore the response
-             * body. Being forgiving would breach the specification.
-             *
-             * Note: The specifications allow a HEAD request instead of a GET
-             * request where the response might be headers-only. Here we solely
-             * use GET requests. Would using an initial HEAD make an overall
-             * difference in terms of execution time? Might if the majority do
-             * not have personal URLs as aliases.
+             * If prior response type was a location header, or a http-equiv
+             * content value, then it should have contained a valid URI to
+             * an XRD document. Each of these when detected would set the
+             * xrdStatus flag to true.
              */
-            switch($resourceType) {
+            if (!$responseType == self::XRDS_CONTENT_TYPE && $xrdStatus == true) {
+                require_once 'Zend/Service/Yadis/Exception.php';
+                throw new Zend_Service_Yadis_Exception('Yadis protocol could not locate a valid XRD document');
+            }
+            
+            /**
+             * The Yadis Spec 1.0 specifies that we must use a valid response
+             * header in preference to other responses. So even if we receive
+             * an XRDS Content-Type, if it also includes an X-XRDS-Location
+             * header we must request the URI and ignore the response body.
+             */
+            switch($responseType) {
                 case self::XRDS_LOCATION_HEADER:
+                    $xrdStatus = true;
                     $currentUri = $this->_xrdsLocationHeaderUrl;
                     break;
                 case self::XRDS_META_HTTP_EQUIV:
-                    $this->_userUriResponse = $response;
+                    $xrdStatus = true;
                     $currentUri = $this->_metaHttpEquivUrl;
                     break;
                 case self::XRDS_CONTENT_TYPE:
                     $xrdsDocument = $response->getBody();
                     break;
-                default: 
-                    $resourceType = self::XRDS_ERROR;
-                    $xrdsDocument = false; // exit the while loop
+                default:
+                    require_once 'Zend/Service/Yadis/Exception.php';
+                    throw new Zend_Service_Yadis_Exception('Yadis protocol could not locate a valid XRD document');
             }
         }
 
-        if ($resourceType == self::XRDS_ERROR) {
-            throw new Zend_Service_Yadis_Exception('Yadis service failure: Unable to locate a valid XRDS resource.');
-        }
-
-        if ($xrdsDocument)
-        {
-            /**
-             * If we found a valid XRDS document, then we use SimpleXML to
-             * parse out the Service List and data and return it to the
-             * user as an object of type Zend_Service_Yadis_Xrds which will
-             * implement SeekableIterator.
-             */
+        try {
             $serviceList = $this->_parseXrds($xrdsDocument);
-            return $serviceList;
+        } catch (Zend_Exception $e) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('XRD Document could not be parsed with the following message: ' . $e->getMessage(), $e->getCode());
         }
-        return false;
+        return $serviceList;
     }
 
     /**
      * Return the very first response received when using a valid Yadis URL.
      * This is important for Services, like OpenID, which can attempt a
-     * fallback solution in case Yadis fails.
+     * fallback solution in case Yadis fails, and the response came from a
+     * user's personal URL acting as an alias.
      *
      * @return  Zend_Http_Response
      */
-    public function getInitialResponse()
+    public function getUserResponse()
     {
-        if ($this->_initialResponse instanceof Zend_Http_Response)
+        if ($this->_metaHttpEquivResponse instanceof Zend_Http_Response)
         {
-            return $this->_initialResponse;
+            return $this->_metaHttpEquivResponse;
         }
         return null;
     }
@@ -335,7 +355,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      *
      * @return  integer
      */
-    protected function _getResourceType(Zend_Http_Response $response)
+    protected function _getResponseType(Zend_Http_Response $response)
     {
         if ($this->_isXrdsLocationHeader($response)) {
             return self::XRDS_LOCATION_HEADER;
@@ -362,8 +382,16 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         $client = self::getHttpClient();
         $client->setUri($url);
         $client->setMethod(Zend_Http_Client::GET);
+        /**
+         * Enable Host to use content negotiation where possible.
+         */
         $client->setHeaders('Accept', 'application/xrds+xml');
-        return $client->request();
+        $response = $client->request();
+        if (!$response->isSuccessful()) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Invalid response to Yadis protocol received: ' . $response->getStatus() . ' ' . $response->getMessage());
+        }
+        return $response;
     }
     
     /**
@@ -421,7 +449,11 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isMetaHttpEquiv(Zend_Http_Response $response)
     {
+        if (!in_array($response->getHeader('Content-Type'), $this->_htmlContentTypeList)) {
+            return false;
+        }
         /**
+         * If HTML, check for a valid <meta> element in <head>.
          * This is a very strict regex for <meta> elements. Might need to be
          * loosened unless specifically required to be strictly adhered to.
          */
@@ -430,14 +462,15 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         $location = null;
         preg_match_all($metaRegex, $response->getBody(), $matches, PREG_PATTERN_ORDER);
         for ($i=0;$i < count($matches[1]);$i++) {
-            if (strtolower($matches[1][$i]) == "x-xrds-location" || strtolower($matches[1][$i]) == "x-yadis-location") {
+            if (strtolower($matches[1][$i]) == "X-XRDS-location" || strtolower($matches[1][$i]) == "X-YADIS-location") {
                 $location = $matches[2][$i];
             }
         }
         if (empty($location)) {
             return false;
         } elseif (!Zend_Uri::check($location)) {
-            throw new Zend_Service_Yadis_Exception('Invalid URI: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('The URI parsed from the HTML document appears to be invalid: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         /**
          * Should now contain the content value of the http-equiv type pointing
@@ -458,18 +491,14 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _parseXrds($xrdsDocument)
     {
-        try {
-            $xrds = new SimpleXMLElement($xrdsDocument);
-            /**
-             * Register all namespaces as set previously for the object.
-             */
-            foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
-                $xrds->registerXPathNamespace($namespace, $namespaceUrl);
-            }
-            $serviceSet = new Zend_Service_Yadis_Xrds($xrds);
-        } catch (Zend_Exception $e) {
-            return false;
+        $xrds = new SimpleXMLElement($xrdsDocument);
+        /**
+         * Register all namespaces as set previously for the object.
+         */
+        foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
+            $xrds->registerXPathNamespace($namespace, $namespaceUrl);
         }
+        $serviceSet = new Zend_Service_Yadis_Xrds($xrds);
         return $serviceSet;
     }
 

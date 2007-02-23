@@ -12,16 +12,32 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
+ * This class forms part of a proposal for the Zend Framework. The attached
+ * copyright will be transferred to Zend Technologies USA Inc. upon future
+ * acceptance of that proposal:
+ *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
+ *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Service_Yadis_Exception */
 require_once 'Zend/Service/Yadis/Exception.php';
 
 /**
+ * The Zend_Service_Yadis_Xrds class is a wrapper for Service elements of an
+ * XRD document which is parsed using SimpleXML, and contains methods for
+ * retrieving data about each Service, including Type, Url and other arbitrary
+ * data added in a separate namespace, e.g. openid:Delegate.
+ *
+ * @uses       SeekableIterator
+ * @category   Zend
+ * @package    Zend_Service
+ * @subpackage Yadis
+ * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis_Xrds implements SeekableIterator
