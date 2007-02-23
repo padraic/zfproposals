@@ -55,11 +55,11 @@ class Zend_Service_Yadis_Xrds implements Iterator
     protected $_currentKey = 0;
 
     /**
-     * Contains the valid xrd:XRD node parsed from the XRD document.
+     * Contains the valid xrd:XRD nodes parsed from the XRD document.
      *
      * @var SimpleXMLElement
      */
-    protected $_xrdNode = null;
+    protected $_xrdNodes = null;
 
     /**
      * Default XRI namespaces as defined in the Yadis Specification. The xrd
@@ -86,11 +86,12 @@ class Zend_Service_Yadis_Xrds implements Iterator
         if(isset($namespaces)){
             $this->_namespaces = array_merge($namespaces, $this->_namespaces);
         }
-        $xrdNode = $this->_getValidXrdNode($xrds);
-        if(!$xrdNode){
+        $xrdNodes = $this->_getValidXrdNodes($xrds);
+        if(!$xrdNodes){
+            require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('The XRD document was found to be invalid');
         }
-        $this->_xrdNode = $xrdNode;
+        $this->_xrdNodes = $xrdNodes;
     }
  
     /**
@@ -129,18 +130,6 @@ class Zend_Service_Yadis_Xrds implements Iterator
      * @return boolean
      */ 
     public function rewind()
-    {}
- 
-    /**
-     * Implements Iterator::seek()
-     * 
-     * Seek to an absolute position.
-     *
-     * @param  integer $key
-     * @return Zend_Service_Yadis_Service
-     * @throws Zend_Service_Yadis_Exception
-     */ 
-    public function seek($key)
     {}
  
     /**
@@ -206,7 +195,7 @@ class Zend_Service_Yadis_Xrds implements Iterator
         return $this->_namespaces;
     }
 
-    protected function _getValidXrdNode(SimpleXMLElement $xrds)
+    protected function _getValidXrdNodes(SimpleXMLElement $xrds)
     {
         /**
          * Register all namespaces to this SimpleXMLElement.
@@ -238,16 +227,18 @@ class Zend_Service_Yadis_Xrds implements Iterator
         }
 
         /**
-         * Grab the XRD element which contains details of the service provider's
-         * Server url, service types, and other details. We should take only one
-         * XRD element as this is a requirement of the Yadis Specification.
+         * Grab the XRD elements which contains details of the service provider's
+         * Server url, service types, and other details. Concrete subclass may
+         * have additional requirements concerning node priority or valid position
+         * in relation to other nodes. E.g. Yadis requires only using the *last*
+         * node.
          */
         $xrdNodes = $xrds->xpath('/xrds:XRDS[1]/xrd:XRD');
         if(!$xrdNodes)
         {
             return null;
         }
-        return $xrdNodes[count($xrdNodes) - 1];
+        return $xrdNodes;
     }
 
     protected function _registerNamespacesOn(SimpleXMLElement $element)
@@ -255,6 +246,30 @@ class Zend_Service_Yadis_Xrds implements Iterator
         foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
             $element->registerXPathNamespace($namespace, $namespaceUrl);
         }
+    }
+
+    /**
+     * Sort all elements in a list by priority in accordance with the rules
+     * defined by Clause 3.3.3 of the XRI Resolution 2.0 Specification with
+     * the aim of establishing order descending of highest priority.
+     *      http://yadis.org/wiki/XRI_Resolution_2.0_specification
+     *
+     * @param   Zend_Service_Yadis_Service $service
+     */
+    protected function _sortByPriority(array $elements)
+    {
+        /**
+         * Sort by numeric priority index ascending, i.e. higher priorities
+         * occur at the top of the iterable list.
+         */
+        ksort($elements, SORT_NUMERIC);
+
+        /**
+         * Detect key collisions and apply a random order to such duplicated
+         * keys.
+         */
+        
+        
     }
 
 }

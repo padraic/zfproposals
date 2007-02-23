@@ -44,6 +44,19 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
 {
 
     /**
+     * Establish a lowest priority integer; we'll take the upper 2^31
+     * integer limit.
+     */
+    const SERVICE_LOWEST_PRIORITY = 2147483647;
+
+    /**
+     * Holds the last XRD node of the XRD document as required by Yadis 1.0.
+     *
+     * @var SimpleXMLElement
+     */
+    protected $_xrdNode = null;
+
+    /**
      * Constructor; Accepts an XRD document for parsing.
      * Parses the XRD document by <xrd:Service> element to construct an array
      * of Zend_Service_Yadis_Service objects ordered by their priority.
@@ -54,41 +67,36 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
     public function __construct(SimpleXMLElement $xrds, array $namespaces = null)
     {
         parent::__construct($xrds, $namespaces);
+        /**
+         * The Yadis Specification requires we only use the last xrd node. The
+         * rest being ignored (if present for whatever reason). Important to
+         * note when writing an XRD document for multiple services - put
+         * the authentication service XRD node last.
+         */
+        $this->_xrdNode = $this->_xrdNodes[count($this->_xrdNodes) - 1];
         $this->_registerNamespacesOn($this->_xrdNode);
         $services = $this->_xrdNode->xpath('xrd:Service');
         foreach ($services as $service) {
             var_dump($service);
             //$this->_addService( new Zend_Service_Yadis_Service($service, $this->getNamespaces()) );
         }
-        $this->_sortServicesByPriority();
+        $this->_sortByPriority($this->_services);
     }
 
     /**
-     * Add a service to the Service list indexed by priority.
+     * Add a service to the Service list indexed by priority. Assumes
+     * a missing or invalid priority should be shuffled to the bottom
+     * of the priority order.
      *
      * @param   Zend_Service_Yadis_Service $service
      */
     protected function _addService(Zend_Service_Yadis_Service $service)
     {
         $servicePriority = $service->getPriority();
+        if(is_null($servicePriority) || !is_numeric($servicePriority)) {
+            $servicePriority = self::SERVICE_LOWEST_PRIORITY;
+        }
         $this->_services[$servicePriority] = $service;
     }
-
-    /**
-     * Sort all Services in the list by priority in accordance with the rules
-     * defined by Clause 3.3.3 of the XRI Resolution 2.0 Specification.
-     *      http://yadis.org/wiki/XRI_Resolution_2.0_specification
-     *
-     * @param   Zend_Service_Yadis_Service $service
-     */
-    protected function _sortServicesByPriority()
-    {
-        /**
-         * Sort by numeric priority index ascending.
-         */
-        ksort($this->_services, SORT_NUMERIC);
-    }
-
-
 
 }
