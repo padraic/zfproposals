@@ -30,6 +30,9 @@ require_once 'Zend/Service/Abstract.php';
 /** Zend_Service_Yadis_Xrds */
 require_once 'Zend/Service/Yadis/Xrds.php';
 
+/** Zend_Uri */
+require_once 'Zend/Uri.php';
+
 /**
  * Zend_Service_Yadis will provide a method of Service Discovery implemented
  * in accordance with the Yadis Specification 1.0. This describes a protocol
@@ -129,11 +132,21 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @link http://www.w3.org/International/articles/serving-xhtml/Overview.en.php
      * @var array
      */
-    $_htmlContentTypeList = array(
+    protected $_htmlContentTypeList = array(
         'text/html',
         'application/xhtml+xml',
         'application/xml',
         'text/xml'
+    );
+
+    /*
+     * Array of characters which if found at the 0 index of a Yadis ID may
+     * indicate the use of an XRI.
+     *
+     * @var array
+     */
+    protected $_xriIdentifiers = array(
+        '=', '$', '!', '@', '+', '('
     );
     
     /**
@@ -171,20 +184,11 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * transforming such IRI's to a valid URI via Zend_Uri.
      *
      * @param   string $yadisId
-     * @returns Zend_Service_Yadis
-     * @throws  Zend_Service_Yadis_Exception
-     * @uses    Zend_Uri
      */
     public function setYadisId($yadisId)
     {
         $this->_yadisId = $yadisId;
-        require_once 'Zend/Uri.php';
-        if (Zend_Uri::check($yadisId)) {
-            $this->_yadisUrl = $yadisId;
-            return $this;
-        }
-        require_once 'Zend/Service/Yadis/Exception.php';
-        throw new Zend_Service_Yadis_Exception('The ID provided by the user was found to be invalid');
+        $this->setYadisUrl($yadisId);
     }
 
     /**
@@ -198,13 +202,54 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     }
 
     /**
+     * Attempts to create a valid URI based on the value of the parameter
+     * which would typically be the Yadis ID.
+     * Note: This currently only supports XRI transformations.
+     *
+     * @param   string $yadisId
+     * @return  Zend_Service_Yadis
+     * @throws  Zend_Service_Yadis_Exception
+     * @todo    Implement Zend_Service_Yadis_Xri
+     */
+    public function setYadisUrl($yadisId)
+    {
+        /**
+         * This step should validate IDNs (see ZF-881)
+         */
+        if (Zend_Uri::check($yadisId)) {
+            $this->_yadisUrl = $yadisId;
+            return $this;
+        }
+        
+        /**
+         * Check if the Yadis ID is an XRI
+         */
+        if(strpos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
+        {
+            throw new Exception('XRI support in progress but incomplete');
+            require_once 'Zend/Service/Yadis/Xri.php';
+            $this->setYadisUrl( Zend_Service_Yadis_Xri::toUri($yadisId) );
+        }
+
+        /**
+         * The use of IRIs (International Resource Identifiers) is governed by
+         * RFC 3490. This is currently a Zend Framework issue (ZF-881) with an
+         * implementation version set at 0.9. That's March 15 2007 so fingers
+         * crossed.
+         */
+        
+        require_once 'Zend/Service/Yadis/Exception.php';
+        throw new Zend_Service_Yadis_Exception('Unable to validate a Yadis ID as a URI, or to transform a Yadis ID into a valid URI.');
+    }
+
+    /**
      * Returns the Yadis URL. This will usually be identical to the Yadis ID,
      * unless the Yadis ID (in the future) was one of ILI, XRI or i-name which
      * required transformation to a valid URI.
      *
      * @returns string
      */
-    public function getYadisUrl()
+    public function getYadisUrl($yadisId)
     {
         return $this->_yadisUrl;
     }
@@ -402,7 +447,6 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @param   Zend_Http_Response $response
      * @return  boolean
      * @throws  Zend_Service_Yadis_Exception
-     * @uses    Zend_Uri 
      */
     protected function _isXrdsLocationHeader(Zend_Http_Response $response)
     {
@@ -444,7 +488,6 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      *
      * @param   Zend_Http_Response $response
      * @return  boolean
-     * @uses    Zend_Uri
      * @throws  Zend_Service_Yadis_Exception
      */
     protected function _isMetaHttpEquiv(Zend_Http_Response $response)
@@ -453,16 +496,17 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             return false;
         }
         /**
-         * If HTML, check for a valid <meta> element in <head>.
-         * This is a very strict regex for <meta> elements. Might need to be
-         * loosened unless specifically required to be strictly adhered to.
+         * Find a match for a relevant <meta> element, then iterate through the
+         * results to see if a valid http-equiv value and matching content URI
+         * exist.
+         * Todo: need to check this is located inside the <head> element too.
          */
-        $metaRegex = "|<meta[^>]+http-equiv=\"([^\"]*)\"[^>]+content=\"([^\"]*)\"[^>]+>|i";
+        $metaRegex = "%<meta[^>]+http-equiv=([\"]{0,1})([^\"]*)([\"]{0,1})[^>]+content=([\"]{0,1})([^\"]*)([\"]{0,1})[^>]*>%i";
         $matches = null;
         $location = null;
         preg_match_all($metaRegex, $response->getBody(), $matches, PREG_PATTERN_ORDER);
         for ($i=0;$i < count($matches[1]);$i++) {
-            if (strtolower($matches[1][$i]) == "X-XRDS-location" || strtolower($matches[1][$i]) == "X-YADIS-location") {
+            if (strtolower($matches[1][$i]) == "x-xrds-location" || strtolower($matches[1][$i]) == "x-yadis-location") {
                 $location = $matches[2][$i];
             }
         }
