@@ -24,9 +24,6 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Service_Yadis_Exception */
-require_once 'Zend/Service/Yadis/Exception.php';
-
 /**
  * The Zend_Service_Yadis_Xrds class is a wrapper for Service elements of an
  * XRD document which is parsed using SimpleXML, and contains methods for
@@ -40,7 +37,7 @@ require_once 'Zend/Service/Yadis/Exception.php';
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Yadis_Xrds implements SeekableIterator
+class Zend_Service_Yadis_Xrds implements Iterator
 {
 
     /**
@@ -48,41 +45,56 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
      *
      * @var array
      */ 
-    protected $_services;
+    protected $_services = array();
  
     /**
      * Current key/pointer for the Iterator
      * 
      * @var integer
      */ 
-    private $_currentKey = 0;
+    protected $_currentKey = 0;
 
     /**
      * Contains the valid xrd:XRD node parsed from the XRD document.
      *
      * @var SimpleXMLElement
      */
-    private $_xrdNode = null;
+    protected $_xrdNode = null;
+
+    /**
+     * Default XRI namespaces as defined in the Yadis Specification. The xrd
+     * namespace XRI should be present although its not declared a requirement.
+     *
+     * @var array
+     */
+    protected $_namespaces = array(
+        'xrds' => 'xri://$xrds',
+        'xrd' => 'xri://$xrd*($v*2.0)'
+    );
  
     /**
-     * Parse the XRD document into a set of Service objects.
+     * Constructor; parses and validates an XRD document. All access to
+     * the data held in the XML is left to a concrete subclass specific to
+     * expected XRD format and data types.
+     * Cannot be directly instantiated; must call from subclass.
      * 
-     * @param SimpleXMLElement $xrdsDocument
+     * @param   SimpleXMLElement $xrds
+     * @param   array $namespaces
      */ 
-    public function __construct(SimpleXMLElement $xrds)
+    protected function __construct(SimpleXMLElement $xrds, array $namespaces = null)
     {
+        if(isset($namespaces)){
+            $this->_namespaces = array_merge($namespaces, $this->_namespaces);
+        }
         $xrdNode = $this->_getValidXrdNode($xrds);
-        if(!$xrdNode)
-        {
+        if(!$xrdNode){
             throw new Zend_Service_Yadis_Exception('The XRD document was found to be invalid');
         }
         $this->_xrdNode = $xrdNode;
-        $services = $xrdNode->xpath('xrd:Service');
-        var_dump($services);
     }
  
     /**
-     * Implements SeekableIterator::current()
+     * Implements Iterator::current()
      * 
      * Return the current element.
      *
@@ -92,7 +104,7 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     {}
  
     /**
-     * Implements SeekableIterator::key()
+     * Implements Iterator::key()
      *
      * Return the key of the current element.
      * 
@@ -102,7 +114,7 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     {}
  
     /**
-     * Implements SeekableIterator::next()
+     * Implements Iterator::next()
      * 
      * Increments pointer to next Service object.
      */ 
@@ -110,7 +122,7 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     {}
  
     /**
-     * Implements SeekableIterator::rewind()
+     * Implements Iterator::rewind()
      * 
      * Rewinds the Iterator to the first Service object
      *
@@ -120,7 +132,7 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     {}
  
     /**
-     * Implements SeekableIterator::seek()
+     * Implements Iterator::seek()
      * 
      * Seek to an absolute position.
      *
@@ -132,7 +144,7 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     {}
  
     /**
-     * Implement SeekableIterator::valid()
+     * Implement Iterator::valid()
      *
      * @param  integer $key
      * @return boolean
@@ -140,8 +152,67 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
     public function valid($key = null)
     {}
 
+        /**
+     * Add a list (array) of additional namespaces to be utilised by the XML
+     * parser when it receives a valid XRD document.
+     *
+     * @param   array $namespaces
+     */
+    public function addNamespaces(array $namespaces)
+    {
+        foreach($namespaces as $namespace=>$namespaceUrl) {
+            $this->addNamespace($namespace, $namespaceUrl);
+        }
+        return $this;
+    }
+
+    /**
+     * Add a single namepsace to be utilised by the XML parser when it receives
+     * a valid XRD document.
+     *
+     * @param   string $namespace
+     * @param   string $namespaceUrl
+     */
+    public function addNamespace($namespace, $namespaceUrl)
+    {
+        if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Requires a valid namespace id and url');
+        }
+        $this->_namespaces[$namespace] = $namespaceUrl;
+        return $this;
+    }
+
+    /**
+     * Return the value of a specific namespace.
+     *
+     * @return   string|null
+     */
+    public function getNamespace($namespace)
+    {
+        if (array_key_exists($namespace, $this->_namespaces)) {
+            return $this->_namespaces[$namespace];
+        }
+        return null;
+    }
+
+    /**
+     * Returns an array of all currently set namespaces.
+     *
+     * @return  array
+     */
+    public function getNamespaces()
+    {
+        return $this->_namespaces;
+    }
+
     protected function _getValidXrdNode(SimpleXMLElement $xrds)
     {
+        /**
+         * Register all namespaces to this SimpleXMLElement.
+         */
+        $this->_registerNamespacesOn($xrds);
+
         /**
          * Verify the XRDS resource has a root element called "xrds:XRDS".
          */
@@ -177,6 +248,13 @@ class Zend_Service_Yadis_Xrds implements SeekableIterator
             return null;
         }
         return $xrdNodes[count($xrdNodes) - 1];
+    }
+
+    protected function _registerNamespacesOn(SimpleXMLElement $element)
+    {
+        foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
+            $element->registerXPathNamespace($namespace, $namespaceUrl);
+        }
     }
 
 }

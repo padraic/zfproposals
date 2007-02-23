@@ -27,8 +27,8 @@
 /** Zend_Service_Abstract */
 require_once 'Zend/Service/Abstract.php';
 
-/** Zend_Service_Yadis_Xrds */
-require_once 'Zend/Service/Yadis/Xrds.php';
+/** Zend_Service_Yadis_Xrds_Service */
+require_once 'Zend/Service/Yadis/Xrds/Service.php';
 
 /** Zend_Uri */
 require_once 'Zend/Uri.php';
@@ -113,15 +113,12 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     protected $_xrdsLocationHeaderUrl = '';
 
     /**
-     * Default XRI namespaces as defined in the Yadis Specification. The xrd
-     * namespace XRI should be present although its not declared a requirement.
+     * Additional namespaces to be merged with the defaults as defined in
+     * Zend_Service_Yadis_Xrds.
      *
      * @var array
      */
-    protected $_namespaces = array(
-        'xrds' => 'xri://$xrds',
-        'xrd' => 'xri://$xrd*($v*2.0)'
-    );
+    protected $_namespaces = array();
 
     /**
      * Array of valid HTML Content-Types. Required since Yadis states agents
@@ -132,7 +129,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @link http://www.w3.org/International/articles/serving-xhtml/Overview.en.php
      * @var array
      */
-    protected $_htmlContentTypeList = array(
+    protected $_validHtmlContentTypes = array(
         'text/html',
         'application/xhtml+xml',
         'application/xml',
@@ -248,7 +245,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      *
      * @returns string
      */
-    public function getYadisUrl($yadisId)
+    public function getYadisUrl()
     {
         return $this->_yadisUrl;
     }
@@ -258,6 +255,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * parser when it receives a valid XRD document.
      *
      * @param   array $namespaces
+     * @todo    Extract namespaces (common to three classes) to new shared class
      */
     public function addNamespaces(array $namespaces)
     {
@@ -268,7 +266,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     }
 
     /**
-     * Add a single namepsace to be utilised by the XML parser when it receives
+     * Add a single namespace to be utilised by the XML parser when it receives
      * a valid XRD document.
      *
      * @param   string $namespace
@@ -276,9 +274,12 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function addNamespace($namespace, $namespaceUrl)
     {
-        if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
+        if (empty($namespace) || empty($namespaceUrl)) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Requires a valid namespace id and url');
+            throw new Zend_Service_Yadis_Exception('Parameters must be non-empty strings');
+        } elseif (!Zend_Uri::check($namespaceUrl)) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Invalid namespace URI: ' . htmlentities($namespaceUrl, ENT_QUOTES, 'utf-8'));
         }
         $this->_namespaces[$namespace] = $namespaceUrl;
         return $this;
@@ -491,7 +492,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isMetaHttpEquiv(Zend_Http_Response $response)
     {
-        if (!in_array($response->getHeader('Content-Type'), $this->_htmlContentTypeList)) {
+        if (!in_array($response->getHeader('Content-Type'), $this->_validHtmlContentTypes)) {
             return false;
         }
         /**
@@ -535,13 +536,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     protected function _parseXrds($xrdsDocument)
     {
         $xrds = new SimpleXMLElement($xrdsDocument);
-        /**
-         * Register all namespaces as set previously for the object.
-         */
-        foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
-            $xrds->registerXPathNamespace($namespace, $namespaceUrl);
-        }
-        $serviceSet = new Zend_Service_Yadis_Xrds($xrds);
+        $serviceSet = new Zend_Service_Yadis_Xrds_Service($xrds, $this->getNamespaces());
         return $serviceSet;
     }
 
