@@ -140,8 +140,8 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     );
 
     /*
-     * Array of characters which if found at the 0 index of a Yadis ID may
-     * indicate the use of an XRI.
+     * Array of characters which if found at the 0 index of a Yadis ID string
+     * may indicate the use of an XRI.
      *
      * @var array
      */
@@ -174,7 +174,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     }
 
     /**
-     * A Yadis ID is usually an URL, but can also include an XRI, IRI, or i-name.
+     * A Yadis ID is usually an URL, but can also include an IRI, or XRI i-name.
      * The initial version will support URLs as standard before examining options
      * for supporting alternatives (IRI,XRI,i-name) since they require additional 
      * validation and conversion steps (e.g. Punycode for IRI) before use.
@@ -209,7 +209,6 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @param   string $yadisId
      * @return  Zend_Service_Yadis
      * @throws  Zend_Service_Yadis_Exception
-     * @todo    Implement Zend_Service_Yadis_Xri
      */
     public function setYadisUrl($yadisId)
     {
@@ -228,14 +227,14 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         {
             throw new Exception('XRI support in progress but incomplete');
             require_once 'Zend/Service/Yadis/Xri.php';
-            $this->setYadisUrl( Zend_Service_Yadis_Xri::toUri($yadisId) );
+            $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()->toUri($yadisId);
         }
 
         /**
          * The use of IRIs (International Resource Identifiers) is governed by
          * RFC 3490. This is currently a Zend Framework issue (ZF-881) with an
-         * implementation version set at 0.9. That's March 15 2007 so fingers
-         * crossed.
+         * implementation version set at 0.9. That's ~March 15 2007 so fingers
+         * crossed ;).
          */
         
         require_once 'Zend/Service/Yadis/Exception.php';
