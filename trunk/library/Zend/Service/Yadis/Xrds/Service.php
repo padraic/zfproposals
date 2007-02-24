@@ -27,11 +27,18 @@
 /** Zend_Service_Yadis_Xrds */
 require_once 'Zend/Service/Yadis/Xrds.php';
 
+/** Zend_Service_Yadis_Service */
+require_once 'Zend/Service/Yadis/Service.php';
+
 /**
  * The Zend_Service_Yadis_Xrds_Service class is a wrapper for Service elements of an
  * XRD document which is parsed using SimpleXML, and contains methods for
  * retrieving data about each Service, including Type, Url and other arbitrary
  * data added in a separate namespace, e.g. openid:Delegate.
+ *
+ * This class extends the basic Zend_Service_Yadis_Xrds wrapper to implement a
+ * Service object specific to the Yadis Specification 1.0. XRDS itself is not
+ * an XML format ruled by Yadis, but by an OASIS proposal.
  *
  * @uses       Iterator
  * @category   Zend
@@ -55,6 +62,13 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @var SimpleXMLElement
      */
     protected $_xrdNode = null;
+    
+    /**
+     * The Yadis Services resultset
+     *
+     * @var array
+     */ 
+    protected $_services = array();
 
     /**
      * Constructor; Accepts an XRD document for parsing.
@@ -62,7 +76,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * of Zend_Service_Yadis_Service objects ordered by their priority.
      *
      * @param   SimpleXMLElement $xrds
-     * @param   array $namespaces
+     * @param   Zend_Service_Yadis_Xrds_Namespace $namespace
      */
     public function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
@@ -78,7 +92,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         $services = $this->_xrdNode->xpath('xrd:Service');
         foreach ($services as $service) {
             var_dump($service);
-            //$this->_addService( new Zend_Service_Yadis_Service($service, $this->getNamespaces()) );
+            $this->_addService( new Zend_Service_Yadis_Service($service, $this->_namespace) );
         }
         $this->_sortByPriority($this->_services);
     }

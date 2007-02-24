@@ -42,13 +42,6 @@ require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
  */
 class Zend_Service_Yadis_Xrds implements Iterator
 {
-
-    /**
-     * The Yadis Services resultset
-     *
-     * @var array
-     */ 
-    protected $_services = array();
  
     /**
      * Current key/pointer for the Iterator
@@ -79,7 +72,7 @@ class Zend_Service_Yadis_Xrds implements Iterator
      * Cannot be directly instantiated; must call from subclass.
      * 
      * @param   SimpleXMLElement $xrds
-     * @param   array $namespaces
+     * @param   Zend_Service_Yadis_Xrds_Namespace $namespace
      */ 
     protected function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
