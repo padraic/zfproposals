@@ -162,13 +162,13 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function __construct($yadisId = null, array $namespaces = null)
     {
-        if (isset($yadisId)) {
+        if(isset($yadisId)) {
             $this->setYadisId($yadisId);
         }
         $this->_namespace = new Zend_Service_Yadis_Xrds_Namespace;
-        if (isset($namespaces) && count($namespaces) > 0) {
+        if(isset($namespaces) && count($namespaces) > 0) {
             $this->addNamespaces($namespaces);
-        } elseif (isset($namespaces)) {
+        }elseif (isset($namespaces)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; but array appears to be empty');
         }

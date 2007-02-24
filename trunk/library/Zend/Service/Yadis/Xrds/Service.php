@@ -91,10 +91,11 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         $this->_registerXpathNamespaces($this->_xrdNode);
         $services = $this->_xrdNode->xpath('xrd:Service');
         foreach ($services as $service) {
-            var_dump($service);
-            $this->_addService( new Zend_Service_Yadis_Service($service, $this->_namespace) );
+            $serviceObj = new Zend_Service_Yadis_Service($service, $this->_namespace);
+            $this->_addService($serviceObj);
         }
         $this->_sortByPriority($this->_services);
+        var_dump($this->_services); echo '<hr/>';
     }
 
     /**

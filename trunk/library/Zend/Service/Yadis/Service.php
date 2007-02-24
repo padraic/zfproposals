@@ -61,7 +61,7 @@ class Zend_Service_Yadis_Service
      * @param   SimpleXMLElement $serviceNode
      * @param   Zend_Service_Yadis_Xrds_Namespace $namespace
      */
-    public function _construct(SimpleXMLElement $serviceNode, Zend_Service_Yadis_Xrds_Namespace $namespace)
+    public function __construct(SimpleXMLElement $serviceNode, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
         $this->_serviceNode = $serviceNode;
         $this->_namespace = $namespace;
@@ -116,8 +116,7 @@ class Zend_Service_Yadis_Service
     public function getPriority()
     {
         $attributes = $this->_serviceNode->attributes();
-        if(array_key_exists('priority', $attributes))
-        {
+        if(array_key_exists('priority', $attributes)) {
             return intval($attributes['priority']);
         }
         return null;
@@ -163,9 +162,29 @@ class Zend_Service_Yadis_Service
      *
      * @param   string $element
      */
+    public function getElementsByName($element)
+    {
+        return $this->_serviceNode->xpath($element);
+    }
+
+    /**
+     * Alias to getElementsByName()
+     *
+     * @param   string $element
+     */
     public function getElements($element)
     {
         return $this->getElementsByName($element);
+    }
+
+    /**
+     * Run an XPath query against the current Service node.
+     *
+     * @param   string $query
+     */
+    public function xpath($query)
+    {
+        return $this->_serviceNode->xpath($query);
     }
 
 }
