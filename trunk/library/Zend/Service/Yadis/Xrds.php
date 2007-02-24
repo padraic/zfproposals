@@ -24,6 +24,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Service_Yadis_Xrds_Namespace */
+require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
+
 /**
  * The Zend_Service_Yadis_Xrds class is a wrapper for Service elements of an
  * XRD document which is parsed using SimpleXML, and contains methods for
@@ -62,15 +65,12 @@ class Zend_Service_Yadis_Xrds implements Iterator
     protected $_xrdNodes = null;
 
     /**
-     * Default XRI namespaces as defined in the Yadis Specification. The xrd
-     * namespace XRI should be present although its not declared a requirement.
+     * Instance of Zend_Service_Yadis_Xrds_Namespace for managing namespaces
+     * associated with an XRDS document.
      *
-     * @var array
+     * @var Zend_Service_Yadis_Xrds_Namespace
      */
-    protected $_namespaces = array(
-        'xrds' => 'xri://$xrds',
-        'xrd' => 'xri://$xrd*($v*2.0)'
-    );
+    protected $_namespace = null;
  
     /**
      * Constructor; parses and validates an XRD document. All access to
@@ -81,11 +81,9 @@ class Zend_Service_Yadis_Xrds implements Iterator
      * @param   SimpleXMLElement $xrds
      * @param   array $namespaces
      */ 
-    protected function __construct(SimpleXMLElement $xrds, array $namespaces = null)
+    protected function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
-        if(isset($namespaces)){
-            $this->_namespaces = array_merge($namespaces, $this->_namespaces);
-        }
+        $this->_namespace = $namespace;
         $xrdNodes = $this->_getValidXrdNodes($xrds);
         if(!$xrdNodes){
             require_once 'Zend/Service/Yadis/Exception.php';
@@ -141,34 +139,30 @@ class Zend_Service_Yadis_Xrds implements Iterator
     public function valid($key = null)
     {}
 
-        /**
+    /**
      * Add a list (array) of additional namespaces to be utilised by the XML
      * parser when it receives a valid XRD document.
      *
      * @param   array $namespaces
+     * @return  Zend_Service_Yadis
      */
     public function addNamespaces(array $namespaces)
     {
-        foreach($namespaces as $namespace=>$namespaceUrl) {
-            $this->addNamespace($namespace, $namespaceUrl);
-        }
+        $this->_namespace->addNamespaces($namespaces);
         return $this;
     }
 
     /**
-     * Add a single namepsace to be utilised by the XML parser when it receives
+     * Add a single namespace to be utilised by the XML parser when it receives
      * a valid XRD document.
      *
      * @param   string $namespace
      * @param   string $namespaceUrl
+     * @return  Zend_Service_Yadis
      */
     public function addNamespace($namespace, $namespaceUrl)
     {
-        if (empty($namespace) || empty($namespaceUrl) || !Zend_Uri::check($namespaceUrl)) {
-            require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Requires a valid namespace id and url');
-        }
-        $this->_namespaces[$namespace] = $namespaceUrl;
+        $this->_namespace->addNamespace($namespace, $namespaceUrl);
         return $this;
     }
 
@@ -179,10 +173,7 @@ class Zend_Service_Yadis_Xrds implements Iterator
      */
     public function getNamespace($namespace)
     {
-        if (array_key_exists($namespace, $this->_namespaces)) {
-            return $this->_namespaces[$namespace];
-        }
-        return null;
+        return $this->_namespace->getNamespace($namespace);
     }
 
     /**
@@ -192,7 +183,7 @@ class Zend_Service_Yadis_Xrds implements Iterator
      */
     public function getNamespaces()
     {
-        return $this->_namespaces;
+        return $this->_namespace->getNamespaces();
     }
 
     protected function _getValidXrdNodes(SimpleXMLElement $xrds)
@@ -200,7 +191,7 @@ class Zend_Service_Yadis_Xrds implements Iterator
         /**
          * Register all namespaces to this SimpleXMLElement.
          */
-        $this->_registerNamespacesOn($xrds);
+        $this->_registerXpathNamespaces($xrds);
 
         /**
          * Verify the XRDS resource has a root element called "xrds:XRDS".
@@ -241,11 +232,9 @@ class Zend_Service_Yadis_Xrds implements Iterator
         return $xrdNodes;
     }
 
-    protected function _registerNamespacesOn(SimpleXMLElement $element)
+    protected function _registerXpathNamespaces(SimpleXMLElement $element)
     {
-        foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
-            $element->registerXPathNamespace($namespace, $namespaceUrl);
-        }
+        $this->_namespace->registerXpathNamespaces($element);
     }
 
     /**

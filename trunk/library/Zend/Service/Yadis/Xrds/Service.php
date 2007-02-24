@@ -64,9 +64,9 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @param   SimpleXMLElement $xrds
      * @param   array $namespaces
      */
-    public function __construct(SimpleXMLElement $xrds, array $namespaces = null)
+    public function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
-        parent::__construct($xrds, $namespaces);
+        parent::__construct($xrds, $namespace);
         /**
          * The Yadis Specification requires we only use the last xrd node. The
          * rest being ignored (if present for whatever reason). Important to
@@ -74,7 +74,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
          * the authentication service XRD node last.
          */
         $this->_xrdNode = $this->_xrdNodes[count($this->_xrdNodes) - 1];
-        $this->_registerNamespacesOn($this->_xrdNode);
+        $this->_registerXpathNamespaces($this->_xrdNode);
         $services = $this->_xrdNode->xpath('xrd:Service');
         foreach ($services as $service) {
             var_dump($service);
