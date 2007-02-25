@@ -24,6 +24,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Service_Abstract */
+require_once 'Zend/Service/Abstract.php';
+
 /** Zend_Uri */
 require_once 'Zend/Uri.php';
 
@@ -37,7 +40,7 @@ require_once 'Zend/Uri.php';
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Yadis_Xri
+class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
 {
 
     /**
@@ -65,11 +68,34 @@ class Zend_Service_Yadis_Xri
     protected $_proxy = 'http://xri.net/';
 
     /**
+     * Instance of Zend_Service_Yadis_Xrds_Namespace for managing namespaces
+     * associated with an XRDS document.
+     *
+     * @var Zend_Service_Yadis_Xrds_Namespace
+     */
+    protected $_namespace = null;
+
+    /**
      * The XRI string.
      *
      * @var string
      */
     protected $_xri = null;
+
+    /**
+     * The URI as translated from an XRI and appended to a Proxy.
+     *
+     * @var string
+     */
+    protected $_uri = null;
+
+    /**
+     * A Canonical ID if requested, and parsed from the XRDS document found
+     * by requesting the URI created from a valid XRI.
+     *
+     * @var string
+     */
+    protected $_canonicalId = null;
 
     /**
      * Constructor; protected since this class is a singleton.
@@ -82,12 +108,18 @@ class Zend_Service_Yadis_Xri
      *
      * @return  Zend_Service_Yadis_Xri
      */
-    public function getInstance()
+    public static function getInstance()
     {
-        if(is_null($this->_instance)) {
-            $this->_instance = new self;
+        if (is_null(self::$_instance)) {
+            self::$_instance = new self;
         }
-        return $this->_instance;
+        return self::$_instance;
+    }
+
+    public function setNamespace(Zend_Service_Yadis_Xrds_Namespace $namespace)
+    {
+        $this->_namespace = $namespace;
+        return $this;
     }
 
     /**
@@ -100,11 +132,11 @@ class Zend_Service_Yadis_Xri
      */
     public function setProxy($proxy)
     {
-        if(!Zend_Uri::check($proxy)) {
+        if (!Zend_Uri::check($proxy)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Invalid URI; unable to set as an XRI proxy');
         }
-        $this->_proxy = $proxy
+        $this->_proxy = $proxy;
         return $this;
     }
 
@@ -131,9 +163,9 @@ class Zend_Service_Yadis_Xri
         /**
          * Check if the passed string is a likely XRI.
          */
-        if(!strpos($yadisId, 'xri://') === 0 && !in_array($xri[0], $this->_xriIdentifiers)) {
+        if (!strpos($xri, 'xri://') === 0 && !in_array($xri[0], $this->_xriIdentifiers)) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Invalid XRI submitted');
+            throw new Zend_Service_Yadis_Exception('Invalid XRI string submitted');
         }
         $this->_xri = $xri;
         return $this;
@@ -159,22 +191,26 @@ class Zend_Service_Yadis_Xri
      * @throws  Zend_Service_Yadis_Exception
      * @uses    Zend_Uri
      */
-    public function toUri($xri = null)
+    public function toUri($xri = null, $serviceType = null)
     {
-        if(isset($xri)) {
+        if (!is_null($serviceType)) {
+            $this->_serviceType = (string) $serviceType;
+        }
+        if (isset($xri)) {
             $this->setXri($xri);
         }
         /**
          * Get rid of the xri:// prefix before assembling the URI
          */
-        if(strpos($this->_xri, 'xri://') === 0) {
-            $id = substr($xri, 6);
+        if (strpos($this->_xri, 'xri://') === 0) {
+            $iname = substr($xri, 6);
+        } else {
+            $iname = $xri;
         }
-        $uri = $this->getProxy() . $id;
-        if(!Zend_Uri::check($uri))
-        {
+        $uri = $this->getProxy() . $iname;
+        if (!Zend_Uri::check($uri)) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Unable to translate XRI to a valid URI using proxy:' . $this->getProxy());
+            throw new Zend_Service_Yadis_Exception('Unable to translate XRI to a valid URI using proxy: ' . $this->getProxy());
         }
         $this->_uri = $uri;
         return $uri;
@@ -193,7 +229,7 @@ class Zend_Service_Yadis_Xri
      */
     public function toCanonicalId($xri = null)
     {
-        if(!isset($xri) && !isset($this->_uri)) {
+        if (!isset($xri) && !isset($this->_uri)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('No XRI passed as parameter as required unless called after Zend_Service_Yadis_Xri:toUri');
         } elseif (isset($xri)) {
@@ -201,10 +237,27 @@ class Zend_Service_Yadis_Xri
         } else {
             $uri = $this->_uri;
         }
+        $response = $this->_get($uri);
+        if (!$response->isSuccessful()) {
+        }  elseif ($response->getHeader('Content-Type') !== 'application/xrds+xml') {
+        }
         
+        header('Content-Type: text/xml');
+        exit($response->getBody());
 
         // for the moment
         return false;
+    }
+
+    public function getCanonicalId()
+    {
+        if (!is_null($this->_canonicalId)) {
+            return $this->_canonicalId;
+        }
+        if (is_null($this->_xri)) {
+            throw new Exception('Unable to get a Canonical Id since no XRI value has been set');
+        }
+        return $this->toCanonicalId($this->_xri);
     }
 
     /**
@@ -214,22 +267,36 @@ class Zend_Service_Yadis_Xri
      *
      * @param   string $uri
      * @return  Zend_Http_Response
+     * @uses    Zend_Http_Client
+     * @todo    Finish this correctly using the QXRI rules.
      */
-    protected function _get()
+    protected function _get($url, $serviceType = null)
     {
-    
+        $client = self::getHttpClient();
+        $client->setUri($url);
+        $client->setMethod(Zend_Http_Client::GET);
+        $client->setHeaders('Accept', 'application/xrds+xml');
+        if ($serviceType) {
+            $client->setParameterGet('_xrd_r', 'application/xrds+xml');
+            $client->setParameterGet('_xrd_t', $serviceType);
+        } else {
+            $client->setParameterGet('_xrd_r', 'application/xrds+xml;sep=false');
+        }
+
+        /**
+         * Quick test of URI
+         */
+        if (!Zend_Uri::check($client->getUri()))
+        {
+            throw new Exception('Bad query from XRI Resolution');
+        }
+
+        $response = $client->request();
+        if (!$response->isSuccessful()) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Invalid response or error received from XRI proxy: ' . $response->getStatus() . ' ' . $response->getMessage());
+        }
+        return $response;
     }
-    
-    /**
-     * Creates a new Zend_Service_Yadis_Xrds_Iname object which uses SimpleXML
-     * to parse the XML. In this case all we need access to is the Canonical ID
-     * of an i-name, or an error message telling us the i-name is invalid.
-     *
-     * @param   string $xrdsDocument
-     * @return  Zend_Service_Yadis_Xrds_Iname|boolean
-     */
-    protected function _parseXrds($xrds)
-    {
-    
-    }
+
 }

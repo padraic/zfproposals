@@ -162,15 +162,15 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function __construct($yadisId = null, array $namespaces = null)
     {
-        if(isset($yadisId)) {
-            $this->setYadisId($yadisId);
-        }
         $this->_namespace = new Zend_Service_Yadis_Xrds_Namespace;
-        if(isset($namespaces) && count($namespaces) > 0) {
+        if (isset($namespaces) && count($namespaces) > 0) {
             $this->addNamespaces($namespaces);
-        }elseif (isset($namespaces)) {
+        } elseif (isset($namespaces)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; but array appears to be empty');
+        }
+        if (isset($yadisId)) {
+            $this->setYadisId($yadisId);
         }
     }
 
@@ -224,11 +224,16 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         /**
          * Check if the Yadis ID is an XRI
          */
-        if(strpos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
+        if (strpos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
         {
-            throw new Exception('XRI support in progress but incomplete');
+            //throw new Exception('XRI support in progress but incomplete');
             require_once 'Zend/Service/Yadis/Xri.php';
-            $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()->toUri($yadisId);
+            $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()
+                    ->setNamespace($this->_namespace)
+                    ->toUri($yadisId);
+
+            $cid = Zend_Service_Yadis_Xri::getInstance()->getCanonicalId();
+
         }
 
         /**
