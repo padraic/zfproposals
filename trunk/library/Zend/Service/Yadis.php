@@ -154,8 +154,9 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      *
      * Allows settings of the initial Yadis ID (an OpenID URL for example) and
      * an optional list of additional namespaces. For example, OpenID uses a
-     * namespace such as:
-     *    xmlns:openid="http://openid.net/xmlns/1.0"
+     * namespace such as: xmlns:openid="http://openid.net/xmlns/1.0"
+     * Namespaces are assigned to a Zend_Service_Yadis_Xrds_Namespace container
+     * object to be passed more easily to other objects being 
      *
      * @param   string $yadisId
      * @param   array $namespaces

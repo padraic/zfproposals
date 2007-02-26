@@ -146,7 +146,7 @@ class Zend_Service_Yadis_Service
      * Return an array of the current XRDS namespaces for working with any
      * XPath queries on the Service node.
      *
-     * @return  SimpleXMLElement
+     * @return  array
      */
     public function getNamespaces()
     {
@@ -162,19 +162,9 @@ class Zend_Service_Yadis_Service
      *
      * @param   string $element
      */
-    public function getElementsByName($element)
-    {
-        return $this->_serviceNode->xpath($element);
-    }
-
-    /**
-     * Alias to getElementsByName()
-     *
-     * @param   string $element
-     */
     public function getElements($element)
     {
-        return $this->getElementsByName($element);
+        return $this->_serviceNode->xpath($element);
     }
 
     /**

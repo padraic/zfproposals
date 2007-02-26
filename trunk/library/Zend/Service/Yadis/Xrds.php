@@ -28,10 +28,10 @@
 require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
 
 /**
- * The Zend_Service_Yadis_Xrds class is a wrapper for Service elements of an
+ * The Zend_Service_Yadis_Xrds class is a wrapper for elements of an
  * XRD document which is parsed using SimpleXML, and contains methods for
- * retrieving data about each Service, including Type, Url and other arbitrary
- * data added in a separate namespace, e.g. openid:Delegate.
+ * retrieving data about the document. The concrete aspects of retrieving
+ * specific data elements is left to a concrete subclass.
  *
  * @uses       SeekableIterator
  * @category   Zend
@@ -40,7 +40,7 @@ require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Yadis_Xrds implements Iterator
+class Zend_Service_Yadis_Xrds
 {
  
     /**
@@ -85,53 +85,6 @@ class Zend_Service_Yadis_Xrds implements Iterator
         $this->_xrdNodes = $xrdNodes;
     }
  
-    /**
-     * Implements Iterator::current()
-     * 
-     * Return the current element.
-     *
-     * @return Zend_Service_Yadis_Service
-     */ 
-    public function current()
-    {}
- 
-    /**
-     * Implements Iterator::key()
-     *
-     * Return the key of the current element.
-     * 
-     * @return integer
-     */ 
-    public function key()
-    {}
- 
-    /**
-     * Implements Iterator::next()
-     * 
-     * Increments pointer to next Service object.
-     */ 
-    public function next()
-    {}
- 
-    /**
-     * Implements Iterator::rewind()
-     * 
-     * Rewinds the Iterator to the first Service object
-     *
-     * @return boolean
-     */ 
-    public function rewind()
-    {}
- 
-    /**
-     * Implement Iterator::valid()
-     *
-     * @param  integer $key
-     * @return boolean
-     */ 
-    public function valid($key = null)
-    {}
-
     /**
      * Add a list (array) of additional namespaces to be utilised by the XML
      * parser when it receives a valid XRD document.

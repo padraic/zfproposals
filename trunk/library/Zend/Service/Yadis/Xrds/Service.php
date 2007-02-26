@@ -47,7 +47,7 @@ require_once 'Zend/Service/Yadis/Service.php';
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements Iterator
+class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements Iterator implements Iterator
 {
 
     /**
@@ -97,6 +97,53 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         $this->_sortByPriority($this->_services);
         var_dump($this->_services); echo '<hr/>';
     }
+
+    /**
+     * Implements Iterator::current()
+     * 
+     * Return the current element.
+     *
+     * @return Zend_Service_Yadis_Service
+     */ 
+    public function current()
+    {}
+ 
+    /**
+     * Implements Iterator::key()
+     *
+     * Return the key of the current element.
+     * 
+     * @return integer
+     */ 
+    public function key()
+    {}
+ 
+    /**
+     * Implements Iterator::next()
+     * 
+     * Increments pointer to next Service object.
+     */ 
+    public function next()
+    {}
+ 
+    /**
+     * Implements Iterator::rewind()
+     * 
+     * Rewinds the Iterator to the first Service object
+     *
+     * @return boolean
+     */ 
+    public function rewind()
+    {}
+ 
+    /**
+     * Implement Iterator::valid()
+     *
+     * @param  integer $key
+     * @return boolean
+     */ 
+    public function valid($key = null)
+    {}
 
     /**
      * Add a service to the Service list indexed by priority. Assumes
