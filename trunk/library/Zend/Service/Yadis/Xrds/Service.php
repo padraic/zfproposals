@@ -47,7 +47,7 @@ require_once 'Zend/Service/Yadis/Service.php';
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements Iterator implements Iterator
+class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements Iterator
 {
 
     /**
