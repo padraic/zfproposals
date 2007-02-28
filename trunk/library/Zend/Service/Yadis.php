@@ -146,7 +146,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @var array
      */
     protected $_xriIdentifiers = array(
-        '=', '$', '!', '@', '+', '('
+        '=', '$', '!', '@', '+', '('  // is a left bracket necessary?
     );
     
     /**
