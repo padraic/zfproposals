@@ -71,6 +71,13 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
     protected $_services = array();
 
     /**
+     * Flag holding whether or not the array endpoint has been reached.
+     *
+     * @var boolean
+     */
+    protected $_valid = true;
+
+    /**
      * Constructor; Accepts an XRD document for parsing.
      * Parses the XRD document by <xrd:Service> element to construct an array
      * of Zend_Service_Yadis_Service objects ordered by their priority.
@@ -106,7 +113,9 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @return Zend_Service_Yadis_Service
      */ 
     public function current()
-    {}
+    {
+         return current($this->_services);
+    }
  
     /**
      * Implements Iterator::key()
@@ -116,7 +125,9 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @return integer
      */ 
     public function key()
-    {}
+    {
+         return key($this->_services);
+    }
  
     /**
      * Implements Iterator::next()
@@ -124,7 +135,9 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * Increments pointer to next Service object.
      */ 
     public function next()
-    {}
+    {
+         $this->_valid = (false !== next($this->_services));
+    }
  
     /**
      * Implements Iterator::rewind()
@@ -134,7 +147,9 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @return boolean
      */ 
     public function rewind()
-    {}
+    {
+        $this->_valid = (false !== reset($this->_services)); 
+    }
  
     /**
      * Implement Iterator::valid()
@@ -142,8 +157,10 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @param  integer $key
      * @return boolean
      */ 
-    public function valid($key = null)
-    {}
+    public function valid()
+    {
+         return $this->_valid;
+    }
 
     /**
      * Add a service to the Service list indexed by priority. Assumes
@@ -158,21 +175,21 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         if(is_null($servicePriority) || !is_numeric($servicePriority)) {
             $servicePriority = self::SERVICE_LOWEST_PRIORITY;
         }
-        if (!array_key_exists($servicePriority, $this->_services))
-        {
+        if (!array_key_exists($servicePriority, $this->_services)){
             $this->_services[$servicePriority] = array();
         }
         $this->_services[$servicePriority][] = $service;
     }
 
     /**
-     * Order an array by priority, with integer priority value ascending. Where
-     * priority has two or more Zend_Service_Yadis_Service objects attached, we
-     * re-order these randomly and rebuild a "flat" sorted array of
-     * Zend_Service_Yadis_Service objects that are more easily iterated across
-     * The priority can afterwards be queried from each object if required.
+     * Order an array of values by priority. This assumes an array form of:
+     * $array[$priority] = <array of elements>
+     * Where multiple elements are assigned to a priority, their order in the
+     * priority array should be made random. After ordering, the array is
+     * flattened to a single array of elements for iteration.
      *
-     * @param   array
+     * @param   array $unsorted
+     * @return  array
      */
     protected function _sortByPriority(array $unsorted)
     {
