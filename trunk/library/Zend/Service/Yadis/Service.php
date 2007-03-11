@@ -167,14 +167,18 @@ class Zend_Service_Yadis_Service
         return $this->_serviceNode->xpath($element);
     }
 
-    /**
-     * Run an XPath query against the current Service node.
-     *
-     * @param   string $query
-     */
-    public function xpath($query)
+    protected function _sortByPriority(array $unsorted)
     {
-        return $this->_serviceNode->xpath($query);
+        $sorted = array();
+        foreach ($unsorted as $priority) {
+            if (count($priority) > 1){
+                shuffle($priority);
+                $sorted = array_merge($sorted, $priority)
+            } else {
+                $sorted[] = $priority[0];
+            } 
+        }
+        return $sorted;
     }
 
 }

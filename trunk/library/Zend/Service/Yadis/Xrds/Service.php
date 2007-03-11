@@ -31,8 +31,8 @@ require_once 'Zend/Service/Yadis/Xrds.php';
 require_once 'Zend/Service/Yadis/Service.php';
 
 /**
- * The Zend_Service_Yadis_Xrds_Service class is a wrapper for Service elements of an
- * XRD document which is parsed using SimpleXML, and contains methods for
+ * The Zend_Service_Yadis_Xrds_Service class is a wrapper for Service elements
+ * of an XRD document which is parsed using SimpleXML, and contains methods for
  * retrieving data about each Service, including Type, Url and other arbitrary
  * data added in a separate namespace, e.g. openid:Delegate.
  *
@@ -94,8 +94,8 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
             $serviceObj = new Zend_Service_Yadis_Service($service, $this->_namespace);
             $this->_addService($serviceObj);
         }
-        $this->_sortByPriority($this->_services);
-        var_dump($this->_services); echo '<hr/>';
+        $this->_services = $this->_sortByPriority($this->_services);
+        var_dump($this->_services); echo '<hr/><br/>XML Dump echoed from: ' . __FILE__ . ' Line:' . __LINE__;
     }
 
     /**
@@ -158,7 +158,34 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         if(is_null($servicePriority) || !is_numeric($servicePriority)) {
             $servicePriority = self::SERVICE_LOWEST_PRIORITY;
         }
-        $this->_services[$servicePriority] = $service;
+        if (!array_key_exists($servicePriority, $this->_services))
+        {
+            $this->_services[$servicePriority] = array();
+        }
+        $this->_services[$servicePriority][] = $service;
+    }
+
+    /**
+     * Order an array by priority, with integer priority value ascending. Where
+     * priority has two or more Zend_Service_Yadis_Service objects attached, we
+     * re-order these randomly and rebuild a "flat" sorted array of
+     * Zend_Service_Yadis_Service objects that are more easily iterated across
+     * The priority can afterwards be queried from each object if required.
+     *
+     * @param   array
+     */
+    protected function _sortByPriority(array $unsorted)
+    {
+        $sorted = array();
+        foreach ($unsorted as $priority) {
+            if (count($priority) > 1){
+                shuffle($priority);
+                $sorted = array_merge($sorted, $priority)
+            } else {
+                $sorted[] = $priority[0];
+            } 
+        }
+        return $sorted;
     }
 
 }
