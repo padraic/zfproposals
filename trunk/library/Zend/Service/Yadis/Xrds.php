@@ -137,7 +137,7 @@ class Zend_Service_Yadis_Xrds
         /**
          * Register all namespaces to this SimpleXMLElement.
          */
-        $this->_registerXpathNamespaces($xrds);
+        $this->_namespace->registerXpathNamespaces($xrds);
 
         /**
          * Verify the XRDS resource has a root element called "xrds:XRDS".
@@ -178,33 +178,28 @@ class Zend_Service_Yadis_Xrds
         return $xrdNodes;
     }
 
-    protected function _registerXpathNamespaces(SimpleXMLElement $element)
-    {
-        $this->_namespace->registerXpathNamespaces($element);
-    }
-
     /**
-     * Sort all elements in a list by priority in accordance with the rules
-     * defined by Clause 3.3.3 of the XRI Resolution 2.0 Specification with
-     * the aim of establishing order descending of highest priority.
-     *      http://yadis.org/wiki/XRI_Resolution_2.0_specification
+     * Order an array of values by priority. This assumes an array form of:
+     * $array[$priority] = <array of elements>
+     * Where multiple elements are assigned to a priority, their order in the
+     * priority array should be made random. After ordering, the array is
+     * flattened to a single array of elements for iteration.
      *
-     * @param   Zend_Service_Yadis_Service $service
+     * @param   array $unsorted
+     * @return  array
      */
-    protected function _sortByPriority(array $elements)
+    protected function _sortByPriority(array $unsorted)
     {
-        /**
-         * Sort by numeric priority index ascending, i.e. higher priorities
-         * occur at the top of the iterable list.
-         */
-        ksort($elements, SORT_NUMERIC);
-
-        /**
-         * Detect key collisions and apply a random order to such duplicated
-         * keys.
-         */
-        
-        
+        $sorted = array();
+        foreach ($unsorted as $priority) {
+            if (count($priority) > 1){
+                shuffle($priority);
+                $sorted = array_merge($sorted, $priority)
+            } else {
+                $sorted[] = $priority[0];
+            } 
+        }
+        return $sorted;
     }
 
 }

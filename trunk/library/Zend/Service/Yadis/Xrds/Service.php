@@ -181,28 +181,4 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
         $this->_services[$servicePriority][] = $service;
     }
 
-    /**
-     * Order an array of values by priority. This assumes an array form of:
-     * $array[$priority] = <array of elements>
-     * Where multiple elements are assigned to a priority, their order in the
-     * priority array should be made random. After ordering, the array is
-     * flattened to a single array of elements for iteration.
-     *
-     * @param   array $unsorted
-     * @return  array
-     */
-    protected function _sortByPriority(array $unsorted)
-    {
-        $sorted = array();
-        foreach ($unsorted as $priority) {
-            if (count($priority) > 1){
-                shuffle($priority);
-                $sorted = array_merge($sorted, $priority)
-            } else {
-                $sorted[] = $priority[0];
-            } 
-        }
-        return $sorted;
-    }
-
 }
