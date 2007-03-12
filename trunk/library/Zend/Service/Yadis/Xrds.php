@@ -178,4 +178,45 @@ class Zend_Service_Yadis_Xrds
         return $xrdNodes;
     }
 
+    /**
+     * Order an array of elements by priority. This assumes an array form of:
+     *      $array[$priority] = <array of elements with equal priority>
+     * Where multiple elements are assigned to a priority, their order in the
+     * priority array should be made random. After ordering, the array is
+     * flattened to a single array of elements for iteration.
+     *
+     * @param   array $unsorted
+     * @return  array
+     */
+    public static function sortByPriority(array $unsorted)
+    {
+        /**
+         * Perform simple numeric ordering of the priorities. This ensures the
+         * initial priority keys are ordered numerically ascending (higher 
+         * priorities are the first to be reached when iterating the array).
+         */
+        $priorities = array_keys($unsorted);
+        sort($priorities, SORT_NUMERIC);
+        $unflattened = array();
+        foreach($priorities as $priority) {
+            $unflattened[$priority][] = $unsorted[$priority];
+        }
+        /**
+         * Flatten the priority arrays to a one-dimensional array after
+         * ordering elements assigned the same priority randomly. The random 
+         * ordering ensures non/same prioritised elements are randomly selected
+         * to avoid a bias towards any particular element.
+         */
+        $flattened = array();
+        foreach ($unflattened as $priority) {
+            if (count($priority) > 1){
+                shuffle($priority);
+                $flattened = array_merge($flattened, $priority)
+            } else {
+                $flattened[] = $priority[0];
+            } 
+        }
+        return $flattened;
+    }
+
 }

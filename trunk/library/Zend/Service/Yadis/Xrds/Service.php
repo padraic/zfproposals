@@ -101,7 +101,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
             $serviceObj = new Zend_Service_Yadis_Service($service, $this->_namespace);
             $this->_addService($serviceObj);
         }
-        $this->_services = $this->_namespace->sortByPriority($this->_services);
+        $this->_services = Zend_Service_Yadis_Xrds::sortByPriority($this->_services);
         var_dump($this->_services); echo '<hr/><br/>XML Dump echoed from: ' . __FILE__ . ' Line:' . __LINE__;
     }
 
