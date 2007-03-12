@@ -95,13 +95,13 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
          * the authentication service XRD node last.
          */
         $this->_xrdNode = $this->_xrdNodes[count($this->_xrdNodes) - 1];
-        $this->_registerXpathNamespaces($this->_xrdNode);
+        $this->_namespace->registerXpathNamespaces($this->_xrdNode);
         $services = $this->_xrdNode->xpath('xrd:Service');
         foreach ($services as $service) {
             $serviceObj = new Zend_Service_Yadis_Service($service, $this->_namespace);
             $this->_addService($serviceObj);
         }
-        $this->_services = $this->_sortByPriority($this->_services);
+        $this->_services = $this->_namespace->sortByPriority($this->_services);
         var_dump($this->_services); echo '<hr/><br/>XML Dump echoed from: ' . __FILE__ . ' Line:' . __LINE__;
     }
 
