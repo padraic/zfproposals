@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sect1 id="zend.service.yadis.introduction">
+  <title>Introduction</title>
+
+  <sect2 id="quantum.db.introduction.background">
+    <title>YADIS</title>
+
+    <para>YADIS stands for "Yet Another Decentralised Identity
+    Interoperability System". It is governed by the Yadis Specification 1.0
+    which details the YADIS protocol, the process by which the owner of a
+    distinct URI can associate a selection of identity services with their
+    URI.</para>
+
+    <para>This can often be a conceptual barrier so we'll offer a simple
+    example to illustrate a specific use case.</para>
+
+    <para>User A has decided to create an OpenID, basically a URI hosted by an
+    OpenID Provider like myopenid.com. However, in order to allow other
+    websites to accept this OpenID, the identity (the URI) must be associated
+    with an identity service to which the website can send authentication
+    requests. To allow the website determine the OpenID Provider's service,
+    and even more relevantly the exact URI it should send HTTP authentication
+    requests, the website can utilise the YADIS protocol. This protocol, which
+    is described in detail below, will allow the website application locate an
+    XML document in a specific format called XRDS. This document will detail a
+    list of identity services (incl. an OpenID service) which the website
+    application can parse to figure out the OpenID Provider, service types and
+    Provider service URI it should use when authentication a new
+    OpenID.</para>
+
+    <para>Since such details are not necessarily obvious from an OpenID URI
+    (i.e. the owner of any OpenID can create an alias based on their own
+    domain name or any other available URI they wish), YADIS provides a simple
+    method of gathering such details.</para>
+  </sect2>
+
+  <sect2 id="quantum.db.introduction.limitations">
+    <title>Getting Started with YADIS</title>
+
+    <para>It's important to note that while the majority uses for YADIS
+    revolve around interoperability between identity services, it's also
+    useful for developing similar service associations in personal web
+    applications. That said, Zend_Service_Yadis is typically integrated into a
+    broader scope within the framework of a more immediately useful service,
+    such as OpenID or LID (Light Weight Identity).</para>
+
+    <para>The basic usage of Zend_Service_Yadis is deceptively simple. Since
+    it's defined by a specification, it's actually quite simple to utilise
+    since the library has no customisable options to complicate usage.</para>
+  </sect2>
+</sect1>
