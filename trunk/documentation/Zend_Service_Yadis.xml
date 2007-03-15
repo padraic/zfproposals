@@ -1,51 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sect1 id="zend.service.yadis.introduction">
+<sect1 id="zend.service.yadis">
   <title>Introduction</title>
 
-  <sect2 id="quantum.db.introduction.background">
+  <sect2 id="zend.service.yadis.yadis">
     <title>YADIS</title>
 
     <para>YADIS stands for "Yet Another Decentralised Identity
     Interoperability System". It is governed by the Yadis Specification 1.0
     which details the YADIS protocol, the process by which the owner of a
-    distinct URI can associate a selection of identity services with their
+    distinct URI can associate a selection of individual services with their
     URI.</para>
+
+    <para>This is actually a simple concept. Given a user's unique identity,
+    for example a URI, how can any relying parties such as web applications
+    determine which services it can avail of for this identity?</para>
 
     <para>This can often be a conceptual barrier so we'll offer a simple
     example to illustrate a specific use case.</para>
 
-    <para>User A has decided to create an OpenID, basically a URI hosted by an
-    OpenID Provider like myopenid.com. However, in order to allow other
-    websites to accept this OpenID, the identity (the URI) must be associated
-    with an identity service to which the website can send authentication
-    requests. To allow the website determine the OpenID Provider's service,
-    and even more relevantly the exact URI it should send HTTP authentication
-    requests, the website can utilise the YADIS protocol. This protocol, which
-    is described in detail below, will allow the website application locate an
-    XML document in a specific format called XRDS. This document will detail a
-    list of identity services (incl. an OpenID service) which the website
-    application can parse to figure out the OpenID Provider, service types and
-    Provider service URI it should use when authentication a new
-    OpenID.</para>
+    <para>User A has decided to create an OpenID. However, in order to allow
+    other websites to accept this OpenID when logging in, the identity (the
+    URI) must be associated with an identity service which the web application
+    can utilise to authenticate the user's identity (i.e. ensure this OpenID
+    ownership claim is correct). To allow the web application determine the
+    OpenID Provider's service, and even more relevantly the exact URI it
+    should send HTTP authentication requests to, the web application can
+    utilise the YADIS protocol.</para>
 
-    <para>Since such details are not necessarily obvious from an OpenID URI
-    (i.e. the owner of any OpenID can create an alias based on their own
-    domain name or any other available URI they wish), YADIS provides a simple
-    method of gathering such details.</para>
+    <para>The YADIS protocol will allow the website application discover the
+    details of all services associated with the OpenID, including of course
+    the OpenID service which the web application can use as the basis for
+    generating and sending authentication requests to the user's OpenID
+    Provider.</para>
+
+    <para>The key thing to remember is that YADIS allows web applications to
+    discover a list of all services associated with an identity. Such services
+    might include authentication, Skype or other.</para>
   </sect2>
 
-  <sect2 id="quantum.db.introduction.limitations">
+  <sect2 id="zend.service.yadis.gettingstartedwithyadis">
     <title>Getting Started with YADIS</title>
 
-    <para>It's important to note that while the majority uses for YADIS
-    revolve around interoperability between identity services, it's also
-    useful for developing similar service associations in personal web
-    applications. That said, Zend_Service_Yadis is typically integrated into a
-    broader scope within the framework of a more immediately useful service,
-    such as OpenID or LID (Light Weight Identity).</para>
+    <para>Since YADIS involves performing a single task, i.e. discovering all
+    services associated with an identity, it doesn't require much in the way
+    of user work. Zend_Service_Yadis operates by accepting a Yadis ID. This
+    might be an OpenID, an LID, or an XRI i-name. Based on it's value, the
+    service class will normalise the Yadis ID to a valid URI using
+    Zend_Uri.</para>
 
-    <para>The basic usage of Zend_Service_Yadis is deceptively simple. Since
-    it's defined by a specification, it's actually quite simple to utilise
-    since the library has no customisable options to complicate usage.</para>
+    <para>This normalised URI is the starting point for a chain of HTTP
+    requests which by following the Yadis Specification should retrieve an XML
+    document in the XRDS format. The XRDS document should contain a set of
+    &lt;Service&gt; elements, each describing a service using the standard
+    Type and Url values as well as any additional values specific to a
+    service.</para>
+
+    <para>Here's an example using an OpenID:</para>
+
+    <programlisting role="php">/**
+ * Our OpenID
+ */
+$yadisId = 'http://myidentity.example.com';
+
+require_once 'Zend/Service/Yadis.php';
+
+/**
+ * OpenID defines a XML namespace we should use.
+ */
+$namespaces = array('xmlns:openid' =&gt; 'http://openid.net/xmlns/1.0');
+
+/**
+ * Instantiate a new Zend_Service_Yadis object, begin service discovery, and
+ * print a list of all service types we discover.
+ */
+$yadis = new Zend_Service_Yadis($yadisId, $namespaces);
+
+try {
+    $services = $yadis-&gt;discover();
+} catch (Zend_Service_Yadis_Exception $e) {
+    exit('Something went wrong and we\'re bailing out! ' . $e-&gt;getMessage());
+}
+
+if(!$services)
+{
+    exit('YADIS protocol did not retrieve a list of services.');
+}
+
+/**
+ * Print out a list of each Service and its details.
+ */
+foreach ($services as $service) {
+    echo '&lt;hr/&gt;';
+    echo 'Service - Priority is ', $service-&gt;getPriority();
+    echo '&lt;br/&gt;&lt;br/&gt;';
+    echo 'Types:&lt;br/&gt;&lt;ul&gt;';
+    foreach ($service-&gt;getTypes() as $type) {
+        echo '&lt;li&gt;', $type, '&lt;/li&gt;';
+    }
+    echo '&lt;/ul&gt;&lt;br/&gt;&lt;br/&gt;Urls:&lt;br/&gt;&lt;ul&gt;';
+    foreach ($service-&gt;getUrls() as $url) {
+        echo '&lt;li&gt;', $url, '&lt;/li&gt;';
+    }
+    echo '&lt;/ul&gt;';
+}</programlisting>
   </sect2>
 </sect1>
