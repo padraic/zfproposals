@@ -17,7 +17,7 @@
  * @package    Zend_Validate
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Interface.php 3278 2007-02-07 21:54:50Z darby $
+ * @version    $Id: Interface.php 4011 2007-03-16 08:46:49Z studio24 $
  */
 
 
@@ -27,27 +27,26 @@
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Validate_Interface
+interface Zend_Validate_Hostname_Interface 
 {
+     
     /**
-     * Returns true if and only if $value meets the validation requirements
+     * Returns UTF-8 characters allowed in DNS hostnames for the specified Top-Level-Domain
      *
-     * If $value fails validation, then this method returns false, and $messages will contain an array of
-     * messages that explain why the validation failed.
+     * UTF-8 characters should be written as four character hex codes \x{XXXX}
+     * For example é (lowercase e with acute) is represented by the hex code \x{00E9}
+     * 
+     * You only need to include lower-case equivalents of characters since the hostname 
+     * check is case-insensitive
+     * 
+     * Please document the supported TLDs in the documentation file at:
+     * manual/en/module_specs/Zend_Validate-Hostname.xml
      *
-     * @param  mixed $value
-     * @throws Zend_Valid_Exception If validation of $value is impossible
-     * @return boolean
+     * @see http://en.wikipedia.org/wiki/Internationalized_domain_name
+     * @see http://www.iana.org/cctld/ Country-Code Top-Level Domains (TLDs)
+     * @see http://www.columbia.edu/kermit/utf8-t1.html UTF-8 characters
+     * @return string
      */
-    public function isValid($value);
-
-    /**
-     * Returns an array of messages that explain why a previous isValid() call returned false
-     *
-     * If isValid() was never called or if the most recent isValid() call returned true, then
-     * this method returns an empty array.
-     *
-     * @return array
-     */
-    public function getMessages();
+    static function getCharacters();
+    
 }

@@ -16,11 +16,12 @@
  * @category   Zend
  * @package    Zend_Http
  * @subpackage Client
- * @version    $Id: Client.php 3039 2007-01-27 12:55:48Z shahar $
+ * @version    $Id: Client.php 3834 2007-03-09 05:12:52Z bkarwin $
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+require_once 'Zend/Loader.php';
 require_once 'Zend/Uri.php';
 require_once 'Zend/Http/Client/Adapter/Interface.php';
 require_once 'Zend/Http/Response.php';
@@ -448,9 +449,14 @@ class Zend_Http_Client
      * constants.
      *  
      * To enable authentication: 
-     *     @example $this->setAuth('shahar', 'secret', Zend_Http_Client::AUTH_BASIC);
+     * <code>
+     * $this->setAuth('shahar', 'secret', Zend_Http_Client::AUTH_BASIC);
+     * </code>
+     *
      * To disable authentication: 
-     *     @example $this->setAuth(false);
+     * <code>
+     * $this->setAuth(false);
+     * </code>
      *
      * @see http://www.faqs.org/rfcs/rfc2617.html
      * @param string|false $user User name or false disable authentication
@@ -762,7 +768,7 @@ class Zend_Http_Client
                     } else {
                     	$query = '';
                     }
-                    $this->uri->setQueryString($query);
+                    $this->uri->setQuery($query);
 
                     // Else, if we got just an absolute path, set it
                     if(strpos($location, '/') === 0) {
@@ -771,7 +777,8 @@ class Zend_Http_Client
                         // Else, assume we have a relative path
                     } else {
                         // Get the current path directory, removing any trailing slashes
-                        $path = rtrim(dirname($this->uri->getPath()), "/");
+                        $path = $this->uri->getPath();
+                        $path = rtrim(substr($path, 0, strrpos($path, '/')), "/");
                         $this->uri->setPath($path . '/' . $location);
                     }
                 }
@@ -960,7 +967,7 @@ class Zend_Http_Client
     {
         if (is_string($adapter)) {
         	try {
-        		Zend::loadClass($adapter);
+        		Zend_Loader::loadClass($adapter);
         	} catch (Zend_Exception $e) {
         		throw new Zend_Http_Client_Exception("Unable to load adapter '$adapter': {$e->getMessage()}");
         	}
