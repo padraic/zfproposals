@@ -146,7 +146,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @var array
      */
     protected $_xriIdentifiers = array(
-        '=', '$', '!', '@', '+', '('  // is a left bracket necessary?
+        '=', '$', '!', '@', '+'
     );
     
     /**
@@ -227,6 +227,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
          */
         if (strpos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
         {
+            
             //throw new Exception('XRI support in progress but incomplete');
             require_once 'Zend/Service/Yadis/Xri.php';
             $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()
@@ -234,7 +235,8 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
                     ->toUri($yadisId);
 
             $cid = Zend_Service_Yadis_Xri::getInstance()->getCanonicalId();
-
+            exit('here');
+            return $this;
         }
 
         /**
@@ -367,6 +369,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         }
 
         try {
+            var_dump($xrdsDocument);
             $serviceList = $this->_parseXrds($xrdsDocument);
         } catch (Zend_Exception $e) {
             require_once 'Zend/Service/Yadis/Exception.php';
@@ -408,7 +411,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         } elseif ($this->_isMetaHttpEquiv($response)) {
             return self::XRDS_META_HTTP_EQUIV;
         }
-        return self::XRDS_ERROR;
+        return false;
     }
 
     /**
@@ -473,7 +476,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     protected function _isXrdsContentType(Zend_Http_Response $response)
     {
-        if (!$response->getHeader('Content-Type') || $response->getHeader('Content-Type') !== 'application/xrds+xml') {
+        if (!$response->getHeader('Content-Type') || strpos($response->getHeader('Content-Type'), 'application/xrds+xml') === false) {
             return false;
         }
         return true;

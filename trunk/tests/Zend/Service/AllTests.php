@@ -12,7 +12,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 // error_reporting(E_ALL);
 
-require_once 'AkismetTest.php';
+//require_once 'AkismetTest.php';
 
 
 class Zend_Service_AllTests

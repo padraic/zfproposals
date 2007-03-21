@@ -211,7 +211,7 @@ class Zend_Service_Yadis_Xrds
         foreach ($unflattened as $priority) {
             if (count($priority) > 1){
                 shuffle($priority);
-                $flattened = array_merge($flattened, $priority)
+                $flattened = array_merge($flattened, $priority);
             } else {
                 $flattened[] = $priority[0];
             } 

@@ -57,7 +57,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
      * @var array
      */
     protected $_xriIdentifiers = array(
-        '=', '$', '!', '@', '+', '('
+        '=', '$', '!', '@', '+'
     );
 
     /**
@@ -237,16 +237,22 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
         } else {
             $uri = $this->_uri;
         }
-        $response = $this->_get($uri);
-        if (!$response->isSuccessful()) {
-        }  elseif ($response->getHeader('Content-Type') !== 'application/xrds+xml') {
-        }
-        
-        header('Content-Type: text/xml');
-        exit($response->getBody());
 
-        // for the moment
-        return false;
+        $response = $this->_get($uri);
+        if (strpos($response->getHeader('Content-Type'), 'application/xrds+xml') === false) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('The response header indicates the response body is not an XRDS document');
+        }
+
+        $xrds = new SimpleXMLElement($response->getBody());
+        $this->_namespace->registerXpathNamespaces($xrds);
+        $canonicalIds = $xrds->xpath('xrd:CanonicalID');
+        if (!$canonicalIds) {
+            return false;
+        }
+        $this->_canonicalId = $canonicalIds[count($canonicalIds) - 1];
+        var_dump($canonicalIds); exit;
+        return $this->_canonicalId;
     }
 
     public function getCanonicalId()

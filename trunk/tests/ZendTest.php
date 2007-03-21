@@ -4,7 +4,6 @@
  * @subpackage UnitTests
  */
 
-
 /**
  * Zend
  */

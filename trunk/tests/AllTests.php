@@ -19,10 +19,16 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
  * Prepend library/ to the include_path.  This allows the tests to run out of the box and
  * helps prevent finding other copies of the framework that might be present.
  */
+set_include_path(
+    realpath('../library') . DIRECTORY_SEPARATOR
+    . get_include_path()
+);
+ini_set('display_errors', 'on');
+error_reporting(E_ALL);
 set_include_path(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'library'
                  . PATH_SEPARATOR . '.' . PATH_SEPARATOR . get_include_path());
 
-require_once 'ZendTest.php';
+//require_once 'ZendTest.php';
 require_once 'Zend/AllTests.php';
 
 class AllTests
@@ -42,7 +48,7 @@ class AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework');
 
-        $suite->addTestSuite('ZendTest');
+        //$suite->addTestSuite('ZendTest');
 
         $suite->addTest(Zend_AllTests::suite());
 
