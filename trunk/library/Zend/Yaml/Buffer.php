@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Yaml_Reader
+class Zend_Yaml_Buffer
 {
 
     private $_stream = null;
@@ -11,21 +11,19 @@ class Zend_Yaml_Reader
     private $_index = 0;
     private $_line = 0;
     private $_column = 0;
-    private $_name = '';
     private $_rawBuffer = '';
 
     public function __construct($stream)
     {
         if (is_string($stream)) {
-            $this->_name = '<string>';
             $this->_rawBuffer = $stream;
-        } else {
-            /** Should verify we get a valid streamed file */
+        } elseif (is_resource($stream)) {
             $this->_stream = $stream;
-            $this->_name = '<file>';
             $this->_eof = false;
+        } else {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Invalid parameter; did not receive a string or file resource');
         }
-        /** Add support of path parameters to be fread or file_get_contents */
     }
 
     public function peek($index = 0)
@@ -81,7 +79,7 @@ class Zend_Yaml_Reader
     {
         if(preg_match('%[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\xFF]%', $string)) {
             require_once 'Zend/Yaml/Exception.php';
-            throw new Zend_Yaml_Exception('Special characters are not allowed.');
+            throw new Zend_Yaml_Exception('Special characters are not allowed');
         }
     }
 
@@ -104,7 +102,7 @@ class Zend_Yaml_Reader
             $this->_rawBuffer = substr($this->_rawBuffer, $converted);
             if($this->_eof)
             {
-                $this->_buffer .= "\0"; // null byte to add in place of empty
+                $this->_buffer .= "\0";
                 $this->_rawBuffer = null;
                 break;
             }
