@@ -7,11 +7,10 @@ class Zend_Yaml_Token_Directive extends Token
     private $_name = null;
     private $_value = null;
 
-    public function __construct($name, $value, $startMark, $endMark)
+    public function __construct($name, $value)
     {
         $this->_name = $name;
         $this->_value = $value;
-        parent::__construct($startMark, $endMark);
     }
 
     public function getName()

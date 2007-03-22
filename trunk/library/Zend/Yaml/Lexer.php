@@ -1,5 +1,14 @@
 <?php
 
+/** Zend_Yaml_Token */
+require_once 'Zend/Yaml/Token.php';
+
+/** Zend_Yaml_SimpleKey */
+require_once 'Zend/Yaml/SimpleKey.php';
+
+/** Zend_Yaml_Constants */
+require_once 'Zend/Yaml/Constants.php'
+
 class Zend_Yaml_Lexer
 {
 
@@ -59,79 +68,170 @@ class Zend_Yaml_Lexer
         }
     }
 
-    private function _peek()
-	{
-
-    }
-
-    private function _prefix()
-	{
-
-    }
-
-    private function _prefixForward()
-	{
-
-    }
-
-    private function _forward()
-	{
-
-    }
-
-    private function _checkPrintable()
-	{
-
-    }
-
-    private function _update()
-	{
-
-    }
-
     private function _needMoreTokens()
 	{
-
+        if ($this->_done) return false;
+        if(empty($this->_tokens)) {
+            return true;
+        }
+        // removeStalePossibleSimpleKeys
+        if($this->_nextPossibleSimpleKey() == $this->_tokensTaken) {
+            return true;
+        }
+        return false;
     }
+
 
     private function _fetchMoreTokens()
 	{
-
+        $this->_scanToNextToken();
+        // removeStalePossibleSimpleKeys
+        $this->_unwindIndent($this->_column);
+        $chr = $this->_peek();
+        switch ($chr) {
+            case "\0":
+                return $this->_fetchStreamEnd();
+                break;
+            case "%":
+                if ($this->_checkDirective()) {
+                    return $this->_fetchDirective();
+                }
+                break;
+            case "-":
+                if ($this->_checkDocumentStart()) {
+                    return $this->_fetchDocumentStart();
+                }
+                break;
+            case ".":
+                if ($this->_checkDocumentEnd()) {
+                    return $this->_fetchDocumentEnd();
+                }
+                break;
+            case "[":
+                return $this->_fetchFlowSequenceStart();
+                break;
+            case "{":
+                return $this->_fetchFlowMappingStart();
+                break;
+            case "]":
+                return $this->_fetchFlowSequenceEnd();
+                break;
+            case "}":
+                return $this->_fetchFlowMappingEnd();
+                break;
+            case ",":
+                return $this->_fetchFlowEntry();
+                break;
+            case "-":
+                if ($this->_checkBlockEntry()) {
+                    return $this->_fetchBlockEntry();
+                }
+                break;
+            case "?":
+                if ($this->_checkKey()) {
+                    return $this->_fetchKey();
+                }
+                break;
+            case ":":
+                if ($this->_checkValue()) {
+                    return $this->_fetchValue();
+                }
+                break;
+            case "*":
+                return $this->_fetchAlias();
+                break;
+            case "&":
+                return $this->_fetchAnchor();
+                break;
+            case "!":
+                return $this->_fetchTag();
+                break;
+            case "|":
+                if (empty($this->_flowLevel)) {
+                    return $this->_fetchLiteral();
+                }
+                break;
+            case ">":
+                if (empty($this->_flowLevel)) {
+                    return $this->_fetchFolded();
+                }   
+                break;
+            case "'":
+                return $this->_fetchSingle();
+                break;
+            case "\"":
+                return $this->_fetchDouble();
+                break;
+            default:
+                if ($this->_checkPlain()) {
+                    return $this->_fetchPlain();
+                }
+        }
+        require_once 'Zend/Yaml/Exception.php';
+        throw new Zend_Yaml_Exception('Scanning for next token but found character: ' . $chr . ' which is not a valid token start mark');
     }
 
     private function _nextPossibleSimpleKey()
 	{
-
+        foreach ($this->_possibleSimpleKeys as $key) {
+            if ($key->tokenNumber > 0) {
+                return $key->tokenNumber;
+            }
+        }
+        return null;
     }
     
     private function _savePossibleSimpleKey()
 	{
-
+        $req = false;
+        if (empty($this->_flowLevel) && $this->_indent == $this->_column) {
+            $req = true;
+        }
+        if ($this->_allowSimpleKey) {
+            $this->_possibleSimpleKeys[$this->_flowLevel] = new Zend_Yaml_SimpleKey($this->_tokenNumber, $req, $this->_column);
+        }
     }
     
-    private function _unwindIndent()
+    private function _unwindIndent($column)
 	{
-
+        if (empty($this->_flowLevel)) {
+            return;
+        }
+        while ($this->_indent > $column) {
+            $indent = array_pop($this->_indents);
+            $this->_tokens[] = new Zend_Yaml_Token_BlockEnd;
+        }
     }
     
-    private function _addIndent()
+    private function _addIndent($column)
 	{
-
+        if ($this->_indent < $column) {
+            $this->_indents[] = $this->_indent;
+            $this->_indent = $column;
+            return true;
+        }
+        return false;
     }
 
     private function _fetchStreamStart()
 	{
-
+        $this->_tokens[] = new Zend_Yaml_Token_StreamStart;
     }
 
     private function _fetchStreamEnd()
 	{
-
+        $this->_unwindIndent(-1);
+        $this->_allowSimpleKey = false;
+        $this->_possibleSimpleKeys = array();
+        $this->_tokens[] = new Zend_Yaml_Token_StreamEnd;
+        $this->_done = true;
     }
 
     private function _fetchDirective()
 	{
-
+        $this->_unwindIndent(-1);
+        $this->_allowSimpleKey = false;
+        $this->_tokens[] = $this->_scanDirective();
     }
     
     private function _fetchDocumentStart()
@@ -256,7 +356,20 @@ class Zend_Yaml_Lexer
     
     private function _scanDirective()
 	{
-
+        $this->_forward();
+        $name = $this->_scanDirectiveName();
+        $value = null;
+        if ($name == 'YAML') {
+            $value = $this->_scanYamlDirectiveValue();
+        } elseif ($name == 'TAG') {
+            $value = $this->_scanTagDirectiveValue();
+        } else {
+            while ($this->_peek()) {
+                $this->_forward();
+            }
+        }
+        $this->_scanDirectiveIgnoredLine();
+        $temp = new Zend_Yaml_Token_Directive($name, $value);
     }
     
     private function _scanDirectiveName()
@@ -379,5 +492,51 @@ class Zend_Yaml_Lexer
 	{
 
     }
+
+
+
+
+
+    private function _peek()
+	{
+
+    }
+
+    private function _prefix()
+	{
+
+    }
+
+    private function _prefixForward()
+	{
+
+    }
+
+    private function _forward()
+	{
+
+    }
+
+    private function _checkPrintable()
+	{
+
+    }
+
+    private function _update()
+	{
+
+    }
+
+
+    /*private function _removePossibleSimpleKey()
+    {
+        if (isset($this->_possibleSimpleKeys[$this->_flowLevel])) {
+            if ($this->_possibleSimpleKeys[$this->_flowLevel]->required) {
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Unable to find an expected ":" simple key');
+            }
+            $this->_possibleSimpleKeys[$this->_flowLevel] = null;
+        }
+    }*/
 
 }

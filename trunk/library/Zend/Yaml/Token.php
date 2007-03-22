@@ -3,8 +3,7 @@
 class Zend_Yaml_Token 
 {
     protected $_id = null;
-    protected $_startMark = null;
-    protected $_endMark = null;
+
     protected $_isDocumentStart = false;
     protected $_isDocumentE= false;
     protected $_isStreamStart = false;
@@ -26,10 +25,10 @@ class Zend_Yaml_Token
     protected $_isTag = false;
     protected $_isScalar = false;
 
-    public function __construct($startMark = null, $endMark = null)
+    public function __construct()
     {
-        $this->_startMark = $startMark;
-        $this->_endMark = $endMark;
+        require_once 'Zend/Yaml/Exception.php';
+        throw new Zend_Yaml_Exception('Zend_Yaml_Token should not be instantiated, please use one of the concrete Token subclasses');
     }
 
     public function getId()
@@ -37,25 +36,25 @@ class Zend_Yaml_Token
         return $this->_id;
     }
 
-    public function isDocumentStart() {}
-    public function isDocumentE() {}
-    public function isStreamStart() {}
-    public function isStreamEnd() {}
-    public function isDirective() {}
-    public function isBlockSequenceStart() {}
-    public function isBlockMappingStart() {}
-    public function isBlockEnd() {}
-    public function isFlowSequenceStart() {}
-    public function isFlowMappingStart() {}
-    public function isFlowSequenceEnd() {}
-    public function isFlowMappingEnd() {}
-    public function is_key() {}
-    public function isValue() {}
-    public function isBlockEntry() {}
-    public function isFlowEntry() {}
-    public function isAlias() {}
-    public function isAnchor() {}
-    public function isTag() {}
-    public function isScalar() {}
+    public function isDocumentStart() { return $this->_isDocumentStart; }
+    public function isDocumentEnd() { return $this->_isDocumentEnd; }
+    public function isStreamStart() { return $this->_isStreamStart; }
+    public function isStreamEnd() { return $this->_isStreamEnd; }
+    public function isDirective() { return $this->_isDirective; }
+    public function isBlockSequenceStart() { return $this->_isBlockSequenceStart; }
+    public function isBlockMappingStart() { return $this->_isBlockMappingStart; }
+    public function isBlockEnd() { return $this->_isBlockEnd; }
+    public function isFlowSequenceStart() { return $this->_isFlowSequenceStart; }
+    public function isFlowMappingStart() { return $this->_isFlowMappingStart; }
+    public function isFlowSequenceEnd() { return $this->_isFlowSequenceEnd; }
+    public function isFlowMappingEnd() { return $this->_isFlowMappingEnd; }
+    public function isKey() { return $this->_isKey; }
+    public function isValue() { return $this->_isValue; }
+    public function isBlockEntry() { return $this->_isBlockEntry; }
+    public function isFlowEntry() { return $this->_isFlowEntry; }
+    public function isAlias() { return $this->_isAlias; }
+    public function isAnchor() { return $this->_isAnchor; }
+    public function isTag() { return $this->_isTag; }
+    public function isScalar() { return $this->_isScalar; }
 
 }
