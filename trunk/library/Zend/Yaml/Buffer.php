@@ -6,7 +6,7 @@ class Zend_Yaml_Buffer
     private $_stream = null;
     private $_streamPointer = 0;
     private $_eof = true;
-    private $_buffer = null;
+    private $_buffer = '';
     private $_pointer = 0;
     private $_index = 0;
     private $_line = 0;
@@ -30,7 +30,7 @@ class Zend_Yaml_Buffer
     {
         $temp = $this->_pointer + $index + 1;
         if($temp >= strlen($this->_buffer)) {
-            $this->update($index + 1)
+            $this->_update($index + 1);
         }
         return $this->_buffer[$this->_pointer + $index];
     }
@@ -49,19 +49,20 @@ class Zend_Yaml_Buffer
         $temp = $this->_pointer + $length + 1;
         if($temp >= strlen($this->_buffer))
         {
-            $this->update($length + 1);
+            $this->_update($length + 1);
         }
         while($length)
         {
             $chr = $this->_buffer[$this->_pointer];
             $this->_pointer += 1;
             $this->_index += 1;
-            if($chr == "\n" || $chr == "\x85") || ($chr == "\r" && $this->_buffer[$this->_pointer+1] !== "\n")) {
+            if(($chr == "\n" || $chr == "\x85") || ($chr == "\r" && $this->_buffer[$this->_pointer+1] !== "\n")) {
                 $this->_line += 1;
                 $this->_column = 0;
             } else {
                 $this->_column += 1;
             }
+            $length -= 1;
         }
     }
 
@@ -83,9 +84,9 @@ class Zend_Yaml_Buffer
         }
     }
 
-    public function update($length)
+    private function _update($length)
     {
-        if(is_null($this->_buffer)) {
+        if(is_null($this->_rawBuffer)) {
             return;
         }
         $this->_buffer = substr($this->_buffer, $this->_pointer);
@@ -93,7 +94,7 @@ class Zend_Yaml_Buffer
         {
             if(!$this->_eof)
             {
-                $this->updateRaw();
+                $this->_updateRaw();
             }
             $data = $this->_rawBuffer;
             $converted = strlen($data);
@@ -109,7 +110,7 @@ class Zend_Yaml_Buffer
         }
     }
 
-    public function updateRaw($size = 1024)
+    private function _updateRaw($size = 1024)
     {
         $data = fread($this->_stream, $size);
         if($data && !empty($data)) {

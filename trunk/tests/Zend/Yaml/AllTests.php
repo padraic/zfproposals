@@ -18,13 +18,13 @@
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: AllTests.php 4186 2007-03-22 20:52:47Z darby $
+ * @version    $Id$
  */
 
 error_reporting( E_ALL | E_STRICT );
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Zend_Service_AllTests::main');
+    define('PHPUnit_MAIN_METHOD', 'Zend_Yaml_AllTests::main');
 
     /**
      * Prepend library/ to the include_path.  This allows the tests to run out
@@ -58,31 +58,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 /**
  * @see Zend_Service_AkismetTest
  */
-require_once 'Zend/Service/AkismetTest.php';
-
-
-/**
- * @see Zend_Service_Audioscrobbler_AllTests
- */
-//require_once 'Zend/Service/Audioscrobbler/AllTests.php';
-
-
-/**
- * @see Zend_Service_Delicious_AllTests
- */
-//require_once 'Zend/Service/Delicious/AllTests.php';
-
-
-/**
- * @see Zend_Service_Flickr_AllTests
- */
-//require_once 'Zend/Service/Flickr/AllTests.php';
-
-
-/**
- * @see Zend_Service_SimpyTest
- */
-//require_once 'Zend/Service/SimpyTest.php';
+require_once 'Zend/Yaml/BufferTest.php';
 
 
 /**
@@ -92,7 +68,7 @@ require_once 'Zend/Service/AkismetTest.php';
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_AllTests
+class Zend_Yaml_AllTests
 {
     /**
      * Runs this test suite
@@ -111,22 +87,14 @@ class Zend_Service_AllTests
      */
     public static function suite()
     {
-        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Service');
+        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Yaml');
 
-        $suite->addTestSuite('Zend_Service_AkismetTest');
-        /*$suite->addTest(Zend_Service_Audioscrobbler_AllTests::suite());
-        $suite->addTest(Zend_Service_Delicious_AllTests::suite());
-        $suite->addTest(Zend_Service_Flickr_AllTests::suite());
-        if (defined('TESTS_ZEND_SERVICE_SIMPY_ENABLED') && constant('TESTS_ZEND_SERVICE_SIMPY_ENABLED') !== false) {
-            $suite->addTestSuite('Zend_Service_SimpyTest');
-        } else {
-            $suite->addTestSuite('Zend_Service_SimpyTest_Skip');
-        }*/
+        $suite->addTestSuite('Zend_Yaml_BufferTest');
 
         return $suite;
     }
 }
 
-if (PHPUnit_MAIN_METHOD == 'Zend_Service_AllTests::main') {
-    Zend_Service_AllTests::main();
+if (PHPUnit_MAIN_METHOD == 'Zend_Yaml_AllTests::main') {
+    Zend_Yaml_AllTests::main();
 }
