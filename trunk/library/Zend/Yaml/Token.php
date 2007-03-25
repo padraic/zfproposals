@@ -26,10 +26,7 @@ class Zend_Yaml_Token
     protected $_isScalar = false;
 
     public function __construct()
-    {
-        require_once 'Zend/Yaml/Exception.php';
-        throw new Zend_Yaml_Exception('Zend_Yaml_Token should not be instantiated, please use one of the concrete Token subclasses');
-    }
+    {}
 
     public function getId()
     {
