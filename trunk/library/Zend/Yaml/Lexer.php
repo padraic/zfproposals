@@ -479,8 +479,7 @@ class Zend_Yaml_Lexer
     
     private function _scanToNextToken()
 	{
-        $located = false;
-        while ($located === false) {
+        while (true) {
             while ($this->_peek() = chr(32)) {
                 $this->_forward();
             }
@@ -494,7 +493,7 @@ class Zend_Yaml_Lexer
                     $this->_allowSimpleKey = true;
                 }
             } else {
-                $located = true;
+                break;
             }
         }
     }
@@ -509,42 +508,97 @@ class Zend_Yaml_Lexer
         } elseif ($name == 'TAG') {
             $value = $this->_scanTagDirectiveValue();
         } else {
-            while ($this->_peek()) {
+            while (!preg_match(Zend_Yaml_Constants::NULL_LINEBR, $this->_peek())) {
                 $this->_forward();
             }
         }
         $this->_scanDirectiveIgnoredLine();
-        $temp = new Zend_Yaml_Token_Directive($name, $value);
+        $return = new Zend_Yaml_Token_Directive($name, $value);
+        return $return;
     }
     
     private function _scanDirectiveName()
 	{
-
+        $length = 0;
+        $char = $this->_peek($length);
+        while (preg_match(Zend_Yaml_Constants::ALPHA, $char)) {
+            $length += 1;
+            $char = $this->_peek($length);
+        }
+        if (empty($length)) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected alphanumeric character, but got ['.$char.']');
+        }
+        $value = $this->_prefix($length);
+        $this->_forward($length);
+        if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$char.']');
+        }
+        return $value;
     }
 
     private function _scanYamlDirectiveValue()
 	{
-
+        while ($this->_peek() == chr(32)) {
+            $this->_forward();
+        }
+        $bigun = $this->_scanYamlDirectiveNumber();
+        if ($this->_peek() !== '.') {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected a digit or space, but got ['.$this->_peek().']');
+        }
+        $this->_forward();
+        $littleun = $this->_scanYamlDirectiveNumber();
+        if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$char.']');
+        }
+        return array($bigun, $littleun);
     }
 
     private function _scanYamlDirectiveNumber()
 	{
-
+        $char = $this->_peek();
+        if (!ctype_digit($char)) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected digit, but got ['.$char.']');
+        }
+        $length = 0;
+        while (ctype_digit($this->_peek($length))) {
+            $length += 1;
+        }
+        $value = $this->_prefix($length);
+        $this->_forward($length);
+        return $value;
     }
 
     private function _scanTagDirectiveValue() ()
 	{
-
+       while ($this->_peek() == chr(32)) {
+           $this->_forward();
+       } 
+       $handle = $this->_scanTagDirectiveHandle();
+       while ($this->_peek() == chr(32)) {
+           $this->_forward();
+       }
+       $prefix = $this->_scanTagDirectivePrefix();
+       return array($handle, $prefix);
     }
 
     private function _scanTagDirectiveHandle()
 	{
-
+        $value = $this->_scanTagHandle('directive');
+        if ($this->_peek() !== chr(32)) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected space, but got ['.$this->_peek().']');
+        }
+        return $value;
     }
     
     private function _scanTagDirectivePrefix()
 	{
-
+        
     }
 
     private function _scanDirectiveIgnoredLine()
