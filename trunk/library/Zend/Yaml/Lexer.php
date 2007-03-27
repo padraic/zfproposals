@@ -513,7 +513,9 @@ class Zend_Yaml_Lexer
             }
         }
         $this->_scanDirectiveIgnoredLine();
-        $return = new Zend_Yaml_Token_Directive($name, $value);
+        $return = new Zend_Yaml_Token_Directive;
+        $return->setName($name);
+        $return->setValue($value);
         return $return;
     }
     
@@ -552,7 +554,7 @@ class Zend_Yaml_Lexer
         $littleun = $this->_scanYamlDirectiveNumber();
         if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
             require_once 'Zend/Yaml/Exception.php';
-            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$char.']');
+            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$this->_peek().']');
         }
         return array($bigun, $littleun);
     }
@@ -598,52 +600,259 @@ class Zend_Yaml_Lexer
     
     private function _scanTagDirectivePrefix()
 	{
-        
+        $value = $this->_scanTagUri('directive');
+        if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$this->_peek().']');
+        }
+        return $value;
     }
 
     private function _scanDirectiveIgnoredLine()
 	{
-
+        while ($this->_peek() == chr(32)) {
+            $this->_forward();
+        }
+        if ($this->_peek() == '#') {
+            while (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR), $this->_peek()) {
+                $this->_forward();
+            }
+        }
+        if (!preg_match(Zend_Yaml_Constants::NULL_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected a comment, null byte [\0], or linebreak character, but got ['.$this->_peek().']');
+        }
+        $this->_scanLineBreak();
     }
 
-    private function _scanAnchor()
+    private function _scanAnchor(Zend_Yaml_Token $token)
 	{
-
+        $this->_forward();
+        $length = 0;
+        $chunkSize = 16;
+        while (true) {
+            $chunk = $this->_prefix($chunkSize);
+            $matches = null;
+            preg_match(Zend_Yaml_Constants::NON_ALPHA, $chunk, $matches);
+            $length = strpos($chunk, $matches[0]);
+            if ($length) {
+                break;
+            }
+            $chunkSize += 16;
+        }
+        if ($length == 0) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected alphanumeric, hyphen or underscore characters but found none');
+        }
+        $value = $this->_prefix($length);
+        $this->_forward($length);
+        if (!preg_match(Zend_Yaml_Constants::NON_ALPHA_OR_NUM, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected alphanumeric character, but got ['.$this->_peek().']');
+        }
+        $token->setValue($value);
+        return $token;
     }
 
     private function _scanTag()
 	{
-
+        $char = $this->_peek(1);
+        if ($char == '?') {
+            $handle = null;
+            $this->_forward(2);
+            $suffix = $this->_scanTagUri('tag');
+            if ($this->_peek() !== '>') {
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Expected [>] as closing tag, but got ['.$this->_peek().']');
+            }
+            $this->_forward(1);
+        } elseif (preg_match(Zend_Yaml_Constants::NULL_SPACE_TAB_LINEBR, $char)) {
+            $handle = null;
+            $suffix = '!';
+            $this->_forward(1);
+        } else {
+            $length = 1;
+            $useHandle = false;
+            while (!preg_match(Zend_Yaml_Constants::NULL_SPACE_TAB_LINEBR, $char)) {
+                if ($char = '!') {
+                    $useHandle = true;
+                    break;
+                }
+                $length += 1;
+                $char = $this->_peek($length);
+            }
+            $handle = '!';
+            if ($useHandle) {
+                $handle = $this->_scanTagHandle('tag');
+            } else {
+                $this->_forward(1);
+            }
+            $suffix = $this->_scanTagUri('tag');
+        }
+        if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected null byte [\0], space or linebreak character, but got ['.$this->_peek().']');
+        }
+        $value = array($handle, $suffix);
+        $return = new Zend_Yaml_Token_Tag;
+        $return->setValue($value);
+        return $return;
     }
 
-    private function _scanBlockScalar()
+    private function _scanBlockScalar($style)
 	{
-
+        $folded = ($style == '>');
+        $chunks = array();
+        $this->_forward(1);
+        list($chomping, $increment) = $this->_scanBlockScalarIndicators();
+        $this->_scanBlockScalarIgnoredLine();
+        $minIndent = $this->_indent + 1;
+        if ($minIndent < 1) {
+            $minIndent = 1;
+        }
+        if (empty($increment)) {
+            list($breaks, $maxIndent) = $this->_scanBlockScalarIndentation();
+            $indent = max($minIndent, $maxIndent);
+        } else {
+            $indent = $minIndent + $increment - 1;
+            $breaks = $this->_scanBlockScalarBreaks($indent);
+        }
+        $lineBreak = '';
+        while ($this->_column == $indent && $this->_peek() !== "\0") {
+            $chunks = array_merge($chunks, $breaks);
+            $leadingNonSpace = !preg_match(Zend_Yaml_Constants::SPACE_TAB, $this->_peek());
+            $length = 0;
+            while (!preg_match(Zend_Yaml_Constants::NULL_LINEBR, $this->_peek($length))) {
+                $length += 1;
+            }
+            $chunks[] = $this->_prefix($length);
+            $this->_forward($length);
+            $lineBreak = $this->_scanLineBreak();
+            $breaks = $this->_scanBlockScalarBreaks($indent);
+            if ($this->_column == $indent && $this->_peek() !== "\0") {
+                if ($folded && $lineBreak == "\n" && $leadingNonSpace && !preg_match(Zend_Yaml_Constants::SPACE_TAB, $this->_peek())) {
+                    if(empty($breaks)) $chunks[] = chr(32);
+                } else {
+                    $chunks[] = $lineBreak;
+                }
+            } else {
+                break;
+            }
+        }
+        if (!empty($chomping)) {
+            $chunks[] = $lineBreak;
+            $chunks = array_merge($chunks, $breaks);
+        }
+        $return = new Zend_Yaml_Token_Scalar;
+        $return->setValue(implode('', $chunks));
+        $return->setPlain(false);
+        $return->setStyle($style);
+        return $return;
     }
 
     private function _scanBlockScalarIndicators()
 	{
-
+        $chomping = null;
+        $increment = null;
+        $char = $this->_peek();
+        if (preg_match(Zend_Yaml_Constants::OPERATOR, $char)) {
+            $chomping = ($char == '+');
+            $this->_forward(1);
+            $char = $this->_peek();
+            if (ctype_digit($char)) {
+                $increment = intval($char);
+                if ($increment == 0) {
+                    require_once 'Zend/Yaml/Exception.php';
+                    throw new Zend_Yaml_Exception('Expected indentation indicator of [1-9], but got [0]');
+                }
+                $this->_forward(1);
+            }
+        } elseif (ctype_digit($char)) {
+            $increment = intval($char);
+            if ($increment == 0) {
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Expected indentation indicator of [1-9], but got [0]');
+            }
+            $this->_forward(1);
+            $char = $this->_peek();
+            if (preg_match(Zend_Yaml_Constants::OPERATOR, $char)) {
+                $chomping = ($char == '+');
+                $this->_forward(1);
+            }
+        }
+        if (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected indentation indicators or chomping, but got ['.$this->_peek().']');
+        }
+        return array($chomping, $increment);
     }
 
     private function _scanBlockScalarIgnoredLine()
 	{
-
+        while ($this->_peek() == chr(32)) {
+            $this->_forward(1);
+        }
+        if ($this->_peek() == '#') {
+            while (!preg_match(Zend_Yaml_Constants::NULL_OR_LINEBR, $this->_peek())) {
+                $this->_forward(1);
+            }
+        }
+        if (!preg_match(Zend_Yaml_Constants::NULL_OR_LINEBR, $this->_peek())) {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expected comment or linebreak, but got ['.$this->_peek().']');
+        }
+        $this->_scanLineBreak();
     }
 
     private function _scanBlockScalarIndentation()
 	{
-
+        $chunks = array();
+        $maxIndent = 0;
+        while (preg_match(Zend_Yaml_Constants::SPACE_LINEBR, $this->_peek())) {
+            if ($this->_peek() !== chr(32)) {
+                $chunks[] = $this->_scanLineBreak();
+            } else {
+                $this->forward(1);
+                if ($this->_column > $maxIndent) {
+                    $maxIndent = $this->_column;
+                }
+            }
+        }
+        return array($chunks, $maxIndent);
     }
 
-    private function _scanBlockScalarBreaks()
+    private function _scanBlockScalarBreaks($indent)
 	{
-
+        $chunks = [];
+        while ($this->_column < $indent && $this->_peek() == chr(32)) {
+            $this->_forward(1);
+        }
+        while (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $this->_peek())) {
+            $chunks[] = $this->_scanLineBreak();
+        }
+        while ($this->_column < $indent && $this->_peek() == chr(32)) {
+            $this->_forward(1);
+        }
+        return $chunks;
     }
 
-    private function _scanFlowScalar()
+    private function _scanFlowScalar($style)
 	{
-
+        $double = ($style == '"');
+        $chunks = array();
+        $quote = $this->_peek();
+        $this->_forward(1);
+        $chunks = array_merge($chnks, $this->_scanFlowScalarNonSpaces($double));
+        while ($this->_peek() !== $quote) {
+            $chunks = array_merge($chunks, $this->_scanFlowScalarSpaces($double));
+            $chunks = array_merge($chunks, $this->_scanFlowScalarNonSpaces($double));
+        }
+        $this->_forward(1);
+        $return = new Zend_Yaml_Token_Scalar;
+        $return->setValue(implode('', $chunks));
+        $return->setPlain(false);
+        $return->setStyle($style);
+        return $return;
     }
 
     private function _scanFlowScalarNonSpaces()

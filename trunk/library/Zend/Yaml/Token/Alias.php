@@ -6,9 +6,9 @@ class Zend_Yaml_Token_Alias extends Token
     protected $_isAlias = true;
     protected $_value = null;
 
-    public function __construct($value, $startMark, $endMark) {
+    public function setValue($value)
+    {
         $this->_value = $value;
-        parent::__construct($startMark, $endMark);
     }
 
     public function getValue()

@@ -6,9 +6,9 @@ class Zend_Yaml_Token_StreamStart extends Token
     protected $_isStreamStart = true;
     protected $_encoding = null;
 
-    public function __construct($encoding = null)
+    public function setEncoding($enc)
     {
-        $this->_encoding = $encoding;
+        $this->_encoding = $enc;
     }
 
     public function getEncoding()

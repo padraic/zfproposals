@@ -18,7 +18,7 @@ class Zend_Yaml_Constants
     const SPACE_TAB = "/[ \t]/";
     const OPERATOR = "/[+-]/";
     const SPACE_LINEBR = "/[ \r\n\x85]/";
-    const WIN32_LINEBR = "/[\r\n\x85]/";
+    const FULL_LINEBR = "/[\r\n\x85]/";
     const NON_HEX = "/[^0-9A-Fa-f]/";
     const HEX = "/[0-9A-Fa-f]/";
     const STRANGE = "/[\]\[\-';\/?:@&=+$,.!~*()%\w]/";

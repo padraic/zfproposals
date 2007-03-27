@@ -8,11 +8,19 @@ class Zend_Yaml_Token_Scalar extends Token
     protected $_plain = null;
     protected $_style = null;
 
-    public function __construct($value, $plain, $startMark, $endMark, $style = null) {
+    public function setValue($value)
+    {
         $this->_value = $value;
+    }
+
+    public function setPlain($plain)
+    {
         $this->_plain = $plain;
+    }
+
+    public function setStyle($style)
+    {
         $this->_style = $style;
-        parent::__construct($startMark, $endMark);
     }
 
     public function getValue()
