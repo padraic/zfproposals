@@ -950,7 +950,6 @@ class Zend_Yaml_Lexer
         }
     }
 
-
     private function _scanPlain()
 	{
         $chunks = array();
@@ -963,31 +962,155 @@ class Zend_Yaml_Lexer
             $flowNonZero = true;
             $regex = Zend_Yaml_Constants::FLOWNONZERO;
         }
+
+        while ($this->_peek() != '#') {
+            $length = 0;
+            $chunkSize = 32;
+            while ($length == 0) {
+                $prefix = $this->_prefix($chunkSize);
+                $matches = null;
+                preg_match($regex, $prefix, $matches);
+                $lengthTemp = strpos($prefix, $matches[0]);
+                if (!empty($lengthTemp)) {
+                    $length = $lengthTemp
+                }
+            }
+            $char = $this->_peek($length);
+            if ($flowNonZero && $char = ':' && !preg_match(Zend_Yaml_Constants::S4, $this->_peek($length + 1))) {
+                $this->_forward($length);
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Unexpected colon [:] while scanning a plain scalar');
+            }
+            if ($length == 0) {
+                break;
+            }
+            $this->_allowSimpleKey = false;
+            $chunks = array_merge($chunks, $spaces);
+            $chunks[] = $this->_prefix($length);
+            $this->_forward($length);
+            $spaces = $this->_scanPlainSpaces($indent);
+            if (empty($spaces) || (empty($this->_flowLevel) && $this->_column < $indent)) {
+                break;
+            }
+        }
+        $return = new Zend_Yaml_Token_Scalar;
+        $return->setValue(implode('', $chunks));
+        $return->setPlain(true);
+        return $return;
     }
 
     private function _scanPlainSpaces()
 	{
-
+        $chunks[] = array();
+        $length = 0;
+        while ($this->_peek($length) = chr(32)) {
+            $length += 1;
+        }
+        $whiteSpaces = $this->_prefix($length);
+        $this->_forward($length);
+        $char = $this->_peek();
+        if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $char)) {
+            $lineBreak = $this->_scanLineBreak();
+            $this->_allowSimpleKey = true;
+            if (preg_match(Zend_Yaml_Constants::ENDING_START, $this->_prefix(4))) {
+                return;
+            }
+            $breaks = array();
+            while (preg_match(Zend_Yaml_Constants::SPACE_LINEBR, $this->_peek())) {
+                if ($this->_peek() == chr(32)) {
+                    $this->_forward();
+                } else {
+                    $breaks[] = $this->_scanLineBreak();
+                    if (preg_match(Zend_Yaml_Constants::ENDING_START, $this->_prefix(4))) {
+                        return;
+                    }
+                }
+            }
+            if ($lineBreak !== "\n") {
+                $chunks[] = $lineBreak;
+            } elseif (empty($breaks)) {
+                $chunks[] = chr(32);
+            }
+            $chunks = array_merge($chunks, $breaks);
+        } else {
+            $chunks[] = $whiteSpaces;
+        }
+        return $chunks;
     }
 
-    private function _scanTagHandle()
+    private function _scanTagHandle($name)
 	{
-
+        $char = $this->_peek();
+        if ($char !== '!') {
+            require_once 'Zend/Yaml/Exception.php';
+            throw new Zend_Yaml_Exception('Expecting [!], but got ['.$char.'] while scanning a '.$name);  
+        }
+        $length = 1;
+        $char = $this->_peek($length);
+        if ($char == chr(32)) {
+            while (preg_match(Zend_Yaml_Constants::ALPHA, $char)) {
+                $length += 1;
+                $char = $this->_peek($length);
+            }
+            if ($char !== '!') {
+                $this->_forward($length);
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Expecting [!], but got ['.$char.'] while scanning '.$name);
+            }
+            $length += 1;
+        }
+        $return = $this->_prefix($length);
+        $this->_forward($length);
+        return $return;
     }
 
-    private function _scanTagUri()
+    private function _scanTagUri($name)
 	{
-
+        $chunks = array();
+        $length = 0;
+        $char = $this->_peek($length);
+        while (preg_match(Zend_Yaml_Constants::STRANGE, $char)) {
+            if ($char == '%') {
+                $chunks[] = $this->_prefix($length);
+                $this->_forward($length);
+                $length = 0;
+                $chunks[] = $this->_scanUriEscapes($name);
+            } else {
+                $length += 1;
+            }
+            $char = $this->_peek($length);
+        }
+        if ($length !== 0) {
+            $chunks[] = $this->_prefix($length);
+            $this->_forward($length);
+        }
+        if (empty($chunks) {
+           require_once 'Zend/Yaml/Exception.php';
+           throw new Zend_Yaml_Exception('Expecting URI, but got ['.$char.'] while scanning '.$name); 
+        }
+        return implode('', $chunks);
     }
 
     private function _scanUriEscapes()
 	{
-
+        $bytes = array();
+        while ($this->_peek() == '%') {
+            $this->_forward();
+            if (!preg_match(Zend_Yaml_Constants::HEX, $this->_peek(1)) || !preg_match(Zend_Yaml_Constants::HEX, $this->_peek(2))) {
+                require_once 'Zend/Yaml/Exception.php';
+                throw new Zend_Yaml_Exception('Expecting URI escape sequence of 2 hexdecimal numbers, but got ['.$this->_peek(1).'] and ['.$this->_peek(2).'] while scanning '.$name);
+            }
+            $bytes[] = (string) hexdec($this->_prefix(2));
+            $this->_forward(2);
+        }
+        return implode('', $bytes);
     }
 
     private function _scanLineBreak()
 	{
-
+        if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $this-._peek())) {
+        
+        }
     }
 
     /**
