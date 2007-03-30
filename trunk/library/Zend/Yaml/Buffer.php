@@ -41,7 +41,7 @@ class Zend_Yaml_Buffer
         if($temp >= strlen($this->_buffer)) {
             $this->_update($length);
         }
-        return substr($this->_buffer, $this->_pointer, $temp);
+        return substr($this->_buffer, $this->_pointer, $length);
     }
 
     public function forward($length = 1)
@@ -103,7 +103,7 @@ class Zend_Yaml_Buffer
             $this->_rawBuffer = substr($this->_rawBuffer, $converted);
             if($this->_eof)
             {
-                $this->_buffer .= "\0";
+                $this->_buffer .= "\x00";
                 $this->_rawBuffer = null;
                 break;
             }

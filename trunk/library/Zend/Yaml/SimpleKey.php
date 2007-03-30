@@ -8,8 +8,8 @@ class Zend_Yaml_SimpleKey
 
     public function __construct($tokenNumber, $required, $column)
     {
-        $this->$tokenNumber = $tokenNumber;
-        $this->$required = $required;
-        $this->$column = $column;
+        $this->tokenNumber = $tokenNumber;
+        $this->required = $required;
+        $this->column = $column;
     }
 }

@@ -28,10 +28,10 @@
 require_once 'Zend/Yaml/Token.php';
 require_once 'Zend/Yaml/Token/Alias.php';
 require_once 'Zend/Yaml/Token/Anchor.php';
+require_once 'Zend/Yaml/Token/BlockEntry.php';
 require_once 'Zend/Yaml/Token/BlockEnd.php';
 require_once 'Zend/Yaml/Token/BlockMappingStart.php';
 require_once 'Zend/Yaml/Token/BlockSequenceStart.php';
-require_once 'Zend/Yaml/Token/BlockStreamingEnd.php';
 require_once 'Zend/Yaml/Token/Directive.php';
 require_once 'Zend/Yaml/Token/DocumentStart.php';
 require_once 'Zend/Yaml/Token/DocumentEnd.php';
@@ -51,7 +51,7 @@ require_once 'Zend/Yaml/Token/Value.php';
 require_once 'Zend/Yaml/SimpleKey.php';
 
 /** Zend_Yaml_Constants */
-require_once 'Zend/Yaml/Constants.php'
+require_once 'Zend/Yaml/Constants.php';
 
 /**
  * Zend_Yaml_Lexer is a YAML string scanner which produces lexical tokens based
@@ -75,7 +75,7 @@ class Zend_Yaml_Lexer
     private $_allowSimpleKey = true;
     private $_possibleSimpleKeys = array();
 
-    private $_buffer = null
+    private $_buffer = null;
 
     public function __construct(Zend_Yaml_Buffer $buffer)
 	{
@@ -96,7 +96,8 @@ class Zend_Yaml_Lexer
                 if (!is_object($choice)) {
                     continue;
                 }
-                if ($this->_tokens[0] instanceof get_class($choice)) {
+                $class = get_class($choice);
+                if ($this->_tokens[0] instanceof $class) {
                     return true;
                 }
             }
@@ -144,86 +145,86 @@ class Zend_Yaml_Lexer
         $this->_unwindIndent($this->_column);
         $chr = $this->_peek();
         switch ($chr) {
-            case "\0":
+            case '\x00':
                 return $this->_fetchStreamEnd();
                 break;
-            case "%":
+            case '%':
                 if ($this->_checkDirective()) {
                     return $this->_fetchDirective();
                 }
                 break;
-            case "-":
+            case '-':
                 if ($this->_checkDocumentStart()) {
                     return $this->_fetchDocumentStart();
                 }
                 break;
-            case ".":
+            case '.':
                 if ($this->_checkDocumentEnd()) {
                     return $this->_fetchDocumentEnd();
                 }
                 break;
-            case "[":
+            case '[':
                 return $this->_fetchFlowSequenceStart();
                 break;
-            case "{":
+            case '{':
                 return $this->_fetchFlowMappingStart();
                 break;
-            case "]":
+            case ']':
                 return $this->_fetchFlowSequenceEnd();
                 break;
-            case "}":
+            case '}':
                 return $this->_fetchFlowMappingEnd();
                 break;
-            case ",":
+            case ',':
                 return $this->_fetchFlowEntry();
                 break;
-            case "-":
+            case '-':
                 if ($this->_checkBlockEntry()) {
                     return $this->_fetchBlockEntry();
                 }
                 break;
-            case "?":
-                if ($this->_checkKey()) {
+            case '?':
+                if (!empty($this->_flowLevel) || preg_match(Zend_Yaml_Constants::NULL_SPACE_TAB_LINEBR, $this->_peek(1))) {
                     return $this->_fetchKey();
                 }
                 break;
-            case ":":
-                if ($this->_checkValue()) {
+            case ':':
+                if (!empty($this->_flowLevel) || preg_match(Zend_Yaml_Constants::NULL_SPACE_TAB_LINEBR, $this->_peek(1))) {
                     return $this->_fetchValue();
                 }
                 break;
-            case "*":
+            case '*':
                 return $this->_fetchAlias();
                 break;
-            case "&":
+            case '&':
                 return $this->_fetchAnchor();
                 break;
-            case "!":
+            case '!':
                 return $this->_fetchTag();
                 break;
-            case "|":
+            case '|':
                 if (empty($this->_flowLevel)) {
                     return $this->_fetchLiteral();
                 }
                 break;
-            case ">":
+            case '>':
                 if (empty($this->_flowLevel)) {
                     return $this->_fetchFolded();
                 }   
                 break;
-            case "'":
+            case '\'':
                 return $this->_fetchSingle();
                 break;
-            case "\"":
+            case '"':
                 return $this->_fetchDouble();
                 break;
             default:
-                if ($this->_checkPlain()) {
+                if ($this->_prefix(2) == '' || preg_match(Zend_Yaml_Constants::BEG, $this->_prefix(2))) {
                     return $this->_fetchPlain();
                 }
         }
         require_once 'Zend/Yaml/Exception.php';
-        throw new Zend_Yaml_Exception('Scanning for next token but found character: ' . $chr . ' which is not a valid token start mark');
+        throw new Zend_Yaml_Exception('Scanning for next token but found character: [' . $chr . '] which is not a valid token start mark');
     }
 
     private function _nextPossibleSimpleKey()
@@ -249,11 +250,11 @@ class Zend_Yaml_Lexer
     
     private function _unwindIndent($column)
 	{
-        if (empty($this->_flowLevel)) {
+        if (!empty($this->_flowLevel)) {
             return;
         }
         while ($this->_indent > $column) {
-            $indent = array_pop($this->_indents);
+            $this->_indent = array_pop($this->_indents);
             $this->_tokens[] = new Zend_Yaml_Token_BlockEnd;
         }
     }
@@ -397,7 +398,7 @@ class Zend_Yaml_Lexer
                 $insertToken = array(new Zend_Yaml_Token_BlockMappingStart);
                 $this->_arrayInsert($this->_tokens, ($key->tokenNumber - $this->_tokensTaken), $insertToken);
             }
-            $this->_allowSimpleKey = false
+            $this->_allowSimpleKey = false;
         } else {
             if (empty($this->_flowLevel) && !$this->_allowSimpleKey) {
                 require_once 'Zend/Yaml/Exception.php';
@@ -480,7 +481,7 @@ class Zend_Yaml_Lexer
     private function _scanToNextToken()
 	{
         while (true) {
-            while ($this->_peek() = chr(32)) {
+            while ($this->_peek() == chr(32)) {
                 $this->_forward();
             }
             if ($this->_peek() == '#') {
@@ -575,7 +576,7 @@ class Zend_Yaml_Lexer
         return $value;
     }
 
-    private function _scanTagDirectiveValue() ()
+    private function _scanTagDirectiveValue()
 	{
        while ($this->_peek() == chr(32)) {
            $this->_forward();
@@ -614,7 +615,7 @@ class Zend_Yaml_Lexer
             $this->_forward();
         }
         if ($this->_peek() == '#') {
-            while (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR), $this->_peek()) {
+            while (!preg_match(Zend_Yaml_Constants::NULL_SPACE_LINEBR, $this->_peek())) {
                 $this->_forward();
             }
         }
@@ -823,7 +824,7 @@ class Zend_Yaml_Lexer
 
     private function _scanBlockScalarBreaks($indent)
 	{
-        $chunks = [];
+        $chunks = array();
         while ($this->_column < $indent && $this->_peek() == chr(32)) {
             $this->_forward();
         }
@@ -883,7 +884,7 @@ class Zend_Yaml_Lexer
                 } elseif (preg_match(Zend_Yaml_Constants::ESCAPE_CODES, $char)) {
                     $length = Zend_Yaml_Constants::$ESCAPE_CODES_ARRAY[$char];
                     $this->_forward();
-                    if (preg_match(Zend_Yaml_Constants::NON_HEX), $this->_prefix($length)) {
+                    if (preg_match(Zend_Yaml_Constants::NON_HEX, $this->_prefix($length))) {
                         require_once 'Zend/Yaml/Exception.php';
                         throw new Zend_Yaml_Exception('Expected escape sequence of '.$length.' hex numbers, but got ['.$this->_prefix($length).']');
                     }
@@ -963,7 +964,7 @@ class Zend_Yaml_Lexer
             $regex = Zend_Yaml_Constants::FLOWNONZERO;
         }
 
-        while ($this->_peek() != '#') {
+        while ($this->_peek() !== '#') {
             $length = 0;
             $chunkSize = 32;
             while ($length == 0) {
@@ -971,13 +972,14 @@ class Zend_Yaml_Lexer
                 $matches = null;
                 preg_match($regex, $prefix, $matches);
                 $lengthTemp = strpos($prefix, $matches[0]);
-                if (!empty($lengthTemp)) {
-                    $length = $lengthTemp
+                if ($lengthTemp !== 0) {
+                    $length = $lengthTemp;
                 }
             }
             $char = $this->_peek($length);
             if ($flowNonZero && $char = ':' && !preg_match(Zend_Yaml_Constants::S4, $this->_peek($length + 1))) {
                 $this->_forward($length);
+                var_dump($this);
                 require_once 'Zend/Yaml/Exception.php';
                 throw new Zend_Yaml_Exception('Unexpected colon [:] while scanning a plain scalar');
             }
@@ -993,20 +995,22 @@ class Zend_Yaml_Lexer
                 break;
             }
         }
+        var_dump($chunks); echo '<br/>';
         $return = new Zend_Yaml_Token_Scalar;
         $return->setValue(implode('', $chunks));
         $return->setPlain(true);
         return $return;
     }
 
-    private function _scanPlainSpaces()
+    private function _scanPlainSpaces($indent)
 	{
         $chunks[] = array();
         $length = 0;
-        while ($this->_peek($length) = chr(32)) {
+        while ($this->_peek($length) == chr(32)) {
             $length += 1;
         }
         $whiteSpaces = $this->_prefix($length);
+        echo '<br/>||'; var_dump($whiteSpaces); echo '||<br/>';
         $this->_forward($length);
         $char = $this->_peek();
         if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $char)) {
@@ -1084,7 +1088,7 @@ class Zend_Yaml_Lexer
             $chunks[] = $this->_prefix($length);
             $this->_forward($length);
         }
-        if (empty($chunks) {
+        if (empty($chunks)) {
            require_once 'Zend/Yaml/Exception.php';
            throw new Zend_Yaml_Exception('Expecting URI, but got ['.$char.'] while scanning '.$name); 
         }
@@ -1108,8 +1112,14 @@ class Zend_Yaml_Lexer
 
     private function _scanLineBreak()
 	{
-        if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $this-._peek())) {
-        
+        if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $this->_peek())) {
+            
+            if (preg_match('/[\r\n]/', $this->_prefix(2))) {
+                $this->_forward(2);
+            } else {
+                $this->_forward(1);
+            }
+            return "\n";
         }
     }
 
@@ -1124,12 +1134,12 @@ class Zend_Yaml_Lexer
 
     private function _prefix($length = 1)
 	{
-        return $this->_buffer->prefix($index);
+        return $this->_buffer->prefix($length);
     }
 
     private function _forward($length = 1)
 	{
-        return $this->_buffer->forward($index);
+        return $this->_buffer->forward($length);
     }
 
     private function _checkPrintable($string)
@@ -1141,7 +1151,7 @@ class Zend_Yaml_Lexer
      * Other internal utils   *************************************************
      */
 
-    private function arrayInsert($array, $position, array $elements)
+    private function _arrayInsert($array, $position, array $elements)
     {
         if ($position < 0 || $position > count($array)) {
             require_once('Zend/Yaml/Exception.php');

@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Yaml_Token_Alias extends Token
+class Zend_Yaml_Token_Alias extends Zend_Yaml_Token
 {
     protected $_id = '<alias>';
     protected $_isAlias = true;

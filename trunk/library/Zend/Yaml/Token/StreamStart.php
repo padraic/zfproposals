@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Yaml_Token_StreamStart extends Token
+class Zend_Yaml_Token_StreamStart extends Zend_Yaml_Token
 {
     protected $_id = '<stream start>';
     protected $_isStreamStart = true;

@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Yaml_Token_Directive extends Token
+class Zend_Yaml_Token_Directive extends Zend_Yaml_Token
 {
     protected $_id = '<directive>';
     protected $_isDirective = true;

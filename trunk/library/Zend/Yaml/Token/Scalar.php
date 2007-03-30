@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Yaml_Token_Scalar extends Token
+class Zend_Yaml_Token_Scalar extends Zend_Yaml_Token
 {
     protected $_id = '<scalar>';
     protected $_isScalar = true;
