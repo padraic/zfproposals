@@ -1,6 +1,6 @@
 <?php
 
-set_time_limit(10);
+set_time_limit(5);
 
 set_include_path(
     '.' . PATH_SEPARATOR

@@ -46,6 +46,7 @@ class Zend_Yaml_Buffer
 
     public function forward($length = 1)
     {
+        $t = $length; //debug
         $temp = $this->_pointer + $length + 1;
         if($temp >= strlen($this->_buffer))
         {
@@ -53,6 +54,10 @@ class Zend_Yaml_Buffer
         }
         while($length)
         {
+            if ($chr == 'a') {
+                echo '<br><br>',$t,'--->>>',$length,'--->>>',$this->_pointer,'<br><br>';
+            
+            }
             $chr = $this->_buffer[$this->_pointer];
             $this->_pointer += 1;
             $this->_index += 1;

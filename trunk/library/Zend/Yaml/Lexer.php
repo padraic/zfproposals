@@ -977,11 +977,10 @@ class Zend_Yaml_Lexer
                 }
             }
             $char = $this->_peek($length);
-            if ($flowNonZero && $char = ':' && !preg_match(Zend_Yaml_Constants::S4, $this->_peek($length + 1))) {
+            if ($flowNonZero && $char == ':' && !preg_match(Zend_Yaml_Constants::S4, $this->_peek($length + 1))) {
                 $this->_forward($length);
-                var_dump($this);
                 require_once 'Zend/Yaml/Exception.php';
-                throw new Zend_Yaml_Exception('Unexpected colon [:] while scanning a plain scalar');
+                throw new Zend_Yaml_Exception('Unexpected colon ['.$char.'] while scanning a plain scalar');
             }
             if ($length == 0) {
                 break;
@@ -995,7 +994,6 @@ class Zend_Yaml_Lexer
                 break;
             }
         }
-        var_dump($chunks); echo '<br/>';
         $return = new Zend_Yaml_Token_Scalar;
         $return->setValue(implode('', $chunks));
         $return->setPlain(true);
@@ -1010,7 +1008,6 @@ class Zend_Yaml_Lexer
             $length += 1;
         }
         $whiteSpaces = $this->_prefix($length);
-        echo '<br/>||'; var_dump($whiteSpaces); echo '||<br/>';
         $this->_forward($length);
         $char = $this->_peek();
         if (preg_match(Zend_Yaml_Constants::FULL_LINEBR, $char)) {
