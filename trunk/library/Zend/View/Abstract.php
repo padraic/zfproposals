@@ -29,6 +29,11 @@ require_once 'Zend/Loader.php';
 require_once 'Zend/View/Interface.php';
 
 /**
+ * Zend_View_Factory
+ */
+require_once 'Zend/View/Factory.php';
+
+/**
  * Abstract class for Zend_View to help enforce private constructs.
  *
  * @category   Zend
@@ -812,7 +817,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     public function content()
     {
         if (isset($this->_layoutContent)) {
-            return $this->_layoutContent
+            return $this->_layoutContent;
         }
         require_once 'Zend/View/Exception.php';
         throw new Zend_View_Exception('there is no rendered output available for insertion in a Layout', $this);
@@ -893,7 +898,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         } elseif (isset($model)) {
             $viewModel = $model;
         }
-        $view = self::getFactory()->createInstance($module, $viewModel);
+        $view = self::getFactory()->createInstance($module, $viewModel, $this);
         return $view->render($name);
     }
 
@@ -952,6 +957,19 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     public function hasLayout()
     {
         return isset($this->_layoutFile);
+    }
+
+    public static function setFactory(Zend_View_Factory_Interface $factory)
+    {
+        self::$_factory = $factory;
+    }
+
+    public static function getFactory()
+    {
+        if (isset(self::$_factory)) {
+            return self::$_factory;
+        }
+        $factory = new Zend_View_Factory;
     }
 
     /**
