@@ -33,7 +33,7 @@ require_once 'Zend/View/Interface.php';
  *
  * @category   Zend
  * @package    Zend_View
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com), Modifications Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_View_Abstract implements Zend_View_Interface
@@ -120,6 +120,32 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      * @var boolean
      */
     private $_strictVars = false;
+
+    /**
+     * Stores a Factory instance for creating Zend_View objects
+     * @var Zend_View_Factory
+     */
+    private static $_factory = null;
+
+    /**
+     * The Layout template for this View if enabled
+     * @var string
+     */
+    protected $_layoutFile = null;
+
+    /**
+     * The main template being rendered by this View, ignoring other secondary
+     * templates rendered by subsequent Zend_View::render() calls.
+     * @var string
+     */
+    protected $_mainFile = null;
+
+    /**
+     * Prerendered content from the view temporarily stored for insertion into
+     * a Layout.
+     * @var string
+     */
+    protected $_layoutContent = null;
 
     /**
      * Constructor.
@@ -762,12 +788,34 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     {
         // find the script file name using the parent private method
         $this->_file = $this->_script($name);
+        if (!isset($this->_mainFile)) {
+            $this->_mainFile = $this->_file;
+        }
         unset($name); // remove $name from local scope
 
         ob_start();
         $this->_run($this->_file); 
+        $output = $this->_filter(ob_get_clean()); // filter output
+        if ($this->_file !== $this->_mainFile || !$this->hasLayout()) {
+            return $output;
+        } else {
+            $this->_layoutContent = $output;
+            return $this->render( $this->getLayout() );
+        } 
+    }
 
-        return $this->_filter(ob_get_clean()); // filter output
+    /**
+     * Simple accessor to return pre-rendered content of the main template
+     *
+     * @return string
+     */
+    public function content()
+    {
+        if (isset($this->_layoutContent)) {
+            return $this->_layoutContent
+        }
+        require_once 'Zend/View/Exception.php';
+        throw new Zend_View_Exception('there is no rendered output available for insertion in a Layout', $this);
     }
 
     /**
@@ -827,6 +875,83 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         $this->_strictVars = ($flag) ? true : false;
 
         return $this;
+    }
+
+    /**
+     * Renders a template fragment within a variable scope distinct from the
+     * calling View object.
+     *
+     * @param string $name
+     * @param string|array $module
+     * @param array $model
+     * @returns string $output
+     */
+    public function partial($name, $module = null, array $model = null)
+    {
+        if (isset($module) && is_array($module) && !isset($model)) {
+            $viewModel = $module;
+        } elseif (isset($model)) {
+            $viewModel = $model;
+        }
+        $view = self::getFactory()->createInstance($module, $viewModel);
+        return $view->render($name);
+    }
+
+    /**
+     * Dispatch a request via the Controller and fetch the resulting rendered
+     * View to return
+     *
+     * @param string $action
+     * @param string $controller
+     * @param string $module
+     * @param array $params
+     * @returns string
+     * @todo Breaks with the ViewRenderer enabled
+     */
+    public function dispatch($action, $controller = null, $module = null, array $params = null)
+    {
+        $front   = Zend_Controller_Front::getInstance();
+        $request = clone $front->getRequest();
+        $request->setModuleName($module)        
+                ->setControllerName($controller)
+                ->setActionName($action)
+                ->setParams($params);
+        $response = new Zend_Controller_Response_Http();
+        $front->getDispatcher()->dispatch($request, $response);
+        return $response->getBody();
+    }
+
+    /**
+     * Set the filename of a Layout template to be used. The existence of a
+     * Layout filename will cause the final rendered View to be stored until
+     * the rendered Layout includes it by calling Zend_View::content().
+     *
+     * @param $file string
+     * @return void
+     */
+    public function setLayout($name)
+    {
+        $this->_layoutFile = $name;
+    }
+
+    /**
+     * Return the filename of the Layout.
+     *
+     * @return string
+     */
+    public function getLayout()
+    {
+        return $this->_layoutFile;
+    }
+
+    /**
+     * Returns true if a Layout has been set for this View.
+     *
+     * @return bool
+     */
+    public function hasLayout()
+    {
+        return isset($this->_layoutFile);
     }
 
     /**
