@@ -74,27 +74,6 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
         return $operand;
     }
 
-    /**
-     * Calculate modular inverse of left_operand with modulo right_operand
-     * and return FALSE if such an inverse does not exist.
-     * This simulated for BCMath
-     */
-    public function invert($left_operand, $right_operand) 
-    {
-        while (bccomp($left_operand, 0) < 0) { 
-            $left_operand = bcadd($left_operand, $right_operand); 
-        }
-        $r = $this->xgcd($left_operand, $right_operand);
-        if ($r[2] == 1) {
-            $a = $r[0];
-            while (bccomp($a, 0 ) < 0) {
-                $a = bcadd($a, $right_operand);
-            }
-            return $a;
-        }
-        return false;
-    }
-
     public function modulus($left_operand, $modulus)
     {
         return bcmod($left_operand, $modulus);
@@ -155,6 +134,27 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
             $operand = substr($operand, 4);
         }
         return $return;
+    }
+
+    /**
+     * Calculate modular inverse of left_operand with modulo right_operand
+     * and return FALSE if such an inverse does not exist.
+     * This simulated for BCMath
+     */
+    public function invert($left_operand, $right_operand) 
+    {
+        while (bccomp($left_operand, 0) < 0) { 
+            $left_operand = bcadd($left_operand, $right_operand); 
+        }
+        $r = $this->xgcd($left_operand, $right_operand);
+        if ($r[2] == 1) {
+            $a = $r[0];
+            while (bccomp($a, 0 ) < 0) {
+                $a = bcadd($a, $right_operand);
+            }
+            return $a;
+        }
+        return false;
     }
 
     public function xgcd($left_operand, $right_operand)

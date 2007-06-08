@@ -24,8 +24,6 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Math_BigInteger_Exception */
-require_once 'Zend/Math/BigInteger/Exception.php';
 
 /** Zend_Math_BigInteger_Interface */
 require_once 'Zend/Math/BigInteger/Interface.php';
@@ -80,6 +78,7 @@ class Zend_Math_BigInteger
             require_once 'Zend/Math/BigInteger/Bcmath.php';
             $this->_math = new Zend_Math_BigInteger_Bcmath();
         } else {
+            require_once 'Zend/Math/BigInteger/Exception.php';
             throw new Zend_Math_BigInteger_Exception('No big integer arbitrary precision math support detected');
         }
     }
@@ -94,6 +93,7 @@ class Zend_Math_BigInteger
     public function __call($methodName, $args)
     {
         if(!method_exists($this->_math, $methodName)) {
+            require_once 'Zend/Math/BigInteger/Exception.php';
             throw new Zend_Math_BigInteger_Exception('Invalid method call: ' . $methodName . ' does not exist');
         }
         return call_user_func_array(array($this->_math, $methodName), $args);
