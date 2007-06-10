@@ -232,7 +232,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
 
         $replacements = array(
             ':moduleDir'  => $moduleDir,
-            ':module'     => str_replace(array('.','-'), '-', $module
+            ':module'     => str_replace(array('.','-'), '-', $module)
         );
         $value = str_replace(array_keys($replacements), array_values($replacements), $spec);
         return $value;

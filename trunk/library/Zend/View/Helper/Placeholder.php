@@ -31,41 +31,87 @@ class Zend_View_Helper_Placeholder {
      * templates.
      * @var Zend_Registry
      */
-    protected $_registry = null
+    protected $_registry = null;
     
+    /**
+     * Constructor; instantiate the object with a Zend_Registry object property
+     *
+     * @return void
+     */
     public function __construct()
     {
-        $this->_registry = new Zend_Registry(array(), ArrayObject::ARRAY_AS_PROPS);
+        $this->_registry = new Zend_Registry;
     }
 
+    /**
+     * Return the current instance of Zend_Registry
+     *
+     * @return Zend_Registry
+     */
     public function placeholder()
     {
         return $this;
     }
-
+    
+    /**
+     * Check for the existence of the named Placeholder key
+     *
+     * @param string $index
+     * @return bool
+     */
     public function has($index)
     {
-        return $this_>_registry->isRegistered($index);
+        return isset($this->_registry->$index);
     }
 
+    /**
+     * Append a value string to an existing Placeholder key
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
     public function append($index, $value)
     {
-        $this->_registry->{$index} .= $value;
+        if ($this->has($index)) {
+            $this->_registry->$index = $this->_registry->$index . $value;
+            return;
+        }
+        $this->_registry->$index = $value;
     }
 
+    /**
+     * Set the value for a Placeholder key. Overwrites existing value.
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
     public function set($index, $value)
     {
-        $this->_registry->{$index} = $value;
+        $this->_registry->$index = $value;
     }
 
+    /**
+     * Return the value of a Placeholder key
+     *
+     * @param string $index
+     * @return mixed
+     */
     public function get($index)
     {
-        return $this->_registry->{$index};
+        return $this->_registry->$index;
     }
 
+    /**
+     * Unset the value of a Placeholder key
+     *
+     * @param string $index
+     * @return void
+     */
     public function remove($index)
     {
-        unset($this->_registry->{$index});
+        unset($this->_registry->$index);
     }
     
 }

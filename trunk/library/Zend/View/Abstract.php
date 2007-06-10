@@ -784,7 +784,8 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     }
 
     /**
-     * Processes a view script and returns the output.
+     * Processes a view script and returns the output. If enabled it will also
+     * 
      *
      * @param string $name The script script name to process.
      * @return string The script output.
@@ -793,7 +794,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     {
         // find the script file name using the parent private method
         $this->_file = $this->_script($name);
-        if (!isset($this->_mainFile)) {
+        if ($this->hasLayout() && !isset($this->_mainFile)) {
             $this->_mainFile = $this->_file;
         }
         unset($name); // remove $name from local scope
@@ -801,10 +802,12 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         ob_start();
         $this->_run($this->_file); 
         $output = $this->_filter(ob_get_clean()); // filter output
+
+        // if enabled, decorate a Layout render with the main content
         if ($this->_file !== $this->_mainFile || !$this->hasLayout()) {
             return $output;
         } else {
-            $this->_layoutContent = $output;
+            $this->setPlaceholder('content', $output);
             return $this->render( $this->getLayout() );
         } 
     }
@@ -816,8 +819,8 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      */
     public function content()
     {
-        if (isset($this->_layoutContent)) {
-            return $this->_layoutContent;
+        if ($this->hasPlaceholder('content')) {
+            return $this->getPlaceholder('content');
         }
         require_once 'Zend/View/Exception.php';
         throw new Zend_View_Exception('there is no rendered output available for insertion in a Layout', $this);
@@ -959,17 +962,85 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         return isset($this->_layoutFile);
     }
 
+    /**
+     * Set an instance of Zend_View_Factory as the local Factory instance
+     *
+     * @param Zend_View_Factory
+     * @return void
+     */
     public static function setFactory(Zend_View_Factory_Interface $factory)
     {
         self::$_factory = $factory;
     }
 
+    /**
+     * Return the local Factory instance
+     *
+     * @return Zend_View_Factory
+     */
     public static function getFactory()
     {
         if (isset(self::$_factory)) {
             return self::$_factory;
         }
         $factory = new Zend_View_Factory;
+    }
+
+        /**
+     * Check for the existence of the named Placeholder key
+     *
+     * @param string $index
+     * @return bool
+     */
+    public function hasPlaceholder($index)
+    {
+        return $this->placeholder()->has($index);
+    }
+
+    /**
+     * Append a value string to an existing Placeholder key
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function appendPlaceholder($index, $value)
+    {
+        $this->placeholder()->append($index, $value);
+    }
+
+    /**
+     * Set the value for a Placeholder key. Overwrites existing value.
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function setPlaceholder($index, $value)
+    {
+        $this->placeholder()->set($index, $value);
+    }
+
+    /**
+     * Return the value of a Placeholder key
+     *
+     * @param string $index
+     * @return mixed
+     */
+    public function getPlaceholder($index)
+    {
+        $this->placeholder()->get($index);
+    }
+
+    /**
+     * Unset the value of a Placeholder key
+     *
+     * @param string $index
+     * @return void
+     */
+    public function removePlaceholder($index)
+    {
+        $this->placeholder()->remove($index);
     }
 
     /**
