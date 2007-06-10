@@ -1,0 +1,9 @@
+// View configuration
+array(
+    'view'=>array(
+        'escaping'=>'htmlentities',
+        'encoding'=>'UTF-8',
+        'strictvars'=>true,
+        'moduledir'=>"f:\xampp\htdocs\projects\zfproposals\trunk\src",
+    )
+)

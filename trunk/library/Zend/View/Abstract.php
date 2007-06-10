@@ -813,20 +813,6 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     }
 
     /**
-     * Simple accessor to return pre-rendered content of the main template
-     *
-     * @return string
-     */
-    public function content()
-    {
-        if ($this->hasPlaceholder('content')) {
-            return $this->getPlaceholder('content');
-        }
-        require_once 'Zend/View/Exception.php';
-        throw new Zend_View_Exception('there is no rendered output available for insertion in a Layout', $this);
-    }
-
-    /**
      * Escapes a value for output in a view script.
      *
      * If escaping mechanism is one of htmlspecialchars or htmlentities, uses 
@@ -963,6 +949,20 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     }
 
     /**
+     * Simple accessor to return pre-rendered content of the main template
+     *
+     * @return string
+     */
+    public function content()
+    {
+        if ($this->hasPlaceholder('content')) {
+            return $this->getPlaceholder('content');
+        }
+        require_once 'Zend/View/Exception.php';
+        throw new Zend_View_Exception('there is no rendered content available for insertion in a Layout', $this);
+    }
+
+    /**
      * Set an instance of Zend_View_Factory as the local Factory instance
      *
      * @param Zend_View_Factory
@@ -984,6 +984,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
             return self::$_factory;
         }
         $factory = new Zend_View_Factory;
+        return $factory;
     }
 
         /**

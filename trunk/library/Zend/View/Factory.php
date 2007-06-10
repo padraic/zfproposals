@@ -18,8 +18,13 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
      * @var string
      */
     protected $_viewBasePathSpec = ':moduleDir/:module/views';
-
+    
+    /**
+     * Options array for configuring view objects
+     */
     protected $_options = null;
+
+    protected $_moduleDirectory = null;
 
     /** 
      * Constructor
@@ -31,29 +36,30 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
      */
     public function __construct($options = null)
     {
-        if (!empty($options)) {
+
+        if (isset($options) && !empty($options)) {
             // normalise to array
             if ($options instanceof Zend_Config) {
                 $options = $options->asArray();
             }
             if (is_array($options)) {
                 $this->_setOptions($options);
-                if ($options['module']) {
-                    $this->_options = $options;
-                }
+                $this->_options = $options;
+            } else {
+                require_once 'Zend/View/Exception.php';
+                throw new Zend_View_Exception('expected $options array is not an array or Zend_Config object');
             }
-            require_once 'Zend/View/Exception.php';
-            throw new Zend_View_Exception('expected $options array is not an array or Zend_Config object');
         }
     }
 
-    public function createInstance($module = null, array $model = null, Zend_View_Interface $parentView = null)
+    public function createInstance($module = 'default', array $model = null, Zend_View_Interface $parentView = null)
     {
         $view = new Zend_View;
+
         if (!$this->_options) {
             $basePath = $this->_getBasePath($module);
             $view->addBasePath($basePath);
-            $this->_assignModel($view, $model);
+            //$this->_assignModel($view, $model);
             return $view;
         }
 
@@ -66,8 +72,6 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         $encoding = $this->_options['encoding'];
         $escape = $this->_options['escape'];
         $strictVars = $this->_options['strictvars'] ? true : false;
-
-        // switch!
 
         if (isset($basePaths)) {
             foreach($basePaths as $bp) {
@@ -110,7 +114,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         }
 
         if ($strictVars) {
-            $view->setStrictVars();
+            $view->strictVars();
         }
 
         return $view;
@@ -160,7 +164,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
      * 
      * @return string
      */
-    public function getModuleDirectory($path)
+    public function getModuleDirectory()
     {
         return $this->_moduleDirectory;
     }
@@ -176,11 +180,11 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         foreach ($options as $key => $value)
         {
             switch ($key) {
-                case 'viewBasePathSpec':
+                case 'viewbasepathspec':
                     $property = '_' . $key;
                     $this->{$property} = (string) $value;
                     break;
-                case 'moduleDirectory':
+                case 'moduledir':
                     $property = '_' . $key;
                     $this->{$property} = rtrim($value, '\\/');
                     break;
@@ -211,7 +215,6 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
      */
     protected function _translateSpec($spec, $module, array $vars = array())
     {
-        $suffix = $this->getViewSuffix();
         $moduleDir  = $this->getModuleDirectory();
         if (null === $moduleDir) {
             require_once 'Zend/View/Exception.php';

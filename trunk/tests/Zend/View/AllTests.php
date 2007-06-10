@@ -15,6 +15,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 // error_reporting(E_ALL);
 
+require_once 'FactoryTest.php';
 require_once 'Helper/DeclareVarsTest.php';
 require_once 'Helper/FormCheckboxTest.php';
 require_once 'Helper/FormLabelTest.php';
@@ -33,6 +34,7 @@ class Zend_View_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_View');
 
+        $suite->addTestSuite('Zend_View_FactoryTest');
         $suite->addTestSuite('Zend_View_Helper_DeclareVarsTest');
         $suite->addTestSuite('Zend_View_Helper_FormCheckboxTest');
         $suite->addTestSuite('Zend_View_Helper_FormLabelTest');

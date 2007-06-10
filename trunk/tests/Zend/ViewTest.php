@@ -833,6 +833,17 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($view->hasPlaceholder('varName1'));
         $this->assertEquals(null, $view->getPlaceholder('varName1'));
     }
+
+    public function testStaticFactoryDefault()
+    {
+        $this->assertTrue(Zend_View::getFactory() instanceof Zend_View_Factory);
+    }
+
+    public function testFactorySetter()
+    {
+        Zend_View::setFactory( new Zend_View_Factory_Sub );
+        $this->assertTrue(Zend_View::getFactory() instanceof Zend_View_Factory_Sub);
+    }
 }
 
 class Zend_ViewTest_Extension extends Zend_View
@@ -842,4 +853,8 @@ class Zend_ViewTest_Extension extends Zend_View
         $this->assign('foo', 'bar');
         $this->setScriptPath(dirname(__FILE__) . '/View/_templates');
     }
+}
+
+class Zend_View_Factory_Sub extends Zend_View_Factory
+{
 }
