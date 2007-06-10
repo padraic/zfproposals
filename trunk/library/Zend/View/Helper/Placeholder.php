@@ -100,7 +100,10 @@ class Zend_View_Helper_Placeholder {
      */
     public function get($index)
     {
-        return $this->_registry->$index;
+        if ($this->has($index)) {
+            return $this->_registry->$index;
+        }
+        return null;
     }
 
     /**

@@ -802,6 +802,37 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($filters));
         $this->assertEquals('foo', $filters[0]);
     }
+
+    public function testLayout()
+    {
+        $view = new Zend_View();
+    	
+    	$view->setScriptPath(dirname(__FILE__) . '/View/_templates');
+    	
+        $view->setLayout('layout.phtml');
+    	$view->bar = 'bar';
+    	
+    	$this->assertEquals("<html>foo bar baz\n</html>", $view->render('test.phtml') );
+    }
+
+    public function testPlaceholder()
+    {
+        $view = new Zend_View();
+
+        $this->assertTrue($view->placeholder() instanceof Zend_View_Helper_Placeholder);
+
+        $view->setPlaceholder('varName1', 'defaultValue');
+        $this->assertTrue($view->hasPlaceholder('varName1'));
+        $this->assertEquals('defaultValue', $view->getPlaceholder('varName1'));
+        
+        $view->appendPlaceholder('varName1', 'defaultValue');
+        $this->assertTrue($view->hasPlaceholder('varName1'));
+        $this->assertEquals('defaultValuedefaultValue', $view->getPlaceholder('varName1'));
+
+        $view->removePlaceholder('varName1');
+        $this->assertFalse($view->hasPlaceholder('varName1'));
+        $this->assertEquals(null, $view->getPlaceholder('varName1'));
+    }
 }
 
 class Zend_ViewTest_Extension extends Zend_View

@@ -804,7 +804,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         $output = $this->_filter(ob_get_clean()); // filter output
 
         // if enabled, decorate a Layout render with the main content
-        if ($this->_file !== $this->_mainFile || !$this->hasLayout()) {
+        if (!$this->hasLayout() || $this->_file !== $this->_mainFile) {
             return $output;
         } else {
             $this->setPlaceholder('content', $output);
@@ -1029,7 +1029,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      */
     public function getPlaceholder($index)
     {
-        $this->placeholder()->get($index);
+        return $this->placeholder()->get($index);
     }
 
     /**
