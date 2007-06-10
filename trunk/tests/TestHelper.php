@@ -22,6 +22,7 @@
 
 // Set error reporting to the level to which Zend Framework code must comply
 error_reporting( E_ALL | E_STRICT );
+date_default_timezone_set('Europe/London');
 
 // Determine the root, library, and tests directories of the framework distribution
 $zfRoot    = dirname(dirname(__FILE__));
