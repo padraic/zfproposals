@@ -46,14 +46,20 @@ class Zend_View_Helper_Controller {
      * @returns string
      * @todo Breaks with the ViewRenderer enabled
      */
-    public function dispatch($action, $controller = null, $module = null, array $params = null)
+    public function controller($action, $controller = null, $module = null, array $params = null)
     {
-        $front   = Zend_Controller_Front::getInstance();
+        $front = Zend_Controller_Front::getInstance();
         $request = clone $front->getRequest();
-        $request->setModuleName($module)        
-                ->setControllerName($controller)
-                ->setActionName($action)
-                ->setParams($params);
+        $request->setActionName($action);
+        if (isset($controller)) {
+            $request->setControllerName($controller);
+        }
+        if (isset($module)) {
+            $request->setModuleName($module);
+        }
+        if (isset($params)) {
+            $request->setParams($params);
+        }
         $response = new Zend_Controller_Response_Http();
         $front->getDispatcher()->dispatch($request, $response);
         return $response->getBody();
