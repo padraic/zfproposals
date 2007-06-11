@@ -138,6 +138,11 @@ abstract class Zend_Controller_Action_Helper_Abstract
 
         return $this->_response;
     }
+
+    public function setResponse(Zend_Controller_Response_Http $response)
+    {
+        $this->_response = $response;
+    }
     
     /**
      * getName() 

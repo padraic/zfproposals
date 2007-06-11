@@ -65,11 +65,14 @@ class Zend_View_Helper_Controller {
             $viewRenderer = Zend_Controller_Action_HelperBroker::getExistingHelper('viewRenderer');
             $originalRequest = $viewRenderer->getRequest();
             $viewRenderer->setRequest($request);
+            //$originalResponse = $viewRenderer->getResponse();
+            //$viewRenderer->setResponse($request);
         }
         var_dump($viewRenderer->getRequest()); exit; 
         $front->getDispatcher()->dispatch($request, $response);
         if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
             $viewRenderer->setRequest($originalRequest);
+            //$viewRenderer->setResponse($originalResponse);
         }
         return $response->getBody();
     }
