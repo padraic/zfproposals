@@ -146,13 +146,6 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     protected $_mainFile = null;
 
     /**
-     * Prerendered content from the view temporarily stored for insertion into
-     * a Layout.
-     * @var string
-     */
-    protected $_layoutContent = null;
-
-    /**
      * Constructor.
      *
      * @param array $config Configuration key-value pairs.
@@ -889,30 +882,6 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         }
         $view = self::getFactory()->createInstance($module, $viewModel, $this);
         return $view->render($name);
-    }
-
-    /**
-     * Dispatch a request via the Controller and fetch the resulting rendered
-     * View to return
-     *
-     * @param string $action
-     * @param string $controller
-     * @param string $module
-     * @param array $params
-     * @returns string
-     * @todo Breaks with the ViewRenderer enabled
-     */
-    public function dispatch($action, $controller = null, $module = null, array $params = null)
-    {
-        $front   = Zend_Controller_Front::getInstance();
-        $request = clone $front->getRequest();
-        $request->setModuleName($module)        
-                ->setControllerName($controller)
-                ->setActionName($action)
-                ->setParams($params);
-        $response = new Zend_Controller_Response_Http();
-        $front->getDispatcher()->dispatch($request, $response);
-        return $response->getBody();
     }
 
     /**
