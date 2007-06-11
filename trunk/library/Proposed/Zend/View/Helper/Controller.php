@@ -62,10 +62,11 @@ class Zend_View_Helper_Controller {
         }
         $response = new Zend_Controller_Response_Http();
         if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
-            $viewRenderer = Zend_Controller_Action_HelperBroker::getExistingHelper('viewHelper');
+            $viewRenderer = Zend_Controller_Action_HelperBroker::getExistingHelper('viewRenderer');
             $originalRequest = $viewRenderer->getRequest();
             $viewRenderer->setRequest($request);
         }
+        var_dump($viewRenderer->getRequest()); exit; 
         $front->getDispatcher()->dispatch($request, $response);
         if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
             $viewRenderer->setRequest($originalRequest);

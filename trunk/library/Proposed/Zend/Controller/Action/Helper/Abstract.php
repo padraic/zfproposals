@@ -120,7 +120,7 @@ abstract class Zend_Controller_Action_Helper_Abstract
         return $this->_request;
     }
 
-    public function setRequest(Zend_Controller_Response_Http $request)
+    public function setRequest(Zend_Controller_Request_Http $request)
     {
         $this->_request = $request;
     }
