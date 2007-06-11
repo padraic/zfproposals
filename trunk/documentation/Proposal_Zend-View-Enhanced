@@ -1,0 +1,58 @@
+
+1. Overview
+=============
+
+The purpose of the Zend_View Enhanced proposal is to propose the addition of Zend_View_Abstract methods, and Zend_View_Helper_* classes, which in combination provide for the ability to generate output in a flexible manner which adheres to the separation of Controller and View, and maintains backwards compatibility as of any final 1.0.0 version of the framework.
+
+At present, Zend_View is a strict implementation of the Template View design pattern. It excels at templating, but has no native functionality for handling several key requirements of the View. This typically includes decorating templates with a common layout, supporting the rendering of templates in their own independent variable scope, allowing templates to integrate additional presentation logic into other templates transparently, and making calls into the Controller for additional output. Terms:
+
+1. Layouts
+2. Partials
+3. Controllers
+4. Placeholders
+
+The common perception is that the Controller is required to facilitate these View features. Unfortunately, this is misleading. All of the above are already standard for templating engines in several frameworks - even Smarty has native capabilities for many of these. The Controller is not a requirement for implementation.
+
+The proposal, however, makes no assumptions about the Controller. The approach requires only one adjustment to Zend_Controller_Action_Helper_ViewRenderer to add setters for the Request and Response objects so that temporary objects of the same type can be switched in to maintain ViewRenderer compliance, and enable Zend_View to dispatch nested requests to Controllers (#ZF-1585). Where possible, View Helpers are preferred over adding code directly to Zend_View_Abstract. The proposed additions maintain Zend_View's decoupling from Zend_Controller. They should (as a requirement) have no conflict with Controller integrated strategies for similar features.
+
+2. References
+===============
+
+http://svn.astrumfutura.org/zendframework/trunk/library/Proposed/Zend/View
+http://blog.astrumfutura.com/archives/291-Complex-Views-with-the-Zend-Framework-Part-6-Setting-The-Terminology.html
+http://www.symfony-project.com/book/trunk/07-Inside-the-View-Layer
+http://smarty.php.net/manual/en/ (much of the above is already possible using plain old Smarty)
+
+3. Component Requirements, Constraints, and Acceptance Criteria
+=================================================================
+
+- Requires adoption of the setters suggested in #ZF-1585
+- Must implement the 4 view construction strategies (Layout, Partial, Controller, Placeholder)
+- Must maintain backwards compatibility with Zend_View and Zend_Controller_Action_Helper_ViewRenderer
+- Must (where feasible) be implemented as default View Helpers
+- Should not prevent or restrict Controller derived strategies for output construction
+- Must be accompanied by a full set of integration tests prior to acceptance in Core
+
+4. Dependencies on Other Framework Components
+===============================================
+
+- Zend_View_Abstract
+- Zend_View_Exception
+- Zend_Registry (Placeholder)
+- Zend_Controller_* (Controller)
+
+5. Theory of Operation
+========================
+
+Zend_View Enhanced advocates a template driven approach to output generation. As templates are rendered by Zend_View, the templates themselves may invoke Partials and Controllers, as well as set Placeholder content (template specific or default) which is centrally stored (with an instance of Zend_Registry) for higher level and subsequent templates (such as Layouts). Layouts are applied at the end of any Zend_View instance's rendering to take advantage of Placeholders as much as possible.
+
+Partials: Partials simply render a specified template within it's own separate variable scope. This is useful for reusable template fragments, avoids variable name clashes, and allows configuration of Partials to operate specific to independent Modules (i.e. using that Module's helpers/filters/paths).
+
+Controllers: Dispatches a request to the Controller which returns output for inclusion in a template. This must be compatible with ViewRenderer. May be used for querying the Model, but due to the processing involved is likely far slower than using a custom View Helper. Most likely useful where authentication or authorisation must also be queried before Model access.
+
+Layouts: Decorates the main output of a Zend_View instance with a Layout template composed of common page elements and Placeholders for context specific additions which are defined by templates prior to the Layout decoration.
+
+Placeholders: Uses an instance of Zend_Registry to allow templates set centrally registered content for inclusion in any subsequently rendered template or Layout. Placeholders are sufficiently decoupled from templates so that templates from different variable scopes can still communicate data to each other. Set Placeholders are only ever available to templates rendered after the Placeholder is set.
+
+6. Milestones / Tasks
+=======================
