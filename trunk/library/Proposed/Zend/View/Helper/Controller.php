@@ -54,14 +54,22 @@ class Zend_View_Helper_Controller {
         if (isset($controller)) {
             $request->setControllerName($controller);
         }
-        if (isset($module)) {
+        if (isset($module) && isset($controller)) {
             $request->setModuleName($module);
         }
         if (isset($params)) {
             $request->setParams($params);
         }
         $response = new Zend_Controller_Response_Http();
+        if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
+            $viewRenderer = Zend_Controller_Action_HelperBroker::getExistingHelper('viewHelper');
+            $originalRequest = $viewRenderer->getRequest();
+            $viewRenderer->setRequest($request);
+        }
         $front->getDispatcher()->dispatch($request, $response);
+        if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
+            $viewRenderer->setRequest($originalRequest);
+        }
         return $response->getBody();
     }
 
