@@ -40,7 +40,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         if (isset($options) && !empty($options)) {
             // normalise to array
             if ($options instanceof Zend_Config) {
-                $options = $options->asArray();
+                $options = $options->toArray();
             }
             if (is_array($options)) {
                 $this->_setOptions($options);
