@@ -63,16 +63,28 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
             return $view;
         }
 
-        $basePaths = (array) $this->_options['modules'][$module]['basePath'];
-        $scriptPaths = (array) $this->_options['modules'][$module]['scriptPath'];
-        $filterPaths = (array) $this->_options['modules'][$module]['filterPath'];
-        $helperPaths = (array) $this->_options['modules'][$module]['helperPath'];
-        $helperClassPrefix = $this->_options['modules'][$module]['helperClassPrefix'];
-        $filterClassPrefix = $this->_options['modules'][$module]['filterClassPrefix'];
-        $encoding = $this->_options['encoding'];
-        $escape = $this->_options['escape'];
-        $strictVars = $this->_options['strictvars'] ? true : false;
-
+        if(isset($this->_options['strictvars'])) {
+            $view->strictVars((bool) $this->_options['strictvars']);
+        }
+        if (isset($this->_options['escape'])) {
+            $view->setEscape($this->_options['escape']);
+        }
+        if (isset($this->_options['encoding'])) {
+            $view->setEncoding($this->_options['encoding']);
+        }
+        
+        /**
+         * @todo Need to check each if set before using
+         */
+        if (isset($this->_options['module'])) {
+            $basePaths = (array) $this->_options['module'][$module]['basePath'];
+            $scriptPaths = (array) $this->_options['module'][$module]['scriptPath'];
+            $filterPaths = (array) $this->_options['module'][$module]['filterPath'];
+            $helperPaths = (array) $this->_options['module'][$module]['helperPath'];
+            $helperClassPrefix = $this->_options['module'][$module]['helperClassPrefix'];
+            $filterClassPrefix = $this->_options['module'][$module]['filterClassPrefix'];
+        }
+ 
         if (isset($basePaths)) {
             foreach($basePaths as $bp) {
                 $view->addBasePath($bp);
@@ -103,18 +115,6 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
                     $view->addFilterPath($fp);
                 }
             }
-        }
-
-        if (isset($escape)) {
-            $view->setEscape($escape);
-        }
-
-        if (isset($encoding)) {
-            $view->setEncoding($encoding);
-        }
-
-        if ($strictVars) {
-            $view->strictVars();
         }
 
         return $view;
@@ -173,7 +173,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
      * Set options
      * 
      * @param  array $options 
-     * @return Zend_Controller_Action_Helper_ViewRenderer
+     * @return Zend_View_Factory
      */
     protected function _setOptions($options)
     {
