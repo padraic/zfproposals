@@ -56,3 +56,21 @@ Placeholders: Uses an instance of Zend_Registry to allow templates set centrally
 
 6. Milestones / Tasks
 =======================
+
+- Milestone 1: Write unit tests capturing the agreed interface and behaviour
+- Milestone 2: Write the code to pass the tests (well, duh! ;))
+- Milestone 3: Write integration tests to cover various use cases
+- Milestone 4: Complete documentation
+
+7. Class Index
+================
+
+Zend_View_Abstract
+Zend_View_Helper_Placeholder
+Zend_View_Helper_Controller
+Zend_View_Helper_Partial
+Zend_View_Factory
+
+8. Use Cases
+==============
+
