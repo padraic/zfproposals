@@ -15,6 +15,7 @@
  * @category   Zend
  * @package    Zend_View
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Modifications from original are Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
@@ -38,7 +39,7 @@ require_once 'Zend/View/Factory.php';
  *
  * @category   Zend
  * @package    Zend_View
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com), Modifications Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_View_Abstract implements Zend_View_Interface
@@ -143,7 +144,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      * templates rendered by subsequent Zend_View::render() calls.
      * @var string
      */
-    protected $_mainFile = null;
+    protected $_fileToRender = null;
 
     /**
      * Constructor.
@@ -787,8 +788,8 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     {
         // find the script file name using the parent private method
         $this->_file = $this->_script($name);
-        if ($this->hasLayout() && !isset($this->_mainFile)) {
-            $this->_mainFile = $this->_file;
+        if ($this->hasLayout() && !isset($this->_fileToRender)) {
+            $this->_fileToRender = $this->_file;
         }
         unset($name); // remove $name from local scope
 
@@ -797,7 +798,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         $output = $this->_filter(ob_get_clean()); // filter output
 
         // if enabled, decorate a Layout render with the main content
-        if (!$this->hasLayout() || $this->_file !== $this->_mainFile) {
+        if (!$this->hasLayout() || $this->_file !== $this->_fileToRender) {
             return $output;
         } else {
             $this->setPlaceholder('content', $output);
