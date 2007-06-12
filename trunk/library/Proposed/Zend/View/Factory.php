@@ -59,7 +59,7 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         if (!$this->_options) {
             $basePath = $this->_getBasePath($module);
             $view->addBasePath($basePath);
-            //$this->_assignModel($view, $model);
+            $this->_assignModel($view, $model);
             return $view;
         }
 
@@ -116,6 +116,8 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
                 }
             }
         }
+
+        $this->_assignModel($view, $model);
 
         return $view;
         
@@ -239,6 +241,13 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         );
         $value = str_replace(array_keys($replacements), array_values($replacements), $spec);
         return $value;
+    }
+
+    protected function _assignModel(Zend_View_Interface $view, array $model)
+    {
+        foreach($model as $key->$value) {
+            $view->$key = $value;
+        }
     }
 
 }
