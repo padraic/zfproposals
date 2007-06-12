@@ -779,8 +779,9 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
 
     /**
      * Processes a view script and returns the output. If enabled it will also
-     * 
+     * decorate the output with a rendered Layout file.
      *
+     * @see Zend_View_Abstract::contentForLayout()
      * @param string $name The script script name to process.
      * @return string The script output.
      */
@@ -801,7 +802,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         if (!$this->hasLayout() || $this->_file !== $this->_fileToRender) {
             return $output;
         } else {
-            $this->setPlaceholder('content', $output);
+            $this->setPlaceholder('contentForLayout', $output);
             return $this->render( $this->getLayout() );
         } 
     }
@@ -866,26 +867,6 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
     }
 
     /**
-     * Renders a template fragment within a variable scope distinct from the
-     * calling View object.
-     *
-     * @param string $name
-     * @param string|array $module
-     * @param array $model
-     * @returns string $output
-     */
-    public function partial($name, $module = null, array $model = null)
-    {
-        if (isset($module) && is_array($module) && !isset($model)) {
-            $viewModel = $module;
-        } elseif (isset($model)) {
-            $viewModel = $model;
-        }
-        $view = self::getFactory()->createInstance($module, $viewModel, $this);
-        return $view->render($name);
-    }
-
-    /**
      * Set the filename of a Layout template to be used. The existence of a
      * Layout filename will cause the final rendered View to be stored until
      * the rendered Layout includes it by calling Zend_View::content().
@@ -923,10 +904,10 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      *
      * @return string
      */
-    public function content()
+    public function contentForLayout()
     {
-        if ($this->hasPlaceholder('content')) {
-            return $this->getPlaceholder('content');
+        if ($this->hasPlaceholder('contentForLayout')) {
+            return $this->getPlaceholder('contentForLayout');
         }
         require_once 'Zend/View/Exception.php';
         throw new Zend_View_Exception('there is no rendered content available for insertion in a Layout', $this);

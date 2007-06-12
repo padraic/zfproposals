@@ -22,7 +22,7 @@ require_once 'Zend/Registry.php';
  * @package    Zend_View
  * @subpackage Helpers
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
- * @license    New BSD
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_Controller {
     

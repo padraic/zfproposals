@@ -74,3 +74,553 @@ Zend_View_Factory
 8. Use Cases
 ==============
 
+#1 Partial
+
+/**
+ * Partials render a template fragment at a specific location within
+ * another template. They are rendered in a separate variable scope
+ * with a Model supplied by the parent template. It is assumed Partials
+ * can therefore be easily rendered from different Modules.
+ */
+
+// src/default/views/scripts/blog/index.phtml
+
+<?php echo $this->render('stdHeader.phtml') ?>
+
+    <div class="blog content">
+        <?php foreach($this->entries as $entry): ?>
+            <?php echo $this->partial('_entry.phtml', 'default', array('entry'=>$entry)) ?>
+        <?php endforeach; ?>
+    </div>
+
+<?php echo $this->render('stdFooter.phtml') ?>
+
+// src/default/views/scripts/blog/_entry.phtml
+
+<div class="entry">
+    <ul class="meta">
+        <li><?php echo $this->entry->author; ?></li>
+        <li><?php echo $this->entry->date; ?></li>
+        <li><?php echo $this->entry->comments; ?></li>
+    </ul>
+    <div class="entry body">
+        <?php echo $this->entry->text; ?>
+    </div>
+</div>
+
+#2 Controller
+
+/**
+ * The Controller View Helper enables templates to dispatch a Request
+ * to any given Controller and Action. The contents of the Response
+ * object resulting from this dispatch is then rendered in the calling
+ * template.
+ */
+
+ // src/default/views/scripts/blog/index.phtml
+
+<?php echo $this->render('stdHeader.phtml'); ?>
+
+    <div id="content">
+        Some content of main body in page...
+    </div id="content">
+    <div id="sidebar right">
+        <?php echo $this->controller('list', 'comment', null, array('count'=>10)); ?>
+    </div>
+
+<?php echo $this->render('stdFooter.phtml'); ?>
+
+#3 Layout
+
+/**
+ * Layouts are templates which decorate the rendered output of a
+ * View. The decoration is handled internally by Zend_View_Abstract::render()
+ * by allowing Layouts to defined an insertion point for the output to be
+ * placed. Layouts are quite flexible, the primary insertion point for
+ * the main rendered output is just a typical Placeholder.
+ */
+
+// src/bootstrap.php before instantiating Front Controller
+
+$view = new Zend_View;
+$view->setBasePath(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'default/views');
+$view->setEncoding('UTF-8');
+$view->setEscape('htmlentities');
+$view->setLayout('layout.phtml'); // manually handled, could be automated by ViewRenderer
+$viewRenderer = new Zend_Controller_Action_Helper_ViewRenderer;
+$viewRenderer->setView($view);
+Zend_Controller_Action_HelperBroker::addHelper($viewRenderer);
+
+// src/default/view/scripts/layout.phtml
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>My Application</title>
+<link rel="stylesheet" type="text/css" href="styles/base.css" media="screen">
+</head>
+<body>
+<div id="main">
+    <?php echo $this->contentForLayout(); ?>
+</div>
+<div id="footer">
+    <p><small>Copyright &copy; 2007 Pádraic Brady</small></p>
+</div>
+</body>
+</html>
+
+#4 Placeholders
+
+/**
+ * Placeholders are centrally registered pieces of content which all
+ * subsequently rendered templates may access. Since Layouts are always
+ * rendered last - they may access all set Placeholders.
+ */
+
+// src/bootstrap.php before instantiating Front Controller
+
+$view = new Zend_View;
+$view->setBasePath(APPLICATION_PATH . DIRECTORY_SEPARATOR . 'default/views');
+$view->setLayout('layout.phtml'); // manually handled, could be automated by ViewRenderer
+$viewRenderer = new Zend_Controller_Action_Helper_ViewRenderer;
+$viewRenderer->setView($view);
+Zend_Controller_Action_HelperBroker::addHelper($viewRenderer);
+
+// src/default/view/scripts/layout.phtml
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>My Application</title>
+<link rel="stylesheet" type="text/css" href="styles/base.css" media="screen">
+    <?php if($this->hasPlaceholder('HEAD')) echo $this->getPlaceholder('HEAD'); ?>
+</head>
+<body>
+<div id="main">
+    <?php echo $this->contentForLayout(); ?>
+</div>
+<div id="footer">
+    <p>
+    <?php if($this->hasPlaceholder('LICENCE')): ?>
+        <?php echo $this->getPlaceholder('LICENSE'); ?>
+    <?php else: ?>
+        Licensed under the <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation License</a>.
+    <?php endif; ?>
+    </p>
+    <p><small>Copyright &copy; 2007 Pádraic Brady</small></p>
+</div>
+</body>
+</html>
+
+// src/default/view/scripts/blog/index.phtml
+
+<?php $this->appendPlaceholder('HEAD', '<link rel="alternate" type="application/rss+xml" title="RSS" href="http://www.planet-php.org/rss/" />'); ?>
+<?php $this->setPlaceholder('LICENSE', 'Licensed under a <a href="http://creativecommons.org/licenses/by/1.0/">Creative Commons License</a>.'); ?>
+
+<div class="blog content">
+    <?php foreach($this->entries as $entry): ?>
+        <?php echo $this->partial('_entry.phtml', 'default', array('entry'=>$entry)) ?>
+    <?php endforeach; ?>
+</div>
+
+9. Class Skeletons
+
+/**
+ * Abstract class for Zend_View to help enforce private constructs.
+ *
+ * @category   Zend
+ * @package    Zend_View
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+abstract class Zend_View_Abstract implements Zend_View_Interface
+{
+    /**
+     * Path stack for script, helper, and filter directories.
+     *
+     * @var array
+     */
+    private $_path = array(
+        'script' => array(),
+        'helper' => array(),
+        'filter' => array(),
+    );
+
+    /**
+     * Script file name to execute
+     *
+     * @var string
+     */
+    private $_file = null;
+
+    /**
+     * Instances of helper objects.
+     *
+     * @var array
+     */
+    private $_helper = array();
+
+    /**
+     * Map of helper => class pairs to help in determining helper class from 
+     * name
+     * @var array 
+     */
+    private $_helperLoaded = array();
+
+    /**
+     * Map of helper => classfile pairs to aid in determining helper classfile
+     * @var array
+     */
+    private $_helperLoadedDir = array();
+
+    /**
+     * Stack of Zend_View_Filter names to apply as filters.
+     * @var array
+     */
+    private $_filter = array();
+
+    /**
+     * Stack of Zend_View_Filter objects that have been loaded
+     * @var array
+     */
+    private $_filterClass = array();
+
+    /**
+     * Map of filter => class pairs to help in determining filter class from 
+     * name
+     * @var array 
+     */
+    private $_filterLoaded = array();
+
+    /**
+     * Map of filter => classfile pairs to aid in determining filter classfile
+     * @var array
+     */
+    private $_filterLoadedDir = array();
+
+    /**
+     * Callback for escaping.
+     *
+     * @var string
+     */
+    private $_escape = 'htmlspecialchars';
+
+    /**
+     * Encoding to use in escaping mechanisms; defaults to latin1 (ISO-8859-1)
+     * @var string 
+     */
+    private $_encoding = 'ISO-8859-1';
+
+    /**
+     * Strict variables flag; when on, undefined variables accessed in the view 
+     * scripts will trigger notices 
+     * @var boolean
+     */
+    private $_strictVars = false;
+
+    /**
+     * Stores a Factory instance for creating Zend_View objects
+     *
+     * @var Zend_View_Factory
+     */
+    private static $_factory = null;
+
+    /**
+     * The Layout template for this View if enabled
+     *
+     * @var string
+     */
+    protected $_layoutFile = null;
+
+    /**
+     * The main template being rendered by this View, ignoring other secondary
+     * templates rendered by subsequent Zend_View::render() calls.
+     *
+     * @var string
+     */
+    protected $_fileToRender = null;
+
+    /**
+     * Constructor.
+     *
+     * @param array $config Configuration key-value pairs.
+     */
+    public function __construct($config = array())
+    {}
+
+    /**
+     * Processes a view script and returns the output. If enabled it will also
+     * decorate the output with a rendered Layout file.
+     *
+     * @see Zend_View_Abstract::contentForLayout()
+     * @param string $name The script script name to process.
+     * @return string The script output.
+     */
+    public function render($name)
+    {}
+
+    /**
+     * Set the filename of a Layout template to be used. The existence of a
+     * Layout filename will cause the final rendered View to be stored until
+     * the rendered Layout includes it by calling Zend_View::content().
+     *
+     * @param $file string
+     * @return void
+     */
+    public function setLayout($name)
+    {}
+
+    /**
+     * Return the filename of the Layout.
+     *
+     * @return string
+     */
+    public function getLayout()
+    {}
+
+    /**
+     * Returns true if a Layout has been set for this View.
+     *
+     * @return bool
+     */
+    public function hasLayout()
+    {}
+
+    /**
+     * Simple accessor to return pre-rendered content of the main template
+     *
+     * @return string
+     */
+    public function contentForLayout()
+    {}
+
+    /**
+     * Set an instance of Zend_View_Factory as the local Factory instance
+     *
+     * @param Zend_View_Factory
+     * @return void
+     */
+    public static function setFactory(Zend_View_Factory_Interface $factory)
+    {}
+
+    /**
+     * Return the local Factory instance
+     *
+     * @return Zend_View_Factory
+     */
+    public static function getFactory()
+    {}
+
+    /**
+     * Check for the existence of the named Placeholder key
+     *
+     * @param string $index
+     * @return bool
+     */
+    public function hasPlaceholder($index)
+    {}
+
+    /**
+     * Append a value string to an existing Placeholder key
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function appendPlaceholder($index, $value)
+    {}
+
+    /**
+     * Set the value for a Placeholder key. Overwrites existing value.
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function setPlaceholder($index, $value)
+    {}
+
+    /**
+     * Return the value of a Placeholder key
+     *
+     * @param string $index
+     * @return mixed
+     */
+    public function getPlaceholder($index)
+    {}
+
+    /**
+     * Unset the value of a Placeholder key
+     *
+     * @param string $index
+     * @return void
+     */
+    public function removePlaceholder($index)
+    {}
+
+    /**
+     * Use to include the view script in a scope that only allows public 
+     * members.
+     * 
+     * @return mixed
+     */
+    abstract protected function _run();
+}
+
+/**
+ * Helper for rendering a template fragment in its own variable scope.
+ * 
+ * @package    Zend_View
+ * @subpackage Helpers
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+class Zend_View_Helper_Partial {
+    
+    /**
+     * Instance of parent Zend_View object
+     * @var Zend_View_Abstract
+     */
+    public $view = null;
+
+    /**
+     * Renders a template fragment within a variable scope distinct from the
+     * calling View object.
+     *
+     * @param string $name
+     * @param string|array $module
+     * @param array $model
+     * @returns string $output
+     */
+    public function partial($name, $module = null, array $model = null)
+    {}
+
+    /**
+     * Set view object
+     * 
+     * @param  Zend_View_Interface $view 
+     * @return Zend_View_Helper_Partial
+     */
+    public function setView(Zend_View_Interface $view)
+    {}
+
+}
+
+/**
+ * Helper for passing data between otherwise segregated Views. In essence this
+ * is just a proxy to a specific centralised Registry. It's called Placeholder to
+ * make its typical usage obvious, but can be used just as easily for non-Placeholder
+ * things. That said, the support for this is only guaranteed to effect Layouts.
+ * 
+ * @package    Zend_View
+ * @subpackage Helpers
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+class Zend_View_Helper_Controller {
+
+    /**
+     * Dispatch a request via the Controller and fetch the resulting rendered
+     * View to return
+     *
+     * @param string $action
+     * @param string $controller
+     * @param string $module
+     * @param array $params
+     * @returns string
+     * @todo Breaks with the ViewRenderer enabled
+     */
+    public function controller($action, $controller = null, $module = null, array $params = null)
+    {}
+
+}
+
+/**
+ * Helper for passing data between otherwise segregated Views. In essence this
+ * is just a proxy to a specific centralised Registry. It's called Placeholder to
+ * make its typical usage obvious, but can be used just as easily for non-Placeholder
+ * things. That said, the support for this is only guaranteed to effect Layouts.
+ *
+ * This Helper is aliased by Zend_View_Abstract's Placeholder methods to reduce the
+ * API complexity (e.g. from $this->placeholder()->set() to $this->setPlaceholder())
+ * 
+ * @package    Zend_View
+ * @subpackage Helpers
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+class Zend_View_Helper_Placeholder {
+
+    /**
+     * Registry to store Placeholder values for later queries from layouts or
+     * templates.
+     * @var Zend_Registry
+     */
+    protected $_registry = null;
+    
+    /**
+     * Constructor; instantiate the object with a Zend_Registry object property
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->_registry = new Zend_Registry;
+    }
+
+    /**
+     * Return the current instance of Zend_Registry
+     *
+     * @return Zend_View_Helper_Placeholder
+     */
+    public function placeholder()
+    {}
+    
+    /**
+     * Check for the existence of the named Placeholder key
+     *
+     * @param string $index
+     * @return bool
+     */
+    public function has($index)
+    {}
+
+    /**
+     * Append a value string to an existing Placeholder key
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function append($index, $value)
+    {}
+
+    /**
+     * Set the value for a Placeholder key. Overwrites existing value.
+     *
+     * @param string $index
+     * @param mixed $value
+     * @return void
+     */
+    public function set($index, $value)
+    {}
+
+    /**
+     * Return the value of a Placeholder key
+     *
+     * @param string $index
+     * @return mixed
+     */
+    public function get($index)
+    {}
+
+    /**
+     * Unset the value of a Placeholder key
+     *
+     * @param string $index
+     * @return void
+     */
+    public function remove($index)
+    {}
+    
+}
