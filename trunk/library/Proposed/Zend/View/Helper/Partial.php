@@ -43,7 +43,7 @@ class Zend_View_Helper_Partial {
             $viewModel = $model;
         }
         $view = self::getFactory()->createInstance($module, $viewModel, $this->view);
-        return $this->view->render($name);
+        return $view->render($name);
     }
 
     /**
