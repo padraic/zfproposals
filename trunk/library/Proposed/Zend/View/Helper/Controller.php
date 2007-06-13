@@ -5,35 +5,20 @@
  *
  * @package    Zend_View
  * @subpackage Helpers
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @version    $Id$
- * @license    New BSD
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Registry */
-require_once 'Zend/Registry.php';
-
 /**
- * Helper for passing data between otherwise segregated Views. In essence this
- * is just a proxy to a specific centralised Registry. It's called Placeholder to
- * make its typical usage obvious, but can be used just as easily for non-Placeholder
- * things. That said, the support for this is only guaranteed to effect Layouts.
+ * Helper for returning the output from dispatching a new Request to the
+ * Controller using the provided Action name, and optional Controller/Module
+ * names and other parameters.
  * 
  * @package    Zend_View
  * @subpackage Helpers
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_View_Helper_Controller {
-    
-    /**
-     * Constructor;
-     *
-     * @return void
-     */
-    public function __construct()
-    { 
-    }
 
     /**
      * Dispatch a request via the Controller and fetch the resulting rendered
@@ -44,34 +29,38 @@ class Zend_View_Helper_Controller {
      * @param string $module
      * @param array $params
      * @returns string
-     * @todo Breaks with the ViewRenderer enabled
      */
     public function controller($action, $controller = null, $module = null, array $params = null)
     {
         $front = Zend_Controller_Front::getInstance();
+        if (!$front->getParam('noViewRenderer') && Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
+            $enableViewRendererReset = true;
+        }
+        $front = Zend_Controller_Front::getInstance();
         $request = clone $front->getRequest();
         $request->setActionName($action);
-        if (isset($controller)) {
+        if (!is_null($controller)) {
             $request->setControllerName($controller);
         }
-        if (isset($module) && isset($controller)) {
+        if (!is_null($module) && !is_null($controller)) {
             $request->setModuleName($module);
         }
-        if (isset($params)) {
+        if (!is_null($params)) {
             $request->setParams($params);
         }
         $response = new Zend_Controller_Response_Http();
-        if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
+        if (isset($enableViewRendererReset)) {
             $viewRenderer = Zend_Controller_Action_HelperBroker::getExistingHelper('viewRenderer');
-            $originalRequest = $viewRenderer->getRequest();
+            $__originalRequest = $viewRenderer->getRequest();
+            $__originalResponse = $viewRenderer->getResponse();
             $viewRenderer->setRequest($request);
-            $originalResponse = $viewRenderer->getResponse();
             $viewRenderer->setResponse($response);
         }
         $front->getDispatcher()->dispatch($request, $response);
-        if (Zend_Controller_Action_HelperBroker::hasHelper('viewRenderer')) {
-            $viewRenderer->setRequest($originalRequest);
-            $viewRenderer->setResponse($originalResponse);
+        // reset original objects back on ViewRenderer
+        if (isset($enableViewRendererReset)) {
+            $viewRenderer->setRequest($__originalRequest);
+            $viewRenderer->setResponse($__originalResponse);
         }
         return $response->getBody();
     }
