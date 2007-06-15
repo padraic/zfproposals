@@ -58,7 +58,7 @@ class Zend_Math_BigInteger
      *
      * @var Zend_Math_BigInteger_Interface
      */
-    private $_math = null;
+    protected $_math = null;
 
     /**
      * Constructor; a Factory which detects a suitable PHP extension for
