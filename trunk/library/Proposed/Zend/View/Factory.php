@@ -59,7 +59,9 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         if (!$this->_options) {
             $basePath = $this->_getBasePath($module);
             $view->addBasePath($basePath);
-            $this->_assignModel($view, $model);
+            if (!is_null($model)) {
+                $this->_assignModel($view, $model);
+            }
             return $view;
         }
 
@@ -116,11 +118,12 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
                 }
             }
         }
-
-        $this->_assignModel($view, $model);
-
-        return $view;
         
+        if (!is_null($model)) {
+            $this->_assignModel($view, $model);
+        }
+        
+        return $view;
     }
 
     /**

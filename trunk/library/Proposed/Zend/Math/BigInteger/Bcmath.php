@@ -24,6 +24,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Math_BigInteger_Interface */
+require_once 'Zend/Math/BigInteger/Interface.php';
+
 /**
  * Support for arbitrary precision mathematics in PHP.
  *
@@ -39,7 +42,23 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
 {
 
     /**
-     * Add two big integers and return result.
+     * Initialise a big integer into an extension specific type. This is not
+     * applicable to BCMath.
+     * @param string $operand
+     * @param int $base
+     * @return string
+     */
+    public function init($operand, $base = 10)
+    {
+        return $operand;
+    }
+
+    /**
+     * Adds two arbitrary precision numbers
+     *
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
      */
     public function add($left_operand, $right_operand)
     {
@@ -47,9 +66,22 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
     }
 
     /**
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
+     */
+    public function subtract($left_operand, $right_operand)
+    {
+        return bcsub($left_operand, $right_operand);
+    }
+
+    /**
      * Compare two big integers and returns result as an integer where 0 means
      * both are identical, 1 that left_operand is larger, or -1 that
      * right_operand is larger.
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return int
      */
     public function compare($left_operand, $right_operand)
     {
@@ -59,6 +91,9 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
     /**
      * Divide two big integers and return result or NULL if the denominator
      * is zero.
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string|null
      */
     public function divide($left_operand, $right_operand)
     {
@@ -66,48 +101,53 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
     }
 
     /**
-     * Initialise a big integer into an extension specific type. This is not
-     * applicable to BCMath.
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
      */
-    public function init($operand, $base = 10)
-    {
-        return $operand;
-    }
-
-
     public function modulus($left_operand, $modulus)
     {
         return bcmod($left_operand, $modulus);
     }
 
-
+    /**
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
+     */
     public function multiply($left_operand, $right_operand)
     {
         return bcmul($left_operand, $right_operand);
     }
 
-
+    /**
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
+     */
     public function pow($left_operand, $right_operand)
     {
         return bcpow($left_operand, $right_operand);
     }
 
-
+    /**
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
+     */
     public function powmod($left_operand, $right_operand, $modulus)
     {
         return bcpowmod($left_operand, $right_operand, $modulus);
     }
 
-
+    /**
+     * @param string $left_operand
+     * @param string $right_operand
+     * @return string
+     */
     public function sqrt($operand)
     {
         return bcsqrt($operand);
-    }
-
-
-    public function subtract($left_operand, $right_operand)
-    {
-        return bcsub($left_operand, $right_operand);
     }
 
 

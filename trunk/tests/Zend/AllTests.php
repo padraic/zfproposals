@@ -31,6 +31,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/ViewTest.php';
 require_once 'Zend/View/AllTests.php';
+require_once 'Zend/Math/AllTests.php';
 
 
 class Zend_AllTests
@@ -45,6 +46,7 @@ class Zend_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend');
         $suite->addTestSuite('Zend_ViewTest');
         $suite->addTest(Zend_View_AllTests::suite());
+        $suite->addTest(Zend_Math_AllTests::suite());
         return $suite;
     }
 }
