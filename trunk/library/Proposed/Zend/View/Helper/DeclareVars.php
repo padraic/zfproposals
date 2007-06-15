@@ -15,7 +15,7 @@
  * @package    Zend_View
  * @subpackage Helpers
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: DeclareVars.php 4332 2007-04-03 19:59:46Z matthew $
+ * @version    $Id$
  * @license    http://www.zend.com/license/framework/1_0.txt Zend Framework License version 1.0
  */
 

@@ -74,37 +74,44 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
         return $operand;
     }
 
+
     public function modulus($left_operand, $modulus)
     {
         return bcmod($left_operand, $modulus);
     }
+
 
     public function multiply($left_operand, $right_operand)
     {
         return bcmul($left_operand, $right_operand);
     }
 
+
     public function pow($left_operand, $right_operand)
     {
         return bcpow($left_operand, $right_operand);
     }
+
 
     public function powmod($left_operand, $right_operand, $modulus)
     {
         return bcpowmod($left_operand, $right_operand, $modulus);
     }
 
+
     public function sqrt($operand)
     {
         return bcsqrt($operand);
     }
+
 
     public function subtract($left_operand, $right_operand)
     {
         return bcsub($left_operand, $right_operand);
     }
 
-    public function bin2int($operand)
+
+    public function binaryToInteger($operand)
     {
         $result = '0';
         while (strlen($operand)) {
@@ -115,7 +122,8 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
         return $result;
     }
 
-    public function int2bin($operand)
+
+    public function integerToBinary($operand)
     {
         $return = '';
         while(bccomp($operand, '0')) {
@@ -125,7 +133,8 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
         return $return;
     }
 
-    public function hex2dec($operand)
+
+    public function hexToDecimal($operand)
     {
         $return = '0';
         while(strlen($hex)) {
@@ -135,52 +144,11 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
         }
         return $return;
     }
+    
 
-    /**
-     * Calculate modular inverse of left_operand with modulo right_operand
-     * and return FALSE if such an inverse does not exist.
-     * This simulated for BCMath
-     */
-    public function invert($left_operand, $right_operand) 
+    public function decimalToHex($operand)
     {
-        while (bccomp($left_operand, 0) < 0) { 
-            $left_operand = bcadd($left_operand, $right_operand); 
-        }
-        $r = $this->xgcd($left_operand, $right_operand);
-        if ($r[2] == 1) {
-            $a = $r[0];
-            while (bccomp($a, 0 ) < 0) {
-                $a = bcadd($a, $right_operand);
-            }
-            return $a;
-        }
-        return false;
-    }
-
-    public function xgcd($left_operand, $right_operand)
-    {
-        /*
-         * GCD algorithm for seeking a greatest common divisor.
-         * Kudos to Euclid ;) This is the eXtended form (XGCD).
-         */
-        $u0 = 1;
-        $u1 = 0;
-        $v0 = 0;
-        $v1 = 1;
-        $w = 0; // dodgy looking loner! Where did $w vanish to below?
-        while($right_operand > 0) {
-            $q = bcdiv($left_operand, $right_operand, 0);
-            $r = bcmod($left_operand, $right_operand);
-            $left_operand = $right_operand;
-            $right_operand = $r;
-            $u2 = bcsub($u0, bcmul($q, $u1));
-            $v2 = bcsub($v0, bcmul($q, $v1));
-            $u0 = $u1;
-            $u1 = $u2;
-            $v0 = $v1;
-            $v1 = $v2;
-        }
-        return array($u0, $v0, $left_operand);
+    
     }
 
 }
