@@ -152,6 +152,17 @@ class Zend_Crypt_DiffieHellman
         }
         $this->_prime = (string) $number;
     }
+
+    /**
+     * Getter for the value of the prime number
+     *
+     * @return string
+     */
+    public function getPrimeNumber()
+    {
+        return $this->_prime;
+    }
+     
     
     /**
      * Setter for the value of the generator number
@@ -169,6 +180,16 @@ class Zend_Crypt_DiffieHellman
     }
 
     /**
+     * Getter for the value of the generator number
+     *
+     * @return string
+     */
+    public function getGeneratorNumber()
+    {
+        return $this->_generator;
+    }
+
+    /**
      * Setter for the value of the private number
      *
      * @param string $number
@@ -183,6 +204,26 @@ class Zend_Crypt_DiffieHellman
         $this->_privateKey = (string) $number;
     }
 
+    /**
+     * Getter for the value of the private number
+     *
+     * @return string
+     */
+    public function getPrivateNumber()
+    {
+        if (!isset($this->_privateKey)) {
+            require_once('Zend/Crypt/DiffieHellman/Exception.php');
+            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
+        }
+        return $this->_private;
+    }
+
+    /**
+     * Setter to impose a specific instance of Zend_Math_BigInteger_Interface.
+     *
+     * @param Zend_Math_BigInteger_Interface
+     * @return void
+     */
     public function setBigIntegerMath(Zend_Math_BigInteger_Interface $math = null)
     {
         if (is_null($math)) {
