@@ -244,7 +244,8 @@ class Zend_Crypt_DiffieHellman
         if (isset($this->_privateKey)) {
             return;
         }
-        // need to complete auto generation! 
+        $rand = $this->_math->rand($this->getGeneratorNumber(), $this->getPrimeNumber());
+        $this->setPrivateNumber($rand);
     }
 
     /**
@@ -253,9 +254,9 @@ class Zend_Crypt_DiffieHellman
      * @param string $publicKey
      * @return bool
      */
-    private function _validatePublicKey($publicKey)
+    public function validatePublicKey($publicKey)
     {
-        
+        throw new Exception('not implemented');
     }
 
 }

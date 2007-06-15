@@ -13,7 +13,7 @@ class Zend_Crypt_DiffieHellmanTest extends PHPUnit_Framework_TestCase
         $this->_diffie = new Zend_Crypt_DiffieHellman;
     }
 
-    public function testDiffie()
+    public function testDiffieWithSpec()
     {
         $aliceOptions = array(
             'prime'=>'563',
@@ -39,6 +39,20 @@ class Zend_Crypt_DiffieHellmanTest extends PHPUnit_Framework_TestCase
         // both Alice and Bob should now have the same secret key
         $this->assertEquals('117', $aliceSecretKey);
         $this->assertEquals('117', $bobSecretKey);
+    }
+
+    public function testDiffieWithDefaults()
+    {
+        $alice = new Zend_Crypt_DiffieHellman;
+        $bob = new Zend_Crypt_DiffieHellman;
+        $alice->generateKeys();
+        $bob->generateKeys();
+        
+        $aliceSecretKey = $alice->computeSecretKey($bob->getPublicKey());
+        $bobSecretKey = $bob->computeSecretKey($alice->getPublicKey());
+        
+        // both Alice and Bob should now have the same secret key
+        $this->assertEquals($aliceSecretKey, $bobSecretKey);
     }
 
 }

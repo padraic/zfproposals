@@ -24,48 +24,27 @@ require_once 'Zend/Math/BigInteger.php';
 
 class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
 {
-    
+
     /**
      * Generate a pseudorandom number within the given range.
      *
      * @param string|int $min
      * @param string|int $max
      * @return string
+     * @todo Even more pseudorandomness would be nice...
      */
-    public function rand($min, $max)
+    public function rand($minimum, $maximum)
     {
-        if($this->_math->compare($max,$min)!=1){
-            return 0;
+        if (strlen($maximum) < 4) {
+            return mt_rand($minimum, $maximum - 1);
         }
-        $top = $this->_math->subtract($max,$min);
-        $rand = $this->_math->add($top, 1);
-        $length = strlen($top);
-        $n = 0;
-        while(9*$n <= $length){
-            if($length - 9*$n >= 9){
-                $rand_part[] = mt_rand(0,999999999);
-            }else{
-                $j = 0; $foo = '';
-                while($j < $length-9*$n){
-                    $foo .= '9';
-                    ++$j;
-                }
-                $foo += 0;
-                $rand_part[] = mt_rand(0,$foo);
-            }
-            ++$n;
+        $rand = '';
+        $i2 = strlen($maximum) - 1;
+        for ($i = 1;$i < $i2;$i++) {
+            $rand .= mt_rand(0,9);
         }
-        $i = 0;
-        $rand ='';
-        $count = count($rand_part);
-        while($i < $count){
-            $rand .= $rand_part[$i];
-            ++$i;
-        }
-        while(bccomp($rand,$top)==1){
-            $rand = substr($rand,1,strlen($rand)).rand(0,9);
-        }
-        return bcadd($rand,$min);
+        $rand .= mt_rand(0,9);
+        return $rand;
     }
 
 }
