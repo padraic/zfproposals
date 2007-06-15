@@ -146,9 +146,9 @@ class Zend_Crypt_DiffieHellman
      */
     public function setPrimeNumber($number)
     {
-        if (!preg_match("/^\d+$/", $number)) {
+        if (!preg_match("/^\d+$/", $number) || $number < 11) {
             require_once('Zend/Crypt/DiffieHellman/Exception.php');
-            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
+            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number or too small: should be a large natural number prime');
         }
         $this->_prime = (string) $number;
     }
@@ -172,9 +172,9 @@ class Zend_Crypt_DiffieHellman
      */
     public function setGeneratorNumber($number)
     {
-        if (!preg_match("/^\d+$/", $number)) {
+        if (!preg_match("/^\d+$/", $number) || $number < 2) {
             require_once('Zend/Crypt/DiffieHellman/Exception.php');
-            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
+            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number greater than 1');
         }
         $this->_generator = (string) $number;
     }
