@@ -48,7 +48,7 @@ class Zend_AllTests
         $suite->addTestSuite('Zend_ViewTest');
         $suite->addTest(Zend_View_AllTests::suite());
         $suite->addTest(Zend_Math_AllTests::suite());
-        $suite->addTest(Zend_Crypt_AllTests::suite());
+        //$suite->addTest(Zend_Crypt_AllTests::suite());
         return $suite;
     }
 }

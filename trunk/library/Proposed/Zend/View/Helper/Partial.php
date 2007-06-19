@@ -37,12 +37,14 @@ class Zend_View_Helper_Partial {
      */
     public function partial($name, $module = null, array $model = null)
     {
+        $viewModel = null;
         if (isset($module) && is_array($module) && !isset($model)) {
             $viewModel = $module;
+            $module = null;
         } elseif (isset($model)) {
             $viewModel = $model;
         }
-        $view = self::getFactory()->createInstance($module, $viewModel, $this->view);
+        $view = Zend_View_Abstract::getFactory()->createInstance($module, $viewModel, $this->view);
         return $view->render($name);
     }
 

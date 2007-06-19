@@ -100,8 +100,11 @@ class Zend_Crypt_DiffieHellman
      */
     public function generateKeys()
     {
-        $this->_verifyPrivateKeyExistsOrGenerate();
-        $this->_publicKey = $this->_math->powmod($this->_generator, $this->_privateKey, $this->_prime);
+        if (!$this->getPrivateNumber()) {
+            $this->_generatePrivateKey();
+        }
+        $publicKey = $this->_math->powmod($this->getGeneratorNumber(), $this->getPrivateNumber(), $this->getPrimeNumber());
+        return $this->_setPublicKey($publicKey);
     }
 
     /**
@@ -114,7 +117,7 @@ class Zend_Crypt_DiffieHellman
     {
         if (is_null($this->_publicKey)) {
             require_once 'Zend/Crypt/DiffieHellman/Exception.php';
-            throw new Zend_Crypt_DiffieHellman_Exception('invalid operation; a public key has not yet been generated using generateKeys()');
+            throw new Zend_Crypt_DiffieHellman_Exception('invalid operation; a public key has not yet been generated using Zend_Crypt_DiffieHellman::generateKeys()');
         }
         return $this->_publicKey;
     }
@@ -134,7 +137,7 @@ class Zend_Crypt_DiffieHellman
             require_once('Zend/Crypt/DiffieHellman/Exception.php');
             throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
         }
-        $secretKey = $this->_math->powmod($publicKey, $this->_privateKey, $this->_prime);
+        $secretKey = $this->_math->powmod($publicKey, $this->getPrivateNumber(), $this->getPrimeNumber());
         return $secretKey;
     }
     
@@ -212,10 +215,9 @@ class Zend_Crypt_DiffieHellman
     public function getPrivateNumber()
     {
         if (!isset($this->_privateKey)) {
-            require_once('Zend/Crypt/DiffieHellman/Exception.php');
-            throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
+            $this->_generatePrivateKey();
         }
-        return $this->_private;
+        return $this->_privateKey;
     }
 
     /**
@@ -238,14 +240,27 @@ class Zend_Crypt_DiffieHellman
      * generate one at random.
      *
      * @return string
+     * @access private
      */
-    private function _verifyPrivateKeyExistsOrGenerate()
+    private function _generatePrivateKey()
     {
-        if (isset($this->_privateKey)) {
-            return;
-        }
         $rand = $this->_math->rand($this->getGeneratorNumber(), $this->getPrimeNumber());
         $this->setPrivateNumber($rand);
+    }
+
+    /**
+     * Private setter for the public key which may optionally in the future
+     * validate the public key.
+     *
+     * @param string $key
+     * @return bool
+     * @access private
+     * @todo Implement optional public key validation (i.e. key is in range {1, p-1} where p is bitlength of Prime)
+     */
+    private function _setPublicKey($key)
+    {
+        $this->_publicKey = $key;
+        return true;
     }
 
     /**
@@ -253,10 +268,11 @@ class Zend_Crypt_DiffieHellman
      *
      * @param string $publicKey
      * @return bool
+     * @access private
      */
-    public function validatePublicKey($publicKey)
+    private function _validatePublicKey($publicKey)
     {
-        throw new Exception('not implemented');
+        return;
     }
 
 }

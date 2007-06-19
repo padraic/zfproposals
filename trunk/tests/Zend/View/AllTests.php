@@ -13,8 +13,6 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
-// error_reporting(E_ALL);
-
 require_once 'FactoryTest.php';
 require_once 'Helper/DeclareVarsTest.php';
 require_once 'Helper/FormCheckboxTest.php';
@@ -22,6 +20,7 @@ require_once 'Helper/FormLabelTest.php';
 require_once 'Helper/FormTextTest.php';
 require_once 'Helper/HtmlListTest.php';
 require_once 'Helper/PlaceholderTest.php';
+require_once 'Helper/PartialTest.php';
 
 class Zend_View_AllTests
 {
@@ -41,6 +40,7 @@ class Zend_View_AllTests
         $suite->addTestSuite('Zend_View_Helper_FormTextTest');
         $suite->addTestSuite('Zend_View_Helper_HtmlListTest');
         $suite->addTestSuite('Zend_View_Helper_PlaceholderTest');
+        $suite->addTestSuite('Zend_View_Helper_PartialTest');
 
         return $suite;
     }

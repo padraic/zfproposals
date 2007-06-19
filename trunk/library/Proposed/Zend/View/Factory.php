@@ -52,13 +52,16 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         }
     }
 
-    public function createInstance($module = 'default', array $model = null, Zend_View_Interface $parentView = null)
+    public function createInstance($module = null, array $model = null, Zend_View_Interface $parentView = null)
     {
         $view = new Zend_View;
 
+        if (is_null($module)) {
+            $module = 'default';
+        }
+
         if (!$this->_options) {
-            $basePath = $this->_getBasePath($module);
-            $view->addBasePath($basePath);
+            $basePath = $this->_getBasePath($module);            $view->addBasePath($basePath);
             if (!is_null($model)) {
                 $this->_assignModel($view, $model);
             }
@@ -185,11 +188,11 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
         foreach ($options as $key => $value)
         {
             switch ($key) {
-                case 'viewbasepathspec':
+                case 'viewBasePathSpec':
                     $property = '_' . $key;
                     $this->{$property} = (string) $value;
                     break;
-                case 'moduledir':
+                case 'moduleDirectory':
                     $property = '_' . $key;
                     $this->{$property} = rtrim($value, '\\/');
                     break;
@@ -225,7 +228,6 @@ class Zend_View_Factory implements Zend_View_Factory_Interface
             require_once 'Zend/View/Exception.php';
             throw new Zend_View_Exception('Factory cannot locate module directory');
         }
-        $moduleDir = dirname($moduleDir);
 
         foreach ($vars as $key => $value) {
             switch ($key) {
