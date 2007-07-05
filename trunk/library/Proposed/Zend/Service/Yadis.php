@@ -12,16 +12,15 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * This class forms part of a proposal for the Zend Framework. The attached
- * copyright will be transferred to Zend Technologies USA Inc. upon future
- * acceptance of that proposal:
+ * This class forms part of a proposal for the Zend Framework.
  *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
  *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2007 PÃ¡draic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 /** Zend_Service_Abstract */
@@ -49,12 +48,13 @@ require_once 'Zend/Uri.php';
  * rules and nuances required to implement the Yadis protocol. Where doubt
  * exists, refer to the Yadis Specification 1.0 at:
  *      http://yadis.org/papers/yadis-v1.0.pdf
+ * Departures from the specification should be regarded as bugs ;).
  *
  * @uses       Zend_Service_Abstract
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @author     Pádraic Brady (http://blog.astrumfutura.com)
+ * @author     PÃ¡draic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis extends Zend_Service_Abstract
@@ -126,7 +126,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     /**
      * Array of valid HTML Content-Types. Required since Yadis states agents
      * must parse a document if received as the first response and with an
-     * MIME type indicating HTML or XHTML. Listed in order of prioroty, with
+     * MIME type indicating HTML or XHTML. Listed in order of priority, with
      * HTML taking priority over XHTML.
      *
      * @link http://www.w3.org/International/articles/serving-xhtml/Overview.en.php
@@ -168,7 +168,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             $this->addNamespaces($namespaces);
         } elseif (isset($namespaces)) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; but array appears to be empty');
+            throw new Zend_Service_Yadis_Exception('Expected parameter $namespaces to be an array; but appears to be ' . gettype($namespaces));
         }
         if (isset($yadisId)) {
             $this->setYadisId($yadisId);
@@ -227,15 +227,13 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
          */
         if (strpos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
         {
-            
-            //throw new Exception('XRI support in progress but incomplete');
             require_once 'Zend/Service/Yadis/Xri.php';
             $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()
                     ->setNamespace($this->_namespace)
                     ->toUri($yadisId);
 
             $cid = Zend_Service_Yadis_Xri::getInstance()->getCanonicalId();
-            exit('here');
+            exit(__LINE__ .' '. __FILE__ . '\nNot implemented yet');
             return $this;
         }
 
@@ -339,7 +337,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
              * an XRD document. Each of these when detected would set the
              * xrdStatus flag to true.
              */
-            if (!$responseType == self::XRDS_CONTENT_TYPE && $xrdStatus == true) {
+            if (!$responseType == self::XRDS_CONTENT_TYPE && $xrdStatus == true) { // true or false???
                 require_once 'Zend/Service/Yadis/Exception.php';
                 throw new Zend_Service_Yadis_Exception('Yadis protocol could not locate a valid XRD document');
             }
@@ -348,7 +346,8 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
              * The Yadis Spec 1.0 specifies that we must use a valid response
              * header in preference to other responses. So even if we receive
              * an XRDS Content-Type, if it also includes an X-XRDS-Location
-             * header we must request the URI and ignore the response body.
+             * header we must request the Location URI and ignore the response
+             * body.
              */
             switch($responseType) {
                 case self::XRDS_LOCATION_HEADER:
@@ -369,7 +368,6 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         }
 
         try {
-            var_dump($xrdsDocument);
             $serviceList = $this->_parseXrds($xrdsDocument);
         } catch (Zend_Exception $e) {
             require_once 'Zend/Service/Yadis/Exception.php';
@@ -388,8 +386,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      */
     public function getUserResponse()
     {
-        if ($this->_metaHttpEquivResponse instanceof Zend_Http_Response)
-        {
+        if ($this->_metaHttpEquivResponse instanceof Zend_Http_Response) {
             return $this->_metaHttpEquivResponse;
         }
         return null;
@@ -427,6 +424,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     protected function _get($url)
     {
         $client = self::getHttpClient();
+        // reset headers and params - todo
         $client->setUri($url);
         $client->setMethod(Zend_Http_Client::GET);
         /**
@@ -460,7 +458,8 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         if (empty($location)) {
             return false;
         } elseif (!Zend_Uri::check($location)) {
-            throw new Zend_Service_Yadis_Exception('Invalid URI: '
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Invalid URI found during Discovery for location of XRDS document:'
                 . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         $this->_xrdsLocationHeaderUrl = $location;
@@ -516,7 +515,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             return false;
         } elseif (!Zend_Uri::check($location)) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('The URI parsed from the HTML document appears to be invalid: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
+            throw new Zend_Service_Yadis_Exception('The URI parsed from the HTML Alias document appears to be invalid: ' . htmlentities($location, ENT_QUOTES, 'utf-8'));
         }
         /**
          * Should now contain the content value of the http-equiv type pointing

@@ -199,7 +199,7 @@ class Zend_Service_Yadis_Xrds
         sort($priorities, SORT_NUMERIC);
         $unflattened = array();
         foreach($priorities as $priority) {
-            $unflattened[$priority][] = $unsorted[$priority];
+            $unflattened[$priority] = $unsorted[$priority];
         }
         /**
          * Flatten the priority arrays to a one-dimensional array after

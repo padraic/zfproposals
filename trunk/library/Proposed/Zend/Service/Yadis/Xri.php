@@ -201,9 +201,16 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
         }
         /**
          * Get rid of the xri:// prefix before assembling the URI
+         * including any IP or DNS wildcards
          */
         if (strpos($this->_xri, 'xri://') === 0) {
-            $iname = substr($xri, 6);
+            if (strpos($this->_xri, 'xri://$ip*') === 0) {
+                $iname = substr($xri, 10);
+            } elseif (strpos($this->_xri, 'xri://$dns*') === 0) {
+                $iname = substr($xri, 11);
+            } else {
+                $iname = substr($xri, 6);
+            }
         } else {
             $iname = $xri;
         }
@@ -251,7 +258,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
             return false;
         }
         $this->_canonicalId = $canonicalIds[count($canonicalIds) - 1];
-        var_dump($canonicalIds); exit;
+        var_dump($canonicalIds . __FILE__.__LINE__); exit;
         return $this->_canonicalId;
     }
 
