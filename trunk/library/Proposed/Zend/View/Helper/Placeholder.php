@@ -56,52 +56,78 @@ class Zend_View_Helper_Placeholder {
     /**
      * Check for the existence of the named Placeholder key
      *
-     * @param string $index
+     * @param string $key
+     * @param mixed $index
      * @return bool
      */
-    public function has($index)
+    public function has($key, $index = null)
     {
-        return isset($this->_registry->$index);
+        if (!is_null($index)) {
+            if (isset($this->_registry->$key)) {
+                $value = $this->get($key, $index);
+                return !empty($value);
+            }
+        }
+        return isset($this->_registry->$key);
     }
 
     /**
      * Append a value string to an existing Placeholder key
+     * without any overwriting or index value
      *
-     * @param string $index
+     * @param string $key
      * @param mixed $value
      * @return void
      */
-    public function append($index, $value)
+    public function append($key, $value)
     {
-        if ($this->has($index)) {
-            $this->_registry->$index = $this->_registry->$index . $value;
+        if ($this->has($key)) {
+            $this->_registry->$key[] = $value;
             return;
         }
-        $this->_registry->$index = $value;
+        $this->_registry->$key = array($value);
     }
 
     /**
      * Set the value for a Placeholder key. Overwrites existing value.
      *
-     * @param string $index
+     * @param string $key
      * @param mixed $value
+     * @param mixed $index
      * @return void
      */
-    public function set($index, $value)
+    public function set($key, $value, $index = null)
     {
-        $this->_registry->$index = $value;
+        if ($this->has($key)) {
+            if (!is_null($index)) {
+                $this->_registry->$key[$index] = $value;
+            } else {
+                $this->_registry->$key[] = $value;
+            }
+            return;
+        }
+        $this->_registry->$key = array();
+        if (!is_null($index)) {
+            $this->_registry->$key[$index] = $value;
+        } else {
+            $this->_registry->$key[] = $value;
+        }
     }
 
     /**
      * Return the value of a Placeholder key
      *
-     * @param string $index
+     * @param string $key
+     * @param mixed $index
      * @return mixed
      */
-    public function get($index)
+    public function get($key, $index = null)
     {
-        if ($this->has($index)) {
-            return $this->_registry->$index;
+        if ($this->has($key, $index)) {
+            if (!is_null($index)) {
+                return $this->_toString($this->_registry->$key[$index]);
+            }
+            return $this->_toString($this->_registry->$key);
         }
         return null;
     }
@@ -109,12 +135,44 @@ class Zend_View_Helper_Placeholder {
     /**
      * Unset the value of a Placeholder key
      *
-     * @param string $index
+     * @param string $key
+     * @param mixed $index
+     * @param string $value
      * @return void
      */
-    public function remove($index)
+    public function remove($key, $index = null, $value = null)
     {
-        unset($this->_registry->$index);
+        if (!is_null($index)) {
+            unset($this->_registry->$key[$index]);
+            return;
+        } elseif (!is_null($value)) {
+            foreach($this->_registry->$key as $k => $v)
+                if ($v == $value) {
+                    unset($this->_registry->$key[$k]);
+                }
+            }
+            return;
+        }
+        unset($this->_registry->$key);
+    }
+
+    /**
+     * Flatten the array of indexed values for output
+     *
+     * @param array $array
+     * @return string
+     */
+    protected function _toString($array) {
+        if (!is_array($array)) {
+            return $array;
+        }
+        $count = count($array);
+        if ($count == 0 || $count == 1) {
+            return (string) $array;
+        }
+        $unsortedArray = $array;
+        ksort($unsortedArray);
+        return implode("\n", $unsortedArray);
     }
 
 }
