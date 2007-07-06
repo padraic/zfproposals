@@ -16,6 +16,7 @@
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2007 Pádraic Brady
+ * @version    $Id: Placeholder.php 82 2007-07-06 21:27:46Z padraic $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
