@@ -21,7 +21,7 @@
  */
 
 /**
- * Helper to insert or append <style> tags to the ZEND_HEAD Placeholder
+ * Helper to add a <title> tag value to a head->title Placeholder
  *
  * @category   Zend
  * @package    Zend_View
