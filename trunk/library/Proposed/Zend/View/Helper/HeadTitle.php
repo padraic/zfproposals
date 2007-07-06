@@ -47,6 +47,11 @@ class Zend_View_Helper_HeadTitle
     protected $_placeholder = null;
 
     /**
+     * Constants
+     */
+    const HEADTITLE_NAMESPACE = 'ZEND_HEAD_TITLE';
+
+    /**
      * Constructor; assigns a Zend_View_Helper_Placeholder object.
      *
      */
@@ -77,17 +82,17 @@ class Zend_View_Helper_HeadTitle
     }
 
     /**
-     * Check for the existence of the ZEND_TITLE Placeholder key
+     * Check for the existence of the self::HEADTITLE_NAMESPACE Placeholder key
      *
      * @return bool
      */
     public function has()
     {
-        return $this->_placeholder->has('ZEND_TITLE');
+        return $this->_placeholder->has(self::HEADTITLE_NAMESPACE);
     }
 
     /**
-     * Set the value for a Placeholder ZEND_TITLE key.
+     * Set the value for a Placeholder self::HEADTITLE_NAMESPACE key.
      * Overwrites existing value.
      *
      * @param mixed $value
@@ -95,31 +100,31 @@ class Zend_View_Helper_HeadTitle
      */
     public function set($value)
     {
-        $this->_placeholder->set('ZEND_TITLE', $value);
+        $this->_placeholder->set(self::HEADTITLE_NAMESPACE, $value);
     }
 
     /**
-     * Return the value of a Placeholder ZEND_TITLE key
+     * Return the value of a Placeholder self::HEADTITLE_NAMESPACE key
      *
      * @return mixed
      */
     public function get()
     {
-        if ($this->_placeholder->has('ZEND_TITLE')) {
-            return $this->_placeholder->get('ZEND_TITLE')
+        if ($this->_placeholder->has(self::HEADTITLE_NAMESPACE)) {
+            return $this->_placeholder->get(self::HEADTITLE_NAMESPACE)
         }
         return null;
     }
 
     /**
-     * Unset the value of a Placeholder ZEND_TITLE key
+     * Unset the value of a Placeholder self::HEADTITLE_NAMESPACE key
      *
      * @param string $index
      * @return void
      */
     public function remove()
     {
-        $this->_placeholder->remove('ZEND_TITLE');
+        $this->_placeholder->remove(self::HEADTITLE_NAMESPACE);
     }
 
 }
