@@ -18,7 +18,7 @@ require_once 'Zend/Registry.php';
  * is just a proxy to a specific centralised Registry. It's called Placeholder to
  * make its typical usage obvious, but can be used just as easily for non-Placeholder
  * things. That said, the support for this is only guaranteed to effect Layouts.
- * 
+ *
  * @package    Zend_View
  * @subpackage Helpers
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
@@ -32,7 +32,7 @@ class Zend_View_Helper_Placeholder {
      * @var Zend_Registry
      */
     protected $_registry = null;
-    
+
     /**
      * Constructor; instantiate the object with a Zend_Registry object property
      *
@@ -41,6 +41,7 @@ class Zend_View_Helper_Placeholder {
     public function __construct()
     {
         $this->_registry = new Zend_Registry;
+        $this->_registry->ZEND_HEAD = array();
     }
 
     /**
@@ -52,7 +53,7 @@ class Zend_View_Helper_Placeholder {
     {
         return $this;
     }
-    
+
     /**
      * Check for the existence of the named Placeholder key
      *
@@ -116,5 +117,5 @@ class Zend_View_Helper_Placeholder {
     {
         unset($this->_registry->$index);
     }
-    
+
 }

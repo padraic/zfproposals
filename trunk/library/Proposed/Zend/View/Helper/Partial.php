@@ -22,6 +22,7 @@ class Zend_View_Helper_Partial {
     
     /**
      * Instance of parent Zend_View object
+     *
      * @var Zend_View_Abstract
      */
     public $view = null;
