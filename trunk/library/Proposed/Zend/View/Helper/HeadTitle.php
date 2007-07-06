@@ -60,12 +60,16 @@ class Zend_View_Helper_HeadTitle
     }
 
     /**
-     * Return self for further in-object calls
+     * Set the Head <title> value if a parameter and
+     * return self for further in-object call
      *
      * @return Zend_View_Helper_HeadTitle
      */
-    public function headTitle()
+    public function headTitle($value = null)
     {
+        if (!is_null($value)) {
+            $this->set($value);
+        }
         return $this;
     }
 
