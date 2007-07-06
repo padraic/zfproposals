@@ -52,9 +52,6 @@ class Zend_View_Helper_HeadStyle
      */
     public function __construct() {
         $this->_placeholder = $this->view->placeholder();
-        if (!isset($this->_placeholder->ZEND_HEAD->['ZEND_STYLE'])) {
-            $this->_placeholder->ZEND_HEAD->['ZEND_STYLE'] = array();
-        }
     }
 
     /**

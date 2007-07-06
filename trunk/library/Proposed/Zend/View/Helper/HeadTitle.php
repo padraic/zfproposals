@@ -52,9 +52,6 @@ class Zend_View_Helper_HeadTitle
      */
     public function __construct() {
         $this->_placeholder = $this->view->placeholder();
-        if (!isset($this->_placeholder->ZEND_HEAD->['ZEND_TITLE'])) {
-            $this->_placeholder->ZEND_HEAD->['ZEND_TITLE'] = array();
-        }
     }
 
     /**
@@ -79,68 +76,50 @@ class Zend_View_Helper_HeadTitle
         return $this;
     }
 
-        /**
-     * Check for the existence of the named Placeholder key
+    /**
+     * Check for the existence of the ZEND_TITLE Placeholder key
      *
-     * @param string $index
      * @return bool
      */
-    public function has($index)
+    public function has()
     {
-        return isset($this->_registry->$index);
+        return $this->_placeholder->has('ZEND_TITLE');
     }
 
     /**
-     * Append a value string to an existing Placeholder key
+     * Set the value for a Placeholder ZEND_TITLE key.
+     * Overwrites existing value.
      *
-     * @param string $index
      * @param mixed $value
      * @return void
      */
-    public function append($index, $value)
+    public function set($value)
     {
-        if ($this->has($index)) {
-            $this->_registry->$index = $this->_registry->$index . $value;
-            return;
-        }
-        $this->_registry->$index = $value;
+        $this->_placeholder->set('ZEND_TITLE', $value);
     }
 
     /**
-     * Set the value for a Placeholder key. Overwrites existing value.
+     * Return the value of a Placeholder ZEND_TITLE key
      *
-     * @param string $index
-     * @param mixed $value
-     * @return void
-     */
-    public function set($index, $value)
-    {
-        $this->_registry->$index = $value;
-    }
-
-    /**
-     * Return the value of a Placeholder key
-     *
-     * @param string $index
      * @return mixed
      */
-    public function get($index)
+    public function get()
     {
-        if ($this->has($index)) {
-            return $this->_registry->$index;
+        if ($this->_placeholder->has('ZEND_TITLE')) {
+            return $this->_placeholder->get('ZEND_TITLE')
         }
         return null;
     }
 
     /**
-     * Unset the value of a Placeholder key
+     * Unset the value of a Placeholder ZEND_TITLE key
      *
      * @param string $index
      * @return void
      */
     public function remove()
     {
-        unset($this->_registry->ZEND_HEAD->ZEND_TITLE);
+        $this->_placeholder->remove('ZEND_TITLE');
     }
 
 }

@@ -41,7 +41,6 @@ class Zend_View_Helper_Placeholder {
     public function __construct()
     {
         $this->_registry = new Zend_Registry;
-        $this->_registry->ZEND_HEAD = array();
     }
 
     /**
