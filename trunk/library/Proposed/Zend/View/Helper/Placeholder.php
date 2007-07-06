@@ -31,7 +31,7 @@ class Zend_View_Helper_Placeholder {
      * templates.
      * @var Zend_Registry
      */
-    protected $_registry = null;
+    protected static $_registry = null;
 
     /**
      * Constructor; instantiate the object with a Zend_Registry object property
@@ -40,7 +40,9 @@ class Zend_View_Helper_Placeholder {
      */
     public function __construct()
     {
-        $this->_registry = new Zend_Registry;
+        if (self::$_registry == null) {
+            self::$_registry = new Zend_Registry;
+        }
     }
 
     /**
@@ -63,12 +65,12 @@ class Zend_View_Helper_Placeholder {
     public function has($key, $index = null)
     {
         if (!is_null($index)) {
-            if (isset($this->_registry->$key)) {
+            if (isset(self::$_registry->$key)) {
                 $value = $this->get($key, $index);
                 return !empty($value);
             }
         }
-        return isset($this->_registry->$key);
+        return isset(self::$_registry->$key);
     }
 
     /**
@@ -82,10 +84,10 @@ class Zend_View_Helper_Placeholder {
     public function append($key, $value)
     {
         if ($this->has($key)) {
-            $this->_registry->$key[] = $value;
+            self::$_registry->$key[] = $value;
             return;
         }
-        $this->_registry->$key = array($value);
+        self::$_registry->$key = array($value);
     }
 
     /**
@@ -100,17 +102,17 @@ class Zend_View_Helper_Placeholder {
     {
         if ($this->has($key)) {
             if (!is_null($index)) {
-                $this->_registry->$key[$index] = $value;
+                self::$_registry->$key[$index] = $value;
             } else {
-                $this->_registry->$key[] = $value;
+                self::$_registry->$key[] = $value;
             }
             return;
         }
-        $this->_registry->$key = array();
+        self::$_registry->$key = array();
         if (!is_null($index)) {
-            $this->_registry->$key[$index] = $value;
+            self::$_registry->$key[$index] = $value;
         } else {
-            $this->_registry->$key[] = $value;
+            self::$_registry->$key[] = $value;
         }
     }
 
@@ -125,9 +127,9 @@ class Zend_View_Helper_Placeholder {
     {
         if ($this->has($key, $index)) {
             if (!is_null($index)) {
-                return $this->_toString($this->_registry->$key[$index]);
+                return $this->_toString(self::$_registry->$key[$index]);
             }
-            return $this->_toString($this->_registry->$key);
+            return $this->_toString(self::$_registry->$key);
         }
         return null;
     }
@@ -143,22 +145,24 @@ class Zend_View_Helper_Placeholder {
     public function remove($key, $index = null, $value = null)
     {
         if (!is_null($index)) {
-            unset($this->_registry->$key[$index]);
+            unset(self::$_registry->$key[$index]);
             return;
         } elseif (!is_null($value)) {
-            foreach($this->_registry->$key as $k => $v)
+            foreach(self::$_registry->$key as $k => $v)
                 if ($v == $value) {
-                    unset($this->_registry->$key[$k]);
+                    unset(self::$_registry->$key[$k]);
                 }
             }
             return;
         }
-        unset($this->_registry->$key);
+        unset(self::$_registry->$key);
     }
 
     /**
-     * Flatten the array of indexed values for output
+     * Flatten the array of indexed values for output and return as
+     * a string after the value array has been sorted.
      *
+     * @todo determine a reasonable sorting strategy for implementation
      * @param array $array
      * @return string
      */
