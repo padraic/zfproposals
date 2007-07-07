@@ -33,6 +33,8 @@ class Zend_View_Helper_Placeholder {
      */
     protected static $_registry = null;
 
+    protected $_callback = null;
+
     /**
      * Constructor; instantiate the object with a Zend_Registry object property
      *
@@ -46,9 +48,9 @@ class Zend_View_Helper_Placeholder {
     }
 
     /**
-     * Return the current instance of Zend_Registry
+     * Return the current object
      *
-     * @return Zend_Registry
+     * @return Zend_View_Helper_Placeholder
      */
     public function placeholder()
     {
@@ -91,7 +93,14 @@ class Zend_View_Helper_Placeholder {
     }
 
     /**
-     * Set the value for a Placeholder key. Overwrites existing value.
+     * Sets the value for a Placeholder key, or sets the value for a specific index
+     * on this key (e.g. to set a rendering order). If an index is not defined, it
+     * is assumed a single value per key is to be set and any pre-existing array
+     * will be replaced with this single value.
+     *
+     * If you want to set multiple values where ordering isn't necessary, use the
+     * Zend_View_Helper_Placeholder::append() method instead. This will append
+     * values using the default array indexation.
      *
      * @param string $key
      * @param mixed $value
@@ -104,7 +113,7 @@ class Zend_View_Helper_Placeholder {
             if (!is_null($index)) {
                 self::$_registry->$key[$index] = $value;
             } else {
-                self::$_registry->$key[] = $value;
+                self::$_registry->$key = array($value);
             }
             return;
         }
@@ -112,7 +121,7 @@ class Zend_View_Helper_Placeholder {
         if (!is_null($index)) {
             self::$_registry->$key[$index] = $value;
         } else {
-            self::$_registry->$key[] = $value;
+            self::$_registry->$key = array($value);
         }
     }
 
@@ -159,6 +168,32 @@ class Zend_View_Helper_Placeholder {
     }
 
     /**
+     * Register a callback function which is passed the Placeholder array
+     * for a given key, along with the key name. This callback function may
+     * then proceed to order the array in such a way as to determine the
+     * sorting order by which element values are rendered into the Placeholder
+     * injection point in any calling template.
+     *
+     * @param string $function
+     * @param object $object
+     * @return void
+     */
+    public function registerCallback($function, $object = null) {
+        if (isset($object) && is_object($object)) {
+            if (!method_exists($function, $object)) {
+                throw new Zend_View_Exception();
+            }
+            $this->_callback = array($object, $function);
+            return;
+        }
+        if (function_exists($function)) {
+            $this->_callback = $function
+        } else {
+            throw new Zend_View_Exception();
+        }
+    }
+
+    /**
      * Flatten the array of indexed values for output and return as
      * a string after the value array has been sorted.
      *
@@ -166,7 +201,7 @@ class Zend_View_Helper_Placeholder {
      * @param array $array
      * @return string
      */
-    protected function _toString($array) {
+    protected function _toString($array, $key = null) {
         if (!is_array($array)) {
             return $array;
         }
@@ -175,7 +210,11 @@ class Zend_View_Helper_Placeholder {
             return (string) $array;
         }
         $unsortedArray = $array;
-        ksort($unsortedArray);
+        if (isset($this->_callback)) {
+            $unsortedArray = call_user_func_array($this->_callback, array($unsortedArray, $key));
+        } else {
+            ksort($unsortedArray);
+        }
         return implode("\n", $unsortedArray);
     }
 
