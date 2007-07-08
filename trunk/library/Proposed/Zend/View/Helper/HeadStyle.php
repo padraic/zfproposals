@@ -21,7 +21,7 @@
  */
 
 /**
- * Helper to insert or append <style> tags to the ZEND_HEAD Placeholder
+ * Helper to add a <style> tag value to a head->style Placeholder
  *
  * @category   Zend
  * @package    Zend_View
@@ -37,7 +37,7 @@ class Zend_View_Helper_HeadStyle
      *
      * @var Zend_View_Abstract
      */
-    public $view = null
+    public $view = null;
 
     /**
      * The default Zend_View_Helper_Placeholder instance
@@ -47,20 +47,24 @@ class Zend_View_Helper_HeadStyle
     protected $_placeholder = null;
 
     /**
-     * Constructor; assigns a Zend_View_Helper_Placeholder object.
-     *
+     * Constants
      */
-    public function __construct() {
-        $this->_placeholder = $this->view->placeholder();
-    }
+    const HEADSTYLE_NAMESPACE = 'ZEND_HEAD_STYLE';
 
     /**
-     * Return self for further in-object calls
+     * Append a Head <meta> value if a parameter and
+     * return self for further in-object calls
      *
      * @return Zend_View_Helper_HeadStyle
      */
-    public function headStyle()
+    public function headStyle($value = null)
     {
+        if (is_null($this->_placeholder)) {
+            $this->_placeholder = $this->view->placeholder();
+        }
+        if (!is_null($value)) {
+            $this->append($value);
+        }
         return $this;
     }
 
@@ -74,6 +78,57 @@ class Zend_View_Helper_HeadStyle
     {
         $this->view = $view;
         return $this;
+    }
+
+    /**
+     * Check for the existence of the self::HEADSTYLE_NAMESPACE Placeholder key
+     *
+     * @return bool
+     */
+    public function has($index = null, $value = null)
+    {
+        return $this->_placeholder->has(self::HEADSTYLE_NAMESPACE, $index, $value);
+    }
+
+    /**
+     * Append a value for a Placeholder self::HEADSTYLE_NAMESPACE key.
+     *
+     * @param mixed $value
+     * @return void
+     */
+    public function append($value)
+    {
+        $this->_placeholder->append(self::HEADSTYLE_NAMESPACE, $value);
+    }
+
+    /**
+     * Return the value of a Placeholder self::HEADSTYLE_NAMESPACE key
+     *
+     * @return mixed
+     */
+    public function get($index = null)
+    {
+        return $this->_placeholder->get(self::HEADSTYLE_NAMESPACE, $index);
+    }
+
+    /**
+     * Unset the value of a Placeholder self::HEADSTYLE_NAMESPACE key
+     *
+     * @param string $index
+     * @return void
+     */
+    public function remove($index = null, $value = null)
+    {
+        $this->_placeholder->remove(self::HEADSTYLE_NAMESPACE, $index, $value);
+    }
+
+    /**
+     * toString function for this class
+     *
+     * @return string
+     */
+    public function __toString() {
+        return $this->get();
     }
 
 }
