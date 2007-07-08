@@ -10,12 +10,8 @@
  * @license    New BSD
  */
 
-/** Zend_Registry */
-require_once 'Zend/Registry.php';
-
 /**
- * Helper for passing data between otherwise segregated Views. In essence this
- * is just a proxy to a specific centralised Registry. It's called Placeholder to
+ * Helper for passing data between otherwise segregated Views. It's called Placeholder to
  * make its typical usage obvious, but can be used just as easily for non-Placeholder
  * things. That said, the support for this is only guaranteed to effect Layouts.
  *
@@ -27,25 +23,19 @@ require_once 'Zend/Registry.php';
 class Zend_View_Helper_Placeholder {
 
     /**
-     * Registry to store Placeholder values for later queries from layouts or
+     * Registry array to store Placeholder values for later queries from layouts or
      * templates.
-     * @var Zend_Registry
+     *
+     * @var array
      */
-    protected static $_registry = null;
-
-    protected $_callback = null;
+    protected static $_registry = array();
 
     /**
-     * Constructor; instantiate the object with a Zend_Registry object property
+     * Potential function for custom ordering of Placeholder key arrays prior to rendering
      *
-     * @return void
+     * @var mixed
      */
-    public function __construct()
-    {
-        if (self::$_registry == null) {
-            self::$_registry = new Zend_Registry;
-        }
-    }
+    protected $_callback = null;
 
     /**
      * Return the current object
@@ -64,15 +54,19 @@ class Zend_View_Helper_Placeholder {
      * @param mixed $index
      * @return bool
      */
-    public function has($key, $index = null)
+    public function has($key, $index = null, $value = null)
     {
         if (!is_null($index)) {
-            if (isset(self::$_registry->$key)) {
-                $value = $this->get($key, $index);
-                return !empty($value);
+            return isset(self::$_registry[$key][$index]);
+        } elseif (!is_null($value)) {
+            foreach(self::$_registry[$key] as $k => $v) {
+                if ($v == $value) {
+                    return true;
+                }
             }
+            return false;
         }
-        return isset(self::$_registry->$key);
+        return isset(self::$_registry[$key]);
     }
 
     /**
@@ -86,10 +80,10 @@ class Zend_View_Helper_Placeholder {
     public function append($key, $value)
     {
         if ($this->has($key)) {
-            self::$_registry->$key[] = $value;
+            self::$_registry[$key][] = $value;
             return;
         }
-        self::$_registry->$key = array($value);
+        self::$_registry[$key] = array($value);
     }
 
     /**
@@ -109,19 +103,13 @@ class Zend_View_Helper_Placeholder {
      */
     public function set($key, $value, $index = null)
     {
-        if ($this->has($key)) {
-            if (!is_null($index)) {
-                self::$_registry->$key[$index] = $value;
-            } else {
-                self::$_registry->$key = array($value);
-            }
-            return;
+        if (!$this->has($key)) {
+            self::$_registry[$key] = array();
         }
-        self::$_registry->$key = array();
         if (!is_null($index)) {
-            self::$_registry->$key[$index] = $value;
+            self::$_registry[$key][$index] = $value;
         } else {
-            self::$_registry->$key = array($value);
+            self::$_registry[$key] = array($value);
         }
     }
 
@@ -134,11 +122,14 @@ class Zend_View_Helper_Placeholder {
      */
     public function get($key, $index = null)
     {
-        if ($this->has($key, $index)) {
+        if ($this->has($key)) {
             if (!is_null($index)) {
-                return $this->_toString(self::$_registry->$key[$index]);
+                if (!$this->has($key, $index)) {
+                    return null;
+                }
+                return $this->_toString(self::$_registry[$key][$index]);
             }
-            return $this->_toString(self::$_registry->$key);
+            return $this->_toString(self::$_registry[$key]);
         }
         return null;
     }
@@ -154,17 +145,18 @@ class Zend_View_Helper_Placeholder {
     public function remove($key, $index = null, $value = null)
     {
         if (!is_null($index)) {
-            unset(self::$_registry->$key[$index]);
+            unset(self::$_registry[$key][$index]);
             return;
         } elseif (!is_null($value)) {
-            foreach(self::$_registry->$key as $k => $v)
+            foreach(self::$_registry[$key] as $k => $v) {
                 if ($v == $value) {
-                    unset(self::$_registry->$key[$k]);
+                    unset(self::$_registry[$key][$k]);
+                    break;
                 }
             }
             return;
         }
-        unset(self::$_registry->$key);
+        unset(self::$_registry[$key]);
     }
 
     /**
@@ -187,7 +179,7 @@ class Zend_View_Helper_Placeholder {
             return;
         }
         if (function_exists($function)) {
-            $this->_callback = $function
+            $this->_callback = $function;
         } else {
             throw new Zend_View_Exception();
         }
@@ -207,7 +199,7 @@ class Zend_View_Helper_Placeholder {
         }
         $count = count($array);
         if ($count == 0 || $count == 1) {
-            return (string) $array;
+            return implode('',$array);
         }
         $unsortedArray = $array;
         if (isset($this->_callback)) {

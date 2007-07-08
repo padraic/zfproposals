@@ -21,6 +21,8 @@ require_once 'Helper/FormTextTest.php';
 require_once 'Helper/HtmlListTest.php';
 require_once 'Helper/PlaceholderTest.php';
 require_once 'Helper/PartialTest.php';
+require_once 'Helper/HeadTitleTest.php';
+require_once 'Helper/HeadMetaTest.php';
 
 class Zend_View_AllTests
 {
@@ -41,6 +43,8 @@ class Zend_View_AllTests
         $suite->addTestSuite('Zend_View_Helper_HtmlListTest');
         $suite->addTestSuite('Zend_View_Helper_PlaceholderTest');
         $suite->addTestSuite('Zend_View_Helper_PartialTest');
+        $suite->addTestSuite('Zend_View_Helper_HeadTitleTest');
+        $suite->addTestSuite('Zend_View_Helper_HeadMetaTest');
 
         return $suite;
     }

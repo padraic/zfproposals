@@ -46,18 +46,18 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     {
         return str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
     }
-    
-    
+
+
 	/**
 	 * Tests that the default helper path is properly initialized
 	 * and the directory is readable
 	 */
 	public function testDefaultHelperPath()
-	{	
+	{
 		$this->_testDefaultPath('helper');
 	}
 
-	
+
 	/**
 	 * Tests that the default filter path is properly initialized
 	 * and the directory is readable
@@ -76,8 +76,8 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     {
     	$this->_testAddPath('script');
     }
-    
-    
+
+
 	/**
 	 * Tests that helper paths are added, properly ordered, and that
 	 * directory separators are handled correctly.
@@ -86,8 +86,8 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     {
     	$this->_testAddPath('helper');
     }
-    
-    
+
+
 	/**
 	 * Tests that filter paths are added, properly ordered, and that
 	 * directory separators are handled correctly.
@@ -96,22 +96,22 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     {
     	$this->_testAddPath('filter');
     }
-    
+
 
 	/**
 	 * Tests that the (script|helper|filter) path array is properly
 	 * initialized after instantiation.
-	 * 
+	 *
 	 * @param string  $pathType         one of "script", "helper", or "filter".
 	 * @param boolean $testReadability  check if the path is readable?
 	 */
     protected function _testDefaultPath($pathType, $testReadability = true)
     {
     	$view = new Zend_View();
-    	
+
 		$reflector = $view->getAllPaths();
         $paths     = $reflector[$pathType];
-			
+
 		// test default helper path
 		$this->assertType('array', $paths);
         if ('script' == $pathType) {
@@ -125,16 +125,16 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
 
             if ($testReadability) {
                 $this->assertTrue(is_dir($item['dir']));
-                $this->assertTrue(is_readable($item['dir']));	    	
+                $this->assertTrue(is_readable($item['dir']));
             }
         }
     }
-        
-    
+
+
     /**
      * Tests (script|helper|filter) paths can be added, that they are added
-     * in the proper order, and that directory separators are properly handled. 
-     * 
+     * in the proper order, and that directory separators are properly handled.
+     *
      * @param string $pathType one of "script", "helper", or "filter".
      */
     protected function _testAddPath($pathType)
@@ -143,7 +143,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $prefix = 'Zend_View_' . ucfirst($pathType) . '_';
 
     	// introspect default paths and build expected results.
-		$reflector     = $view->getAllPaths(); 
+		$reflector     = $view->getAllPaths();
 		$expectedPaths = $reflector[$pathType];
 
         if ('script' == $pathType) {
@@ -155,21 +155,21 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
             array_unshift($expectedPaths, array('prefix' => $prefix, 'dir' => 'bar' . DIRECTORY_SEPARATOR));
             array_unshift($expectedPaths, array('prefix' => $prefix, 'dir' => 'foo' . DIRECTORY_SEPARATOR));
         }
-    	
+
     	// add paths
     	$func = 'add' . ucfirst($pathType) . 'Path';
 		$view->$func('baz');    // no separator
-		$view->$func('bar\\');  // windows 
-		$view->$func('foo/');   // unix		
-		
+		$view->$func('bar\\');  // windows
+		$view->$func('foo/');   // unix
+
     	// introspect script paths after adding two new paths
-		$reflector   = $view->getAllPaths(); 
+		$reflector   = $view->getAllPaths();
 		$actualPaths = $reflector[$pathType];
 
         $this->assertSame($expectedPaths, $actualPaths);
     }
 
-    
+
 	/**
 	 * Tests that the Zend_View environment is clean of any instance variables
 	 */
@@ -179,7 +179,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     	$this->assertSame(array(), get_object_vars($view));
     }
 
-    
+
     /**
      * Tests that isset() and empty() work correctly.  This is a common problem
      * because __isset() was not supported until PHP 5.1.
@@ -187,26 +187,26 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     public function testIssetEmpty()
     {
     	$view = new Zend_View();
-		$this->assertFalse(isset($view->foo));    	
+		$this->assertFalse(isset($view->foo));
 		$this->assertTrue(empty($view->foo));
-		
+
 		$view->foo = 'bar';
 		$this->assertTrue(isset($view->foo));
 		$this->assertFalse(empty($view->foo));
-    }    
-    
-    
+    }
+
+
     /**
-     * Tests that a help can be loaded from the search path 
+     * Tests that a help can be loaded from the search path
      *
      */
     public function testLoadHelper()
     {
 		$view = new Zend_View();
-		
+
 		$view->setHelperPath(array(dirname(__FILE__) . '/View/_stubs/HelperDir1',
 								   dirname(__FILE__) . '/View/_stubs/HelperDir2'));
-								   
+
 
 		$this->assertEquals('foo', $view->stub1());
 		$this->assertEquals('bar', $view->stub2());
@@ -216,17 +216,17 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
 
 		// verify that object handle of a stub was cache by calling it again
 		// without its path in the helper search paths
-		$this->assertEquals( 'foo', $view->stub1() );	
+		$this->assertEquals( 'foo', $view->stub1() );
     }
-    
-    
+
+
     /**
      * Tests that calling a nonexistant helper file throws the expected exception
      */
     public function testLoadHelperNonexistantFile()
     {
     	$view = new Zend_View();
-    	
+
     	try {
 	    	$view->nonexistantHelper();
     	} catch (Zend_View_Exception $e) {
@@ -235,7 +235,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     	}
     }
 
-    
+
     /**
      * Tests that calling a helper whose file exists but class is not found within
      * throws the expected exception
@@ -243,37 +243,37 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     public function testLoadHelperNonexistantClass()
     {
     	$view = new Zend_View();
-    	
+
 		$view->setHelperPath(array(dirname(__FILE__) . '/View/_stubs/HelperDir1'));
 
-		
+
 		try {
-			// attempt to load the helper StubEmpty, whose file exists but 
+			// attempt to load the helper StubEmpty, whose file exists but
 			// does not contain the expected class within
-			$view->stubEmpty();	
+			$view->stubEmpty();
 		} catch (Zend_View_Exception $e) {
     		$this->assertRegexp("/['_a-z]+ not found in path/i", $e->getMessage());
 		}
     }
-    
-    
-    
+
+
+
     /**
      * Tests that render() can render a template.
      */
     public function testRender()
     {
     	$view = new Zend_View();
-    	
+
     	$view->setScriptPath(dirname(__FILE__) . '/View/_templates');
-    	
+
     	$view->bar = 'bar';
-    	
+
     	$this->assertEquals("foo bar baz\n", $view->render('test.phtml') );
     }
-    
+
     /**
-     * Tests that render() works when called within a template, and that 
+     * Tests that render() works when called within a template, and that
      * protected members are not available
      */
     public function testRenderSubTemplates()
@@ -290,9 +290,9 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $this->assertContains('This text should not be displayed', $log);
         $this->assertNotContains('testSubTemplate.phtml', $log);
     }
-    
+
     /**
-     * Tests that array properties may be modified after being set (see [ZF-460] 
+     * Tests that array properties may be modified after being set (see [ZF-460]
      * and [ZF-268] for symptoms leading to this test)
      */
     public function testSetArrayProperty()
@@ -345,7 +345,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     public function testClearScriptPath()
     {
         $view = new Zend_View();
-        
+
         // paths should be initially empty
         $this->assertSame(array(), $view->getScriptPaths());
 
@@ -354,7 +354,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $scriptPaths = $view->getScriptPaths();
         $this->assertType('array', $scriptPaths);
         $this->assertEquals(1, count($scriptPaths));
-        
+
         // clear paths
         $view->setScriptPath(null);
         $this->assertSame(array(), $view->getScriptPaths());
@@ -404,7 +404,7 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test set/getEncoding() 
+     * Test set/getEncoding()
      */
     public function testSetGetEncoding()
     {
@@ -806,12 +806,12 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     public function testLayout()
     {
         $view = new Zend_View();
-    	
+
     	$view->setScriptPath(dirname(__FILE__) . '/View/_templates');
-    	
+
         $view->setLayout('layout.phtml');
     	$view->bar = 'bar';
-    	
+
     	$this->assertEquals("<html>foo bar baz\n</html>", $view->render('test.phtml') );
     }
 
@@ -824,10 +824,10 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
         $view->setPlaceholder('varName1', 'defaultValue');
         $this->assertTrue($view->hasPlaceholder('varName1'));
         $this->assertEquals('defaultValue', $view->getPlaceholder('varName1'));
-        
+
         $view->appendPlaceholder('varName1', 'defaultValue');
         $this->assertTrue($view->hasPlaceholder('varName1'));
-        $this->assertEquals('defaultValuedefaultValue', $view->getPlaceholder('varName1'));
+        $this->assertEquals("defaultValue\ndefaultValue", $view->getPlaceholder('varName1'));
 
         $view->removePlaceholder('varName1');
         $this->assertFalse($view->hasPlaceholder('varName1'));

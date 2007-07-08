@@ -21,7 +21,7 @@
  */
 
 /**
- * Helper to insert or append <meta> tags to the ZEND_HEAD Placeholder
+ * Helper to add a <meta> tag value to a head->meta Placeholder
  *
  * @category   Zend
  * @package    Zend_View
@@ -37,7 +37,7 @@ class Zend_View_Helper_HeadMeta
      *
      * @var Zend_View_Abstract
      */
-    public $view = null
+    public $view = null;
 
     /**
      * The default Zend_View_Helper_Placeholder instance
@@ -47,20 +47,24 @@ class Zend_View_Helper_HeadMeta
     protected $_placeholder = null;
 
     /**
-     * Constructor; assigns a Zend_View_Helper_Placeholder object.
-     *
+     * Constants
      */
-    public function __construct() {
-        $this->_placeholder = $this->view->placeholder();
-    }
+    const HEADMETA_NAMESPACE = 'ZEND_HEAD_META';
 
     /**
-     * Return self for further in-object calls
+     * Append a Head <meta> value if a parameter and
+     * return self for further in-object calls
      *
      * @return Zend_View_Helper_HeadMeta
      */
-    public function headMeta()
+    public function headMeta($value = null)
     {
+        if (is_null($this->_placeholder)) {
+            $this->_placeholder = $this->view->placeholder();
+        }
+        if (!is_null($value)) {
+            $this->append($value);
+        }
         return $this;
     }
 
@@ -68,12 +72,63 @@ class Zend_View_Helper_HeadMeta
      * Set view object
      *
      * @param  Zend_View_Interface $view
-     * @return Zend_View_Helper_HeadMeta
+     * @return Zend_View_Helper_HeadTitle
      */
     public function setView(Zend_View_Interface $view)
     {
         $this->view = $view;
         return $this;
+    }
+
+    /**
+     * Check for the existence of the self::HEADMETA_NAMESPACE Placeholder key
+     *
+     * @return bool
+     */
+    public function has($index = null, $value = null)
+    {
+        return $this->_placeholder->has(self::HEADMETA_NAMESPACE, $index, $value);
+    }
+
+    /**
+     * Append a value for a Placeholder self::HEADMETA_NAMESPACE key.
+     *
+     * @param mixed $value
+     * @return void
+     */
+    public function append($value)
+    {
+        $this->_placeholder->append(self::HEADMETA_NAMESPACE, $value);
+    }
+
+    /**
+     * Return the value of a Placeholder self::HEADMETA_NAMESPACE key
+     *
+     * @return mixed
+     */
+    public function get($index = null)
+    {
+        return $this->_placeholder->get(self::HEADMETA_NAMESPACE, $index);
+    }
+
+    /**
+     * Unset the value of a Placeholder self::HEADMETA_NAMESPACE key
+     *
+     * @param string $index
+     * @return void
+     */
+    public function remove($index = null, $value = null)
+    {
+        $this->_placeholder->remove(self::HEADMETA_NAMESPACE, $index, $value);
+    }
+
+    /**
+     * toString function for this class
+     *
+     * @return string
+     */
+    public function __toString() {
+        return $this->get();
     }
 
 }

@@ -37,7 +37,7 @@ class Zend_View_Helper_HeadTitle
      *
      * @var Zend_View_Abstract
      */
-    public $view = null
+    public $view = null;
 
     /**
      * The default Zend_View_Helper_Placeholder instance
@@ -52,14 +52,6 @@ class Zend_View_Helper_HeadTitle
     const HEADTITLE_NAMESPACE = 'ZEND_HEAD_TITLE';
 
     /**
-     * Constructor; assigns a Zend_View_Helper_Placeholder object.
-     *
-     */
-    public function __construct() {
-        $this->_placeholder = $this->view->placeholder();
-    }
-
-    /**
      * Set the Head <title> value if a parameter and
      * return self for further in-object call
      *
@@ -67,6 +59,9 @@ class Zend_View_Helper_HeadTitle
      */
     public function headTitle($value = null)
     {
+        if (is_null($this->_placeholder)) {
+            $this->_placeholder = $this->view->placeholder();
+        }
         if (!is_null($value)) {
             $this->set($value);
         }
@@ -115,7 +110,7 @@ class Zend_View_Helper_HeadTitle
     public function get()
     {
         if ($this->_placeholder->has(self::HEADTITLE_NAMESPACE)) {
-            return $this->_placeholder->get(self::HEADTITLE_NAMESPACE)
+            return $this->_placeholder->get(self::HEADTITLE_NAMESPACE);
         }
         return null;
     }
@@ -129,6 +124,15 @@ class Zend_View_Helper_HeadTitle
     public function remove()
     {
         $this->_placeholder->remove(self::HEADTITLE_NAMESPACE);
+    }
+
+    /**
+     * toString function for this class
+     *
+     * @return string
+     */
+    public function __toString() {
+        return $this->get();
     }
 
 }
