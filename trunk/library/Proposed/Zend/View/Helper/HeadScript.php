@@ -61,7 +61,7 @@ class Zend_View_Helper_HeadScript
     public function headScript($file = null, $type = null, $index = null)
     {
         if (isset($file)) {
-
+            $this->append($file, $type, $index);
         }
         return $this;
     }
@@ -86,9 +86,9 @@ class Zend_View_Helper_HeadScript
      * @param mixed $value
      * @return void
      */
-    public function append($file, $type = 'javascript')
+    public function append($file, $type = 'javascript', $index = null)
     {
-        $this->_placeholder->append(self::HEADSCRIPT_NAMESPACE, array($file, $type));
+        $this->_placeholder->set(self::HEADSCRIPT_NAMESPACE, array($file, $type), $index);
     }
 
     /**
