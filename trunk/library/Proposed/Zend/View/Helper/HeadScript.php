@@ -98,7 +98,10 @@ class Zend_View_Helper_HeadScript
      */
     public function get($index = null)
     {
-        return $this->_placeholder->get(self::HEADSCRIPT_NAMESPACE, $index);
+        if ($this->_placeholder->has(self::HEADSCRIPT_NAMESPACE, $index)) {
+            return $this->_placeholder->get(self::HEADSCRIPT_NAMESPACE, $index);
+        }
+        return null;
     }
 
     /**
@@ -123,16 +126,19 @@ class Zend_View_Helper_HeadScript
      */
     public function __toString() {
         $scripts = $this->get();
-        $output = '';
+        if (is_null($scripts) || !is_array($scripts) || count($scripts) <= 0) {
+            return '';
+        }
+        $output = array();
         foreach ($scripts as $script) {
             switch ($script[1]) {
                 case 'javascript':
                 default:
-                    $output .= '<script type="text/javascript" src="' . $script[0] . '"></script>';
+                    $output[] = '<script type="text/javascript" src="' . $script[0] . '"></script>';
                     break;
             }
         }
-        return $output;
+        return implode(PHP_EOL, $output);
     }
 
     /**
