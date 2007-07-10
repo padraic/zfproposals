@@ -170,7 +170,8 @@ class Zend_View_Helper_Placeholder {
      * @param object $object
      * @return void
      */
-    public function registerCallback($function, $object = null) {
+    public function registerCallback($function, $object = null)
+    {
         if (isset($object) && is_object($object)) {
             if (!method_exists($function, $object)) {
                 throw new Zend_View_Exception();
@@ -193,7 +194,8 @@ class Zend_View_Helper_Placeholder {
      * @param array $array
      * @return string
      */
-    protected function _toString($array, $key = null) {
+    protected function _toString($array, $key = null)
+    {
         if (!is_array($array)) {
             return $array;
         }
