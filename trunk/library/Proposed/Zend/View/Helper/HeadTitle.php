@@ -47,6 +47,13 @@ class Zend_View_Helper_HeadTitle
     protected $_placeholder = null;
 
     /**
+     * A common prefix prefixed to all <title> text
+     *
+     * @var string
+     */
+    protected $_prefix = null;
+
+    /**
      * Constants
      */
     const HEADTITLE_NAMESPACE = 'ZEND_HEAD_TITLE';
@@ -95,11 +102,12 @@ class Zend_View_Helper_HeadTitle
      * Overwrites existing value.
      *
      * @param mixed $value
-     * @return void
+     * @return Zend_View_Helper_HeadTitle
      */
     public function set($value)
     {
         $this->_placeholder->set(self::HEADTITLE_NAMESPACE, $value);
+        return $this;
     }
 
     /**
@@ -119,11 +127,34 @@ class Zend_View_Helper_HeadTitle
      * Unset the value of a Placeholder self::HEADTITLE_NAMESPACE key
      *
      * @param string $index
-     * @return void
+     * @return Zend_View_Helper_HeadTitle
      */
     public function remove()
     {
         $this->_placeholder->remove(self::HEADTITLE_NAMESPACE);
+        return $this;
+    }
+
+    /**
+     * Add a common prefix to the <title> text
+     *
+     * @param string $prefix
+     * @return Zend_View_Helper_HeadTitle
+     */
+    public function setPrefix($prefix)
+    {
+        $this->_prefix = $prefix;
+        return $this;
+    }
+
+    /**
+     * Get any common prefix to the <title> text
+     *
+     * @return Zend_View_Helper_HeadTitle
+     */
+    public function getPrefix($prefix)
+    {
+        return $this->_prefix;
     }
 
     /**
@@ -131,8 +162,9 @@ class Zend_View_Helper_HeadTitle
      *
      * @return string
      */
-    public function __toString() {
-        return $this->get();
+    public function __toString()
+    {
+        return '<title>' . $this->getPrefix() . $this->get() . '</title>';
     }
 
 }
