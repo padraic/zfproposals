@@ -34,16 +34,16 @@ class Zend_View_Helper_Doctype
 {
 
     public function doctype($standard = 'XHTML 1.0 Transitional') {
-        if(stripos($standard, 'xhtml')) {
+        if(stripos($standard, 'xhtml') == 0) {
             return $this->_doctypeXhtml($standard);
         }
-        if(stripos($standard, 'html')) {
+        if(stripos($standard, 'html') == 0) {
             return $this->_doctypeHtml($standard);
         }
-        if(stripos($standard, 'mathml')) {
+        if(stripos($standard, 'mathml') == 0) {
             return $this->_doctypeMath($standard);
         }
-        if(stripos($standard, 'svg')) {
+        if(stripos($standard, 'svg') == 0) {
             return $this->_doctypeSvg($standard);
         }
         throw new Zend_View_Exception('Invalid standard: ' . $standard);

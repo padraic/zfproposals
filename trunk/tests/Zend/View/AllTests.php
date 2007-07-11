@@ -26,6 +26,8 @@ require_once 'Helper/HeadMetaTest.php';
 require_once 'Helper/HeadScriptTest.php';
 require_once 'Helper/HeadLinkTest.php';
 
+require_once 'Helper/DoctypeTest.php';
+
 class Zend_View_AllTests
 {
     public static function main()
@@ -49,6 +51,8 @@ class Zend_View_AllTests
         $suite->addTestSuite('Zend_View_Helper_HeadMetaTest');
         $suite->addTestSuite('Zend_View_Helper_HeadScriptTest');
         $suite->addTestSuite('Zend_View_Helper_HeadLinkTest');
+
+        $suite->addTestSuite('Zend_View_Helper_DoctypeTest');
 
         return $suite;
     }
