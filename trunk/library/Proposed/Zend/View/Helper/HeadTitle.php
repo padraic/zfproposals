@@ -158,7 +158,17 @@ class Zend_View_Helper_HeadTitle
     }
 
     /**
-     * toString function for this class
+     * Alias to toString for public API
+     * 
+     * @return string
+     */
+    public function toString()
+    {
+        return $this->__toString();
+    }
+
+    /**
+     * __toString function for this class
      *
      * @return string
      */

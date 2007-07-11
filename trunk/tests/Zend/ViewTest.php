@@ -815,25 +815,6 @@ class Zend_ViewTest extends PHPUnit_Framework_TestCase
     	$this->assertEquals("<html>foo bar baz\n</html>", $view->render('test.phtml') );
     }
 
-    public function testPlaceholder()
-    {
-        $view = new Zend_View();
-
-        $this->assertTrue($view->placeholder() instanceof Zend_View_Helper_Placeholder);
-
-        $view->setPlaceholder('varName1', 'defaultValue');
-        $this->assertTrue($view->hasPlaceholder('varName1'));
-        $this->assertEquals('defaultValue', $view->getPlaceholder('varName1'));
-
-        $view->appendPlaceholder('varName1', 'defaultValue');
-        $this->assertTrue($view->hasPlaceholder('varName1'));
-        $this->assertEquals("defaultValue\ndefaultValue", $view->getPlaceholder('varName1'));
-
-        $view->removePlaceholder('varName1');
-        $this->assertFalse($view->hasPlaceholder('varName1'));
-        $this->assertEquals(null, $view->getPlaceholder('varName1'));
-    }
-
     public function testStaticFactoryDefault()
     {
         $this->assertTrue(Zend_View::getFactory() instanceof Zend_View_Factory);

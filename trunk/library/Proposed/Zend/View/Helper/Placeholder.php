@@ -77,13 +77,21 @@ class Zend_View_Helper_Placeholder {
      * @param mixed $value
      * @return void
      */
-    public function append($key, $value)
+    public function append($key, $value, $index = null)
     {
-        if ($this->has($key)) {
-            self::$_registry[$key][] = $value;
-            return;
+        if (!isset($index)) {
+            if ($this->has($key)) {
+                self::$_registry[$key][] = $value;
+                return;
+            }
+            self::$_registry[$key] = array($value);
+        } else {
+            if ($this->has($key)) {
+                self::$_registry[$key][$index] = $value;
+                return;
+            }
+            self::$_registry[$key] = array($index => $value);
         }
-        self::$_registry[$key] = array($value);
     }
 
     /**
@@ -127,9 +135,32 @@ class Zend_View_Helper_Placeholder {
                 if (!$this->has($key, $index)) {
                     return null;
                 }
-                return $this->_toString(self::$_registry[$key][$index]);
+                return $this->__toString(self::$_registry[$key][$index]);
             }
-            return $this->_toString(self::$_registry[$key]);
+            return $this->__toString(self::$_registry[$key]);
+        }
+        return null;
+    }
+
+    /**
+     * Return the value of a Placeholder key
+     *
+     * @param string $key
+     * @param mixed $index
+     * @return mixed
+     */
+    public function asArray($key, $index = null)
+    {
+        if ($this->has($key)) {
+            if (!is_null($index)) {
+                if (!$this->has($key, $index)) {
+                    return null;
+                }
+                return array(self::$_registry[$key][$index]);
+            }
+            $unsortedArray = self::$_registry[$key];
+            $sorted = $this->_sort($unsortedArray, $key);
+            return $sorted; // now sorted
         }
         return null;
     }
@@ -194,7 +225,7 @@ class Zend_View_Helper_Placeholder {
      * @param array $array
      * @return string
      */
-    protected function _toString($array, $key = null)
+    public function __toString($array, $key = null)
     {
         if (!is_array($array)) {
             return $array;
@@ -203,13 +234,25 @@ class Zend_View_Helper_Placeholder {
         if ($count == 0 || $count == 1) {
             return implode('',$array);
         }
-        $unsortedArray = $array;
-        if (isset($this->_callback)) {
-            $unsortedArray = call_user_func_array($this->_callback, array($unsortedArray, $key));
-        } else {
-            ksort($unsortedArray);
-        }
-        return implode("\n", $unsortedArray);
+        $sorted = $this->_sort($array, $key);
+        return implode("\n", $sorted);
     }
 
+    /**
+     * Sort an array using the default ksort() or a user defined
+     * callback function
+     *
+     * @param array $array
+     * @param string $key
+     * @return array
+     */
+    protected function _sort(array $array, $key = null)
+    {
+        if (isset($this->_callback)) {
+            $array = call_user_func_array($this->_callback, array($array, $key));
+        } else {
+            ksort($array);
+        }
+        return $array;
+    }
 }

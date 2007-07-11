@@ -28,6 +28,7 @@ class Zend_View_Helper_PlaceholderTest extends PHPUnit_Framework_TestCase
         $this->view->placeholder()->append('varName1', 'defaultValue');
         $this->assertTrue($this->view->placeholder()->has('varName1'));
         $this->assertEquals("defaultValue\ndefaultValue", $this->view->placeholder()->get('varName1'));
+        $this->assertEquals(array('defaultValue','defaultValue'), $this->view->placeholder()->asArray('varName1'));
 
         $this->view->placeholder()->remove('varName1');
         $this->assertFalse($this->view->placeholder()->has('varName1'));

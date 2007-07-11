@@ -36,7 +36,7 @@ class Zend_View_Helper_HeadScript
      *
      * @var Zend_View_Abstract
      */
-    public $view = null
+    public $view = null;
 
     /**
      * The default Zend_View_Helper_Placeholder instance
@@ -46,12 +46,9 @@ class Zend_View_Helper_HeadScript
     protected $_placeholder = null;
 
     /**
-     * Constructor; assigns a Zend_View_Helper_Placeholder object.
-     *
+     * Constants
      */
-    public function __construct() {
-        $this->_placeholder = $this->view->placeholder();
-    }
+    const HEADSCRIPT_NAMESPACE = 'ZEND_HEAD_SCRIPT';
 
     /**
      * Return self for further in-object calls
@@ -60,6 +57,9 @@ class Zend_View_Helper_HeadScript
      */
     public function headScript($file = null, $type = null, $index = null)
     {
+        if (is_null($this->_placeholder)) {
+            $this->_placeholder = $this->view->placeholder();
+        }
         if (isset($file)) {
             $this->append($file, $type, $index);
         }
@@ -86,9 +86,26 @@ class Zend_View_Helper_HeadScript
      * @param mixed $value
      * @return void
      */
-    public function append($file, $type = 'javascript', $index = null)
+    public function append($file, $type = null, $index = null)
     {
-        $this->_placeholder->set(self::HEADSCRIPT_NAMESPACE, array($file, $type), $index);
+        if (!isset($type)) {
+            $type = 'javascript';
+        }
+        $this->_placeholder->append(self::HEADSCRIPT_NAMESPACE, array($file, $type), $index);
+    }
+
+    /**
+     * Append a script-block value for a Placeholder self::HEADSCRIPT_NAMESPACE key.
+     *
+     * @param mixed $value
+     * @return void
+     */
+    public function appendScript($code, $type = null, $index = null)
+    {
+        if (!isset($type)) {
+            $type = 'javascript';
+        }
+        $this->_placeholder->append(self::HEADSCRIPT_NAMESPACE, array($code, $type, true), $index);
     }
 
     /**
@@ -99,7 +116,7 @@ class Zend_View_Helper_HeadScript
     public function get($index = null)
     {
         if ($this->_placeholder->has(self::HEADSCRIPT_NAMESPACE, $index)) {
-            return $this->_placeholder->get(self::HEADSCRIPT_NAMESPACE, $index);
+            return $this->_placeholder->asArray(self::HEADSCRIPT_NAMESPACE, $index);
         }
         return null;
     }
@@ -120,25 +137,35 @@ class Zend_View_Helper_HeadScript
     }
 
     /**
+     * Alias to toString for public API
+     * 
+     * @return string
+     */
+    public function toString($index = null)
+    {
+        return $this->__toString($index);
+    }
+
+    /**
      * toString function for this class
      *
      * @return string
      */
-    public function __toString() {
-        $scripts = $this->get();
+    public function __toString($index = null) {
+        $scripts = $this->get($index);
         if (is_null($scripts) || !is_array($scripts) || count($scripts) <= 0) {
             return '';
         }
         $output = array();
         foreach ($scripts as $script) {
-            switch ($script[1]) {
-                case 'javascript':
-                default:
-                    $output[] = '<script type="text/javascript" src="' . $script[0] . '"></script>';
-                    break;
+            $type = $this->_getType($script[1]);
+            if (isset($script[2]) && $script[2] === true) {
+                $output[] = '<script type="' . $type. '">' . "\n" . $script[0] . "\n" . '</script>';
+            } else {
+                $output[] = '<script type="' . $type . '" src="' . $script[0] . '"></script>';
             }
         }
-        return implode(PHP_EOL, $output);
+        return implode("\n", $output);
     }
 
     /**
@@ -151,6 +178,40 @@ class Zend_View_Helper_HeadScript
     {
         $this->view = $view;
         return $this;
+    }
+
+    /**
+     * Return a type attribute value for the <script> element
+     *
+     * @param string $type
+     * @return string
+     */
+    protected function _getType($type)
+    {
+        switch ($type) {
+            case 'javascript':
+                $return = 'text/javascript';
+                break;
+            case 'ecmascript':
+                $return = 'text/ecmascript';
+                break;
+            case 'vbscript':
+                $return = 'text/vbscript';
+                break;
+            case 'jscript':
+                $return = 'text/jcript';
+                break;
+            case 'vbs':
+                $return = 'text/vbs';
+                break;
+            case 'xml':
+                $return = 'text/xml';
+                break;
+            case 'javascript':
+                $return = 'text/javascript';
+                break;
+        }
+        return $return;
     }
 
 }
