@@ -781,7 +781,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      * Processes a view script and returns the output. If enabled it will also
      * decorate the output with a rendered Layout file.
      *
-     * @see Zend_View_Abstract::contentForLayout()
+     * @see Zend_View_Abstract::getLayoutContent()
      * @param string $name The script script name to process.
      * @return string The script output.
      */
@@ -802,7 +802,7 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
         if (!$this->hasLayout() || $this->_file !== $this->_fileToRender) {
             return $output;
         } else {
-            $this->setPlaceholder('contentForLayout', $output);
+            $this->placeholder()->set('ZEND_LAYOUT_CONTENT', $output);
             return $this->render( $this->getLayout() );
         } 
     }
@@ -904,10 +904,10 @@ abstract class Zend_View_Abstract implements Zend_View_Interface
      *
      * @return string
      */
-    public function contentForLayout()
+    public function getLayoutContent()
     {
-        if ($this->hasPlaceholder('contentForLayout')) {
-            return $this->getPlaceholder('contentForLayout');
+        if ($this->placeholder()->has('ZEND_LAYOUT_CONTENT')) {
+            return $this->placeholder()->get('ZEND_LAYOUT_CONTENT');
         }
         require_once 'Zend/View/Exception.php';
         throw new Zend_View_Exception('there is no rendered content available for insertion in a Layout', $this);

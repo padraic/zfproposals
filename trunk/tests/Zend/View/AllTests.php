@@ -24,6 +24,7 @@ require_once 'Helper/PartialTest.php';
 require_once 'Helper/HeadTitleTest.php';
 require_once 'Helper/HeadMetaTest.php';
 require_once 'Helper/HeadScriptTest.php';
+require_once 'Helper/HeadLinkTest.php';
 
 class Zend_View_AllTests
 {
@@ -47,6 +48,7 @@ class Zend_View_AllTests
         $suite->addTestSuite('Zend_View_Helper_HeadTitleTest');
         $suite->addTestSuite('Zend_View_Helper_HeadMetaTest');
         $suite->addTestSuite('Zend_View_Helper_HeadScriptTest');
+        $suite->addTestSuite('Zend_View_Helper_HeadLinkTest');
 
         return $suite;
     }
