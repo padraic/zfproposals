@@ -17,7 +17,7 @@
  * @package    Zend_Crypt
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Validate.php 4974 2007-05-25 21:11:56Z bkarwin $
+ * @version    $Id: BigInteger.php 49 2007-06-28 21:59:08Z padraic $
  */
 
 require_once 'Zend/Math/BigInteger.php';
@@ -27,6 +27,7 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
 
     /**
      * Generate a pseudorandom number within the given range.
+     * Will attempt to read from a systems RNG if it exists.
      *
      * @param string|int $min
      * @param string|int $max
@@ -35,6 +36,12 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
      */
     public function rand($minimum, $maximum)
     {
+        if (file_exists('/dev/urandom')) {
+            $frandom = fopen('/dev/urandom', 'r');
+            if ($frandom !== false) {
+                return fread($frandom, strlen($maximum) - 1);
+            }
+        }
         if (strlen($maximum) < 4) {
             return mt_rand($minimum, $maximum - 1);
         }
@@ -47,4 +54,39 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
         return $rand;
     }
 
+    public function btwoc($long) {
+        if (ord($long[0]) > 127) {
+            return "\x00" . $long;
+        }
+        return $long;
+    }
+
+    public function fromBinary($binary) {
+        if (!$this instanceof Zend_Math_BigInteger_Gmp) {
+            $big = 0;
+            $length = strlen($binary);
+            for ($i = 0; $i < $length; $i++) {
+                $big = $this->_math->multiply($big, 256);
+                $big = $this->_math->add($big, ord($binary[$i]));
+            }
+            return $big;
+        } else {
+            return $this->_math->init(bin2hex($binary), 16); // gmp shortcut
+        }
+    }
+
+    public function toBinary($big)
+    {
+        $compare = $this->_math->compare($big, 0);
+        if ($compare == 0) {
+            return (chr(0));
+        } else if ($compare < 0) {
+            return false;
+        }
+        while ($this->_math->compare($big, 0) > 0) {
+            $binary = chr($this->_math->modulus($big, 256)) . $binary;
+            $big = $this->_math->divide($big, 256);
+        }
+        return $binary;
+    }
 }

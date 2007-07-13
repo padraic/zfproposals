@@ -17,7 +17,7 @@
  * @package    Zend_Math
  * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 2794 2007-01-16 01:29:51Z bkarwin $
+ * @version    $Id: Exception.php 1 2007-06-17 12:41:11Z padraic $
  */
 
 

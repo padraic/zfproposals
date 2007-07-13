@@ -67,16 +67,20 @@ class Zend_Math_BigInteger
      *
      * @throws  Zend_Math_BigInteger_Exception
      */
-    public function __construct()
+    public function __construct($extension = null)
     {
-        if(extension_loaded('gmp') || @dl('gmp.' . PHP_SHLIB_SUFFIX) || @dl('php_gmp.' . PHP_SHLIB_SUFFIX)) {
+        if (!is_null($extension) && !in_array($extension, array('bcmath', 'gmp', 'bigint'))) {
+            require_once('Zend/Math/BigInteger/Exception.php');
+            throw new Zend_Math_BigInteger_Exception('Invalid extension type; please use one of bcmath, gmp or bigint');
+        }
+        if($extension == 'gmp' || extension_loaded('gmp') || @dl('gmp.' . PHP_SHLIB_SUFFIX) || @dl('php_gmp.' . PHP_SHLIB_SUFFIX)) {
             require_once 'Zend/Math/BigInteger/Gmp.php';
             $this->_math = new Zend_Math_BigInteger_Gmp();
         }
-        elseif(extension_loaded('big_int') || @dl('big_int.' . PHP_SHLIB_SUFFIX) || @dl('php_big_int.' . PHP_SHLIB_SUFFIX)) {
+        elseif($extension == 'bigint' || extension_loaded('big_int') || @dl('big_int.' . PHP_SHLIB_SUFFIX) || @dl('php_big_int.' . PHP_SHLIB_SUFFIX)) {
             require_once 'Zend/Math/BigInteger/Bigint.php';
             $this->_math = new Zend_Math_BigInteger_Bigint();
-        } elseif(extension_loaded('bcmath') || @dl('bcmath.' . PHP_SHLIB_SUFFIX) || @dl('php_bcmath.' . PHP_SHLIB_SUFFIX)) {
+        } elseif($extension == 'bcmath' || extension_loaded('bcmath') || @dl('bcmath.' . PHP_SHLIB_SUFFIX) || @dl('php_bcmath.' . PHP_SHLIB_SUFFIX)) {
             require_once 'Zend/Math/BigInteger/Bcmath.php';
             $this->_math = new Zend_Math_BigInteger_Bcmath();
         } else {

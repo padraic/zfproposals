@@ -17,7 +17,7 @@
  * @package    Zend_Auth
  * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 1 2007-06-17 12:41:11Z padraic $
+ * @version    $Id: Exception.php 3 2007-06-17 14:48:27Z padraic $
  */
 
 
@@ -33,5 +33,5 @@ require_once 'Zend/Crypt/Exception.php';
  * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Crypt_DiffieHellman_Exception extends Zend_Crypt_Exception
+class Zend_Crypt_Hmac_Exception extends Zend_Crypt_Exception
 {}
