@@ -16,7 +16,7 @@
  * @package    Zend_Crypt
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: DiffieHellman.php 48 2007-06-28 16:46:15Z padraic $
+ * @version    $Id$
  */
 
 require_once 'Zend/Crypt/Math/BigInteger.php';

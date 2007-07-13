@@ -17,7 +17,7 @@
  * @package    Zend_Auth
  * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Exception.php 3 2007-06-17 14:48:27Z padraic $
+ * @version    $Id$
  */
 
 

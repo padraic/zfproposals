@@ -16,7 +16,7 @@
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2007 Pádraic Brady
- * @version    $Id: HeadMeta.php 92 2007-07-08 14:51:24Z padraic $
+ * @version    $Id$
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
