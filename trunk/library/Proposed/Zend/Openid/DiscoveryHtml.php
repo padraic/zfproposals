@@ -17,7 +17,7 @@
  * @subpackage Openid
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Consumer.php 17 2007-06-19 23:03:41Z padraic $
+ * @version    $Id$
  */
 
 /** Zend_Uri */

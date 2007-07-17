@@ -16,7 +16,7 @@
  * @package    Zend_Openid
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Authorisation.php 42 2007-06-25 15:23:56Z padraic $
+ * @version    $Id$
  */
 
 /**
