@@ -54,8 +54,15 @@ class Zend_Openid_Redirect_Authorisation
 
     /**
      *
+     * @var array
+     */
     protected $_extensionNamespacesSet = array();
 
+    /**
+     * The Consumer object generating this redirect
+     *
+     * @var Zend_Openid_Consumer
+     */
     protected $_consumer = null;
 
     /**
