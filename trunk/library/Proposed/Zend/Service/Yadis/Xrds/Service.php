@@ -53,6 +53,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
     /**
      * Establish a lowest priority integer; we'll take the upper 2^31
      * integer limit.
+     * Highest priority is 0.
      */
     const SERVICE_LOWEST_PRIORITY = 2147483647;
 
@@ -62,12 +63,12 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @var SimpleXMLElement
      */
     protected $_xrdNode = null;
-    
+
     /**
      * The Yadis Services resultset
      *
      * @var array
-     */ 
+     */
     protected $_services = array();
 
     /**
@@ -106,56 +107,57 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
 
     /**
      * Implements Iterator::current()
-     * 
+     *
      * Return the current element.
      *
      * @return Zend_Service_Yadis_Service
-     */ 
+     */
     public function current()
     {
          return current($this->_services);
     }
- 
+
     /**
      * Implements Iterator::key()
      *
      * Return the key of the current element.
-     * 
+     *
      * @return integer
-     */ 
+     */
     public function key()
     {
          return key($this->_services);
     }
- 
+
     /**
      * Implements Iterator::next()
-     * 
+     *
      * Increments pointer to next Service object.
-     */ 
+     *
+     * @return void
+     */
     public function next()
     {
          $this->_valid = (false !== next($this->_services));
     }
- 
+
     /**
      * Implements Iterator::rewind()
-     * 
+     *
      * Rewinds the Iterator to the first Service object
      *
      * @return boolean
-     */ 
+     */
     public function rewind()
     {
-        $this->_valid = (false !== reset($this->_services)); 
+        $this->_valid = (false !== reset($this->_services));
     }
- 
+
     /**
      * Implement Iterator::valid()
      *
-     * @param  integer $key
      * @return boolean
-     */ 
+     */
     public function valid()
     {
          return $this->_valid;
@@ -166,7 +168,7 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * a missing or invalid priority should be shuffled to the bottom
      * of the priority order.
      *
-     * @param   Zend_Service_Yadis_Service $service
+     * @param Zend_Service_Yadis_Service $service
      */
     protected function _addService(Zend_Service_Yadis_Service $service)
     {

@@ -116,6 +116,13 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
         return self::$_instance;
     }
 
+    /**
+     * Set a Namespace object which contains all relevant namespaces
+     * for XPath queries on this Yadis resource.
+     *
+     * @param Services_Yadis_Xrds_Namespace
+     * @return Services_Yadis_Xri
+     */
     public function setNamespace(Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
         $this->_namespace = $namespace;
@@ -163,7 +170,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
         /**
          * Check if the passed string is a likely XRI.
          */
-        if (!strpos($xri, 'xri://') === 0 && !in_array($xri[0], $this->_xriIdentifiers)) {
+        if (stripos($xri, 'xri://') === false && !in_array($xri[0], $this->_xriIdentifiers)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Invalid XRI string submitted');
         }
@@ -174,7 +181,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
     /**
      * Return the original XRI string.
      *
-     * @return  string
+     * @return string
      */
     public function getXri()
     {
@@ -186,10 +193,10 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
      * removing the "xri://" prefix and appending the remainder to the URI of
      * an XRI proxy such as "http://xri.net/".
      *
-     * @param   string $xri
-     * @return  string
-     * @throws  Zend_Service_Yadis_Exception
-     * @uses    Zend_Uri
+     * @param string $xri
+     * @return string
+     * @throws Zend_Service_Yadis_Exception
+     * @uses Zend_Uri
      */
     public function toUri($xri = null, $serviceType = null)
     {
@@ -203,10 +210,10 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
          * Get rid of the xri:// prefix before assembling the URI
          * including any IP or DNS wildcards
          */
-        if (strpos($this->_xri, 'xri://') === 0) {
-            if (strpos($this->_xri, 'xri://$ip*') === 0) {
+        if (stripos($this->_xri, 'xri://') == 0) {
+            if (stripos($this->_xri, 'xri://$ip*') == 0) {
                 $iname = substr($xri, 10);
-            } elseif (strpos($this->_xri, 'xri://$dns*') === 0) {
+            } elseif (stripos($this->_xri, 'xri://$dns*') == 0) {
                 $iname = substr($xri, 11);
             } else {
                 $iname = substr($xri, 6);
@@ -246,19 +253,19 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
         }
 
         $response = $this->_get($uri);
-        if (strpos($response->getHeader('Content-Type'), 'application/xrds+xml') === false) {
+        if (stripos($response->getHeader('Content-Type'), 'application/xrds+xml') === false) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('The response header indicates the response body is not an XRDS document');
         }
 
         $xrds = new SimpleXMLElement($response->getBody());
         $this->_namespace->registerXpathNamespaces($xrds);
-        $canonicalIds = $xrds->xpath('xrd:CanonicalID');
-        if (!$canonicalIds) {
+        $this->_canonicalId = $xrds->xpath('/xrd:CanonicalID[last()]');
+        if (!$this->_canonicalId) {
             return false;
         }
         $this->_canonicalId = $canonicalIds[count($canonicalIds) - 1];
-        var_dump($canonicalIds . __FILE__.__LINE__); exit;
+        //var_dump($canonicalIds . __FILE__.__LINE__); exit;
         return $this->_canonicalId;
     }
 
@@ -268,7 +275,8 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
             return $this->_canonicalId;
         }
         if (is_null($this->_xri)) {
-            throw new Exception('Unable to get a Canonical Id since no XRI value has been set');
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('Unable to get a Canonical Id since no XRI value has been set');
         }
         return $this->toCanonicalId($this->_xri);
     }

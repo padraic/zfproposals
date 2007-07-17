@@ -52,22 +52,15 @@ class Zend_Service_Yadis_Xrds_Namespace
     );
 
     /**
-     * Class constructor
-     */
-    public function __construct()
-    {}
-
-    /**
      * Add a list (array) of additional namespaces to be utilised by the XML
      * parser when it receives a valid XRD document.
      *
-     * @param   array $namespaces
-     * @todo    Extract namespaces (common to three classes) to new shared class
+     * @param  array $namespaces
      */
     public function addNamespaces(array $namespaces)
     {
-        foreach($namespaces as $namespace=>$namespaceUrl) {
-            $this->addNamespace($namespace, $namespaceUrl);
+        foreach($namespaces as $namespaceKey=>$namespaceUrl) {
+            $this->addNamespace($namespaceKey, $namespaceUrl);
         }
     }
 
@@ -75,19 +68,22 @@ class Zend_Service_Yadis_Xrds_Namespace
      * Add a single namespace to be utilised by the XML parser when it receives
      * a valid XRD document.
      *
-     * @param   string $namespace
-     * @param   string $namespaceUrl
-     * @return  void
-     * @uses    Zend_Uri
+     * @param string $namespaceKey
+     * @param string $namespaceUrl
+     * @return void
+     * @uses Zend_Uri
      */
-    public function addNamespace($namespace, $namespaceUrl)
+    public function addNamespace($namespaceKey, $namespaceUrl)
     {
-        if (empty($namespace) || empty($namespaceUrl)) {
+        if (!isset($namespaceKey) || !isset($namespaceUrl) || empty($namespaceKey) || empty($namespaceUrl)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Parameters must be non-empty strings');
         } elseif (!Zend_Uri::check($namespaceUrl)) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('Invalid namespace URI: ' . htmlentities($namespaceUrl, ENT_QUOTES, 'utf-8'));
+        } elseif (array_key_exists($namespaceKey, $this->getNamespaces())) {
+            require_once 'Zend/Service/Yadis/Exception.php';
+            throw new Zend_Service_Yadis_Exception('You may not redefine the "xrds" or "xrd" XML Namespaces');
         }
         $this->_namespaces[$namespace] = $namespaceUrl;
     }
@@ -123,8 +119,8 @@ class Zend_Service_Yadis_Xrds_Namespace
      */
     public function registerXpathNamespaces(SimpleXMLElement $element)
     {
-        foreach ($this->_namespaces as $namespace=>$namespaceUrl) {
-            $element->registerXPathNamespace($namespace, $namespaceUrl);
+        foreach ($this->_namespaces as $namespaceKey=>$namespaceUrl) {
+            $element->registerXPathNamespace($namespaceKey, $namespaceUrl);
         }
     }
 

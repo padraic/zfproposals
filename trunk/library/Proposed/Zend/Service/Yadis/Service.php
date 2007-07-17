@@ -76,15 +76,7 @@ class Zend_Service_Yadis_Service
      */
     public function getTypes()
     {
-        $return = array();
-        $types = $this->_serviceNode->xpath('xrd:Type');
-        foreach ($types as $type) {
-            $string = strval($type);
-            if(!empty($string)) {
-                $return[] = $string;
-            }
-        }
-        return $return;
+        return $this->getElements('xrd:Type');
     }
 
     /**
@@ -97,15 +89,7 @@ class Zend_Service_Yadis_Service
      */
     public function getUris()
     {
-        $defaultArray = array();
-        $uris = $this->_serviceNode->xpath('xrd:Uri');
-        foreach ($uris as $uri) {
-            $string = strval($uri);
-            if(!empty($string)) {
-                $defaultArray[] = $string;
-            }
-        }
-        return $defaultArray;
+        return $this->getElements('xrd:URI');
     }
 
     /**
@@ -116,8 +100,10 @@ class Zend_Service_Yadis_Service
     public function getPriority()
     {
         $attributes = $this->_serviceNode->attributes();
-        if(array_key_exists('priority', $attributes)) {
-            return intval($attributes['priority']);
+        foreach($attributes as $attribute=>$value) {
+            if($attribute == 'priority') {
+                return intval($value);
+            }
         }
         return null;
     }
@@ -127,15 +113,27 @@ class Zend_Service_Yadis_Service
      *
      * @return  SimpleXMLElement
      */
-    public function getXmlObject()
+    public function getSimpleXmlObject()
     {
         return $this->_serviceNode;
     }
-    
+
+    /**
+     * Return the current XRDS Service node as a DOMDocument object.
+     * This is just a simple transfer by loading the XML output from
+     * the SimpleXMLElement object into a new DOMDocument instance.
+     *
+     * @return DOMDocument
+     */
+    public function getDomObject()
+    {
+        return dom_import_simplexml($this->serviceNode);
+    }
+
     /**
      * Return the current Zend_Service_Yadis_Xrds_Namespace object.
      *
-     * @return  Zend_Service_Yadis_Xrds_Namespace
+     * @return Zend_Service_Yadis_Xrds_Namespace
      */
     public function getNamespaceObject()
     {
@@ -146,7 +144,7 @@ class Zend_Service_Yadis_Service
      * Return an array of the current XRDS namespaces for working with any
      * XPath queries on the Service node.
      *
-     * @return  array
+     * @return array
      */
     public function getNamespaces()
     {
@@ -160,11 +158,23 @@ class Zend_Service_Yadis_Service
      * as an XPath query so it's open to other uses despite the assumed use
      * case.
      *
-     * @param   string $element
+     * @param string $name
+     * @return array|boolean
      */
-    public function getElements($element)
+    public function getElements($name)
     {
-        return $this->_serviceNode->xpath($element);
+        $return = array();
+        $elements = $this->_serviceNode->xpath($name);
+        if (!is_array($elements) || count($elements) < 1) {
+            return false;
+        }
+        foreach ($elements as $element) {
+            $string = strval($element);
+            if(!empty($string)) {
+                $return[] = $string;
+            }
+        }
+        return $return;
     }
 
 }

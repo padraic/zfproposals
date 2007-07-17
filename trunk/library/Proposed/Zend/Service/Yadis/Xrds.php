@@ -42,12 +42,12 @@ require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
  */
 class Zend_Service_Yadis_Xrds
 {
- 
+
     /**
      * Current key/pointer for the Iterator
-     * 
+     *
      * @var integer
-     */ 
+     */
     protected $_currentKey = 0;
 
     /**
@@ -64,27 +64,27 @@ class Zend_Service_Yadis_Xrds
      * @var Zend_Service_Yadis_Xrds_Namespace
      */
     protected $_namespace = null;
- 
+
     /**
      * Constructor; parses and validates an XRD document. All access to
      * the data held in the XML is left to a concrete subclass specific to
      * expected XRD format and data types.
      * Cannot be directly instantiated; must call from subclass.
-     * 
+     *
      * @param   SimpleXMLElement $xrds
      * @param   Zend_Service_Yadis_Xrds_Namespace $namespace
-     */ 
+     */
     protected function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
         $this->_namespace = $namespace;
         $xrdNodes = $this->_getValidXrdNodes($xrds);
-        if(!$xrdNodes){
+        if (!$xrdNodes){
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('The XRD document was found to be invalid');
         }
         $this->_xrdNodes = $xrdNodes;
     }
- 
+
     /**
      * Add a list (array) of additional namespaces to be utilised by the XML
      * parser when it receives a valid XRD document.
@@ -132,6 +132,12 @@ class Zend_Service_Yadis_Xrds
         return $this->_namespace->getNamespaces();
     }
 
+    /**
+     * Returns an array of all xrd elements located in the XRD document.
+     *
+     * @param SimpleXMLElement
+     * @return array
+     */
     protected function _getValidXrdNodes(SimpleXMLElement $xrds)
     {
         /**
@@ -143,8 +149,7 @@ class Zend_Service_Yadis_Xrds
          * Verify the XRDS resource has a root element called "xrds:XRDS".
          */
         $root = $xrds->xpath('/xrds:XRDS[1]');
-        if(count($root) == 0)
-        {
+        if (count($root) == 0) {
             return null;
         }
 
@@ -153,13 +158,10 @@ class Zend_Service_Yadis_Xrds
          * (if present and of priority) for validity.
          * No loss if neither exists, but they really should be.
          */
-        $nameSpaces = $xrds->getDocNamespaces();
-        if(array_key_exists('xrd', $nameSpaces) && $nameSpaces['xrd'] != 'xri://$xrd*($v*2.0)')
-        {
+        $namespaces = $xrds->getDocNamespaces();
+        if (array_key_exists('xrd', $namespaces) && $namespaces['xrd'] != 'xri://$xrd*($v*2.0)') {
             return null;
-        }
-        elseif(array_key_exists('', $nameSpaces) && $nameSpaces[''] != 'xri://$xrd*($v*2.0)')
-        {
+        } elseif (array_key_exists('', $namespaces) && $namespaces[''] != 'xri://$xrd*($v*2.0)') {
             return null;
         }
 
@@ -171,8 +173,7 @@ class Zend_Service_Yadis_Xrds
          * node.
          */
         $xrdNodes = $xrds->xpath('/xrds:XRDS[1]/xrd:XRD');
-        if(!$xrdNodes)
-        {
+        if (!$xrdNodes) {
             return null;
         }
         return $xrdNodes;
@@ -190,31 +191,15 @@ class Zend_Service_Yadis_Xrds
      */
     public static function sortByPriority(array $unsorted)
     {
-        /**
-         * Perform simple numeric ordering of the priorities. This ensures the
-         * initial priority keys are ordered numerically ascending (higher 
-         * priorities are the first to be reached when iterating the array).
-         */
-        $priorities = array_keys($unsorted);
-        sort($priorities, SORT_NUMERIC);
-        $unflattened = array();
-        foreach($priorities as $priority) {
-            $unflattened[$priority] = $unsorted[$priority];
-        }
-        /**
-         * Flatten the priority arrays to a one-dimensional array after
-         * ordering elements assigned the same priority randomly. The random 
-         * ordering ensures non/same prioritised elements are randomly selected
-         * to avoid a bias towards any particular element.
-         */
+        ksort($unsorted);
         $flattened = array();
-        foreach ($unflattened as $priority) {
-            if (count($priority) > 1){
+        foreach ($unsorted as $priority) {
+            if (count($priority) > 1) {
                 shuffle($priority);
                 $flattened = array_merge($flattened, $priority);
             } else {
                 $flattened[] = $priority[0];
-            } 
+            }
         }
         return $flattened;
     }
