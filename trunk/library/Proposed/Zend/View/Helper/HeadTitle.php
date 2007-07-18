@@ -152,7 +152,7 @@ class Zend_View_Helper_HeadTitle
      *
      * @return Zend_View_Helper_HeadTitle
      */
-    public function getPrefix($prefix)
+    public function getPrefix()
     {
         return $this->_prefix;
     }

@@ -31,4 +31,10 @@ class Zend_View_Helper_HeadTitleTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->view->headTitle()->has());
     }
 
+    public function testPrefix()
+    {
+        $this->view->headTitle()->setPrefix('prefix');
+        $this->assertEquals('prefix', $this->view->headTitle()->getPrefix());
+    }
+
 }
