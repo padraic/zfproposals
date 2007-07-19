@@ -83,6 +83,7 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
         } else if ($compare < 0) {
             return false;
         }
+        $binary = '';
         while ($this->_math->compare($big, 0) > 0) {
             $binary = chr($this->_math->modulus($big, 256)) . $binary;
             $big = $this->_math->divide($big, 256);

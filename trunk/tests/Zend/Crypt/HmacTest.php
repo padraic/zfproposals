@@ -303,4 +303,12 @@ class Zend_Crypt_HmacTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('e8e99d0f45237d786d6bbaa7965c7808bbff1a91', $hmac->hash($data), true);
     }
 
+    // quick test of the static method shortcut
+    public function testStaticHmac()
+    {
+        $data = 'Hi There';
+        $key = str_repeat("\x0b", 16);
+        $this->assertEquals('9294727a3638bb1c13f48ef8158bfc9d', Zend_Crypt_Hmac::hmac($key, 'MD5', $data));
+    }
+
 }

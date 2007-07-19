@@ -109,6 +109,22 @@ class Zend_Crypt_Hmac
     }
 
     /**
+     * For the decoupling challenged, a static method for performing HMAC in
+     * one foul swoop.
+     *
+     * @param string $key
+     * @param string $hash
+     * @param string $data
+     * @param string $output
+     * @return string
+     */
+    public static function hmac($key, $hash, $data, $output = self::STRING)
+    {
+        $hmac = new self($key, $hash);
+        return $hmac->hash($data, $output);
+    }
+
+    /**
      * Set the key to use when hashing
      *
      * @param string $key
