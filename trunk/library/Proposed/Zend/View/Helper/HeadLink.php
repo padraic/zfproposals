@@ -162,6 +162,9 @@ class Zend_View_Helper_HeadLink
      */
     public function __toString($index = null)
     {
+        if (($attributeList = $this->get($index)) == null) {
+            return '';
+        }
         $attributeList = $this->get($index);
         $output = '';
         foreach ($attributeList as $attributes) {

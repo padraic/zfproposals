@@ -76,7 +76,7 @@ class Zend_View_Helper_Partial {
         $view = clone $this->view;
         $view->clearVars();
         if (!is_null($viewModel)) {
-            foreach($viewModel as $key->$value) {
+            foreach($viewModel as $key=>$value) {
                 $view->$key = $value;
             }
         }
