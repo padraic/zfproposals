@@ -23,6 +23,7 @@
  * PHP implementation of the RFC 2104 Hash based Message Authentication Code
  * algorithm.
  *
+ * @todo  Patch for refactoring failed tests (key block sizes >80 using internal algo)
  * @category   Zend
  * @package    Zend_Crypt
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
@@ -37,14 +38,14 @@ class Zend_Crypt_Hmac
      *
      * @var string
      */
-    private $_key = null;
+    protected static $_key = null;
 
     /**
      * pack() format to be used for current hashing method
      *
      * @var string
      */
-    private $_packFormat = null;
+    protected static $_packFormat = null;
 
     /**
      * Hashing algorithm; can be the md5/sha1 functions or any algorithm name
@@ -52,14 +53,14 @@ class Zend_Crypt_Hmac
      *
      * @var string
      */
-    private $_hashAlgorithm = 'md5';
+    protected static $_hashAlgorithm = 'md5';
 
     /**
      * Supported direct hashing functions in PHP
      *
      * @var array
      */
-    private $_supportedHashNativeFunctions = array(
+    protected static $_supportedHashNativeFunctions = array(
         'md5',
         'sha1',
     );
@@ -71,7 +72,7 @@ class Zend_Crypt_Hmac
      *
      * @var array
      */
-    private $_hashPackFormats = array(
+    protected static $_hashPackFormats = array(
         'md5'        => 'H32',
         'sha1'       => 'H40'
     );
@@ -81,7 +82,7 @@ class Zend_Crypt_Hmac
      *
      * @var array
      */
-    private $_supportedMhashAlgorithms = array('adler32',' crc32', 'crc32b', 'gost', 
+    protected static $_supportedMhashAlgorithms = array('adler32',' crc32', 'crc32b', 'gost', 
             'haval128', 'haval160', 'haval192', 'haval256', 'md4', 'md5', 'ripemd160', 
             'sha1', 'sha256', 'tiger', 'tiger128', 'tiger160');
 
@@ -91,67 +92,60 @@ class Zend_Crypt_Hmac
     const STRING = 'string';
     const BINARY = 'binary';
 
-    /**
-     * Constructor; optionally set Key and Hash at this point
-     *
-     * @param string $key
-     * @param string $hash
-     * @return void
-     */
-    public function __construct($key = null, $hash = null)
+    public static function digest($key, $hash, $data, $output = self::STRING, $internal = false)
     {
-        if (!is_null($key)) {
-            $this->setKey($key);
-        }
-        if (!is_null($hash)) {
-            $this->setHashAlgorithm($hash);
-        }
-    }
-
-    /**
-     * For the decoupling challenged, a static method for performing HMAC in
-     * one foul swoop.
-     *
-     * @param string $key
-     * @param string $hash
-     * @param string $data
-     * @param string $output
-     * @return string
-     */
-    public static function hmac($key, $hash, $data, $output = self::STRING)
-    {
-        $hmac = new self($key, $hash);
-        return $hmac->hash($data, $output);
-    }
-
-    /**
-     * Set the key to use when hashing
-     *
-     * @param string $key
-     * @return Zend_Crypt_Hmac
-     */
-    public function setKey($key)
-    {
+        // set the key
         if (!isset($key) || empty($key)) {
             require_once 'Zend/Crypt/Hmac/Exception.php';
             throw new Zend_Crypt_Hmac_Exception('provided key is null or empty');
         }
-        $this->_key = $key;
-        return $this;
+        self::$_key = $key;
+
+        // set the hash
+        self::_setHashAlgorithm($hash);
+
+        // perform hashing and return
+        return self::_hash($data, $output, $internal);
     }
 
     /**
-     * Getter to return the currently set key
+     * Setter for the hash method. Supports md5() and sha1() functions, and if
+     * available the hashing algorithms supported by the hash() PHP5 function.
      *
-     * @return string
+     * @param string $hash
+     * @return Zend_Crypt_Hmac
      */
-    public function getKey()
+    protected static function _setHashAlgorithm($hash)
     {
-        if (is_null($this->_key)) {
+        if (!isset($hash) || empty($hash)) {
             require_once 'Zend/Crypt/Hmac/Exception.php';
-            throw new Zend_Crypt_Hmac_Exception('key has not yet been set');
+            throw new Zend_Crypt_Hmac_Exception('provided hash string is null or empty');
         }
-        return $this->_key;
+
+        $hash = strtolower($hash);
+        if (isset(self::$_hashPackFormats[$hash])) {
+            self::$_packFormat = self::$_hashPackFormats[$hash];
+        }
+        $hashSupported = false;
+
+        if (function_exists('hash_algos') && in_array($hash, hash_algos())) {
+            $hashSupported = true;
+        }
+
+        if ($hashSupported === false && function_exists('mhash') && in_array($hash, self::$_supportedMhashAlgorithms)) {
+            $hashSupported = true;
+        }
+
+        if ($hashSupported === false && in_array($hash, self::$_supportedHashNativeFunctions) && in_array($hash, array_keys(self::$_hashPackFormats))) {
+            self::$_packFormat = self::$_hashPackFormats[$hash];
+            $hashSupported = true;
+        }
+
+        if ($hashSupported === false) {
+            require_once 'Zend/Crypt/Hmac/Exception.php';
+            throw new Zend_Crypt_Hmac_Exception('hash algorithm provided is not supported on this PHP installation; please enable the hash or mhash extensions');
+        }
+        self::$_hashAlgorithm = $hash;
     }
 
     /**
@@ -188,16 +182,6 @@ class Zend_Crypt_Hmac
     }
 
     /**
-     * Return the current hashing algorithm
-     *
-     * @return string
-     */
-    public function getHashAlgorithm()
-    {
-        return $this->_hashAlgorithm;
-    }
-
-    /**
      * Perform HMAC and return the keyed data
      *
      * @param string $data
@@ -205,36 +189,36 @@ class Zend_Crypt_Hmac
      * @param bool $internal Option to not use hash() functions for testing
      * @return string
      */
-    public function hash($data, $output = self::STRING, $internal = false)
+    protected static function _hash($data, $output = self::STRING, $internal = false)
     {
         if (function_exists('hash_hmac') && $internal === false) {
             if ($output == self::BINARY) {
-                return hash_hmac($this->getHashAlgorithm(), $data, $this->getKey(), 1);
+                return hash_hmac(self::$_hashAlgorithm, $data, self::$_key, 1);
             }
-            return hash_hmac($this->getHashAlgorithm(), $data, $this->getKey());
+            return hash_hmac(self::$_hashAlgorithm, $data, self::$_key);
         }
 
         if (function_exists('mhash') && $internal === false) {
             if ($output == self::BINARY) {
-                return mhash($this->_getMhashDefinition($this->getHashAlgorithm()), $data, $this->getKey());
+                return mhash(self::_getMhashDefinition(self::$_hashAlgorithm), $data, self::$_key);
             }
-            $bin = mhash($this->_getMhashDefinition($this->getHashAlgorithm()), $data, $this->getKey());
+            $bin = mhash(self::_getMhashDefinition(self::$_hashAlgorithm), $data, self::$_key);
             return bin2hex($bin);
         }
 
         // last ditch effort for MD5 and SHA1 only
-        $key = $this->getKey();
-        $hash = $this->getHashAlgorithm();
+        $key = self::$_key;
+        $hash = self::$_hashAlgorithm;
 
         if (strlen($key) < 64) {
             $key = str_pad($key, 64, chr(0));
         } elseif (strlen($key) > 64) {
-           $key =  pack($this->_packFormat, $this->_digest($hash, $key, $output));
+           $key =  pack(self::$_packFormat, self::_digest($hash, $key, $output));
         }
         $padInner = (substr($key, 0, 64) ^ str_repeat(chr(0x36), 64));
         $padOuter = (substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64));
         
-        return $this->_digest($hash, $padOuter . pack($this->_packFormat, $this->_digest($hash, $padInner . $data, $output)), $output);
+        return self::_digest($hash, $padOuter . pack(self::$_packFormat, self::_digest($hash, $padInner . $data, $output)), $output);
     }
 
     /**
@@ -245,7 +229,7 @@ class Zend_Crypt_Hmac
      * @param string $hashAlgorithm
      * @return integer
      */
-    protected function _getMhashDefinition($hashAlgorithm)
+    protected static function _getMhashDefinition($hashAlgorithm)
     {
         for ($i = 0; $i <= mhash_count(); $i++)
         {
@@ -263,7 +247,7 @@ class Zend_Crypt_Hmac
      * @param string $mode
      * @return string
      */
-    protected function _digest($hash, $key, $mode)
+    protected static function _digest($hash, $key, $mode)
     {
         if ($mode == self::BINARY) {
             return $hash($key, true);
