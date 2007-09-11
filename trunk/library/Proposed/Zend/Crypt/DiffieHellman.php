@@ -148,11 +148,14 @@ class Zend_Crypt_DiffieHellman
      * By default, the function expects the public key to be in binary form
      * which is the typical format when being transmitted.
      *
+     * If you need the binary form of the shared secret key, call
+     * getSharedSecretKey() with the optional parameter for Binary output.
+     *
      * @param string $publicKey
      * @param string $type
-     * @return Zend_Crypt_DiffieHellman
+     * @return string
      */
-    public function computeSecretKey($publicKey, $type = self::NUMBER)
+    public function computeSecretKey($publicKey, $type = self::NUMBER, $output = self::NUMBER)
     {
         if ($type == self::BINARY) {
             $publicKey = $this->_math->fromBinary($publicKey);
@@ -162,7 +165,7 @@ class Zend_Crypt_DiffieHellman
             throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
         }
         $this->_secretKey = $this->_math->powmod($publicKey, $this->getPrivateKey(), $this->getPrime());
-        return $this;
+        return $this->getSharedSecretKey($output);
     }
 
     /**
