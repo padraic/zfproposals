@@ -148,8 +148,7 @@ class Zend_Crypt_Hmac
             $hashSupported = true;
         }
 
-        if ($hashSupported === false && in_array($hash, self::$_supportedHashNativeFunctions) && in_array($hash, array_keys(self::$_hashPackFormats))) {
-            self::$_packFormat = self::$_hashPackFormats[$hash];
+        if ($hashSupported === false && in_array($hash, self::$_supportedHashNativeFunctions)) {
             $hashSupported = true;
         }
 
@@ -192,7 +191,7 @@ class Zend_Crypt_Hmac
         if (strlen($key) < 64) {
             $key = str_pad($key, 64, chr(0));
         } elseif (strlen($key) > 64) {
-           $key =  pack(self::$_packFormat, self::_digest($hash, $key, $output));
+            $key = pack(self::$_packFormat, self::_digest($hash, $key, $output));
         }
         $padInner = (substr($key, 0, 64) ^ str_repeat(chr(0x36), 64));
         $padOuter = (substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64));
