@@ -92,7 +92,19 @@ class Zend_Crypt_Hmac
     const STRING = 'string';
     const BINARY = 'binary';
 
-    public static function digest($key, $hash, $data, $output = self::STRING, $internal = false)
+    /**
+     * Performs a HMAC computation given relevant details such as Key, Hashing
+     * algorithm, the data to compute MAC of, and an output format of String,
+     * Binary notation or BTWOC.
+     *
+     * @param string $key
+     * @param string $hash
+     * @param string $data
+     * @param string $output
+     * @param boolean $internal
+     * @return string
+     */
+    public static function compute($key, $hash, $data, $output = self::STRING, $internal = false)
     {
         // set the key
         if (!isset($key) || empty($key)) {
@@ -146,39 +158,6 @@ class Zend_Crypt_Hmac
             throw new Zend_Crypt_Hmac_Exception('hash algorithm provided is not supported on this PHP installation; please enable the hash or mhash extensions');
         }
         self::$_hashAlgorithm = $hash;
-    }
-
-    /**
-     * Setter for the hash method. Supports md5() and sha1() functions, and if
-     * available the hashing algorithms supported by the hash() PHP5 function.
-     *
-     * @param string $hash
-     * @return Zend_Crypt_Hmac
-     */
-    public function setHashAlgorithm($hash)
-    {
-        if (!isset($hash) || empty($hash)) {
-            require_once 'Zend/Crypt/Hmac/Exception.php';
-            throw new Zend_Crypt_Hmac_Exception('provided hash string is null or empty');
-        }
-        $hash = strtolower($hash);
-        $hashSupported = false;
-        if (function_exists('hash_algos') && in_array($hash, hash_algos())) {
-            $hashSupported = true;
-        }
-        if ($hashSupported === false && function_exists('mhash') && in_array($hash, $this->_supportedMhashAlgorithms)) {
-            $hashSupported = true;
-        }
-        if ($hashSupported === false && in_array($hash, $this->_supportedHashNativeFunctions) && in_array($hash, array_keys($this->_hashPackFormats))) {
-            $this->_packFormat = $this->_hashPackFormats[$hash];
-            $hashSupported = true;
-        }
-        if ($hashSupported === false) {
-            require_once 'Zend/Crypt/Hmac/Exception.php';
-            throw new Zend_Crypt_Hmac_Exception('hash algorithm provided is not supported on this PHP installation; please enable the hash or mhash extensions');
-        }
-        $this->_hashAlgorithm = $hash;
-        return $this;
     }
 
     /**
@@ -242,6 +221,7 @@ class Zend_Crypt_Hmac
      * Digest method when using native functions which allows the selection
      * of raw binary output.
      *
+     * @todo Replace with Zend_Crypt::digest() once committed
      * @param string $hash
      * @param string $key
      * @param string $mode

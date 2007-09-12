@@ -35,6 +35,14 @@ class Zend_Crypt_DiffieHellman
 {
 
     /**
+     * Static flag to select whether to use PHP5.3's openssl extension
+     * if available.
+     *
+     * @var boolean
+     */
+    public static $useOpenssl = true;
+
+    /**
      * Default large prime number; required by the algorithm. 
      *
      * @var string
@@ -115,7 +123,20 @@ class Zend_Crypt_DiffieHellman
      */
     public function generateKeys()
     {
-        $this->_publicKey = $this->_math->powmod($this->getGenerator(), $this->getPrivateKey(), $this->getPrime());
+        if (function_exists('openssl_dh_compute_key') && self::$useOpenssl !== false) {
+            $details = array();
+            $details['p'] = $this->getPrime();
+            $details['g'] = $this->getGenerator();
+            if ($this->hasPrivateKey()) {
+                $details['priv_key'] = $this->getPrivateKey();
+            }
+            $this->_publicKey = openssl_pkey_new( array('dh' => $details) );
+            // get private key for later use or external retrieval
+            $data = openssl_pkey_get_details($this->_publicKey);
+            $this->setPrivateKey( $data['dh']['priv_key'] );
+        } else {
+            $this->_publicKey = $this->_math->powmod($this->getGenerator(), $this->getPrivateKey(), $this->getPrime());
+        }
         return $this;
     }
 
@@ -153,7 +174,7 @@ class Zend_Crypt_DiffieHellman
      *
      * @param string $publicKey
      * @param string $type
-     * @return string
+     * @return mixed
      */
     public function computeSecretKey($publicKey, $type = self::NUMBER, $output = self::NUMBER)
     {
@@ -164,7 +185,11 @@ class Zend_Crypt_DiffieHellman
             require_once('Zend/Crypt/DiffieHellman/Exception.php');
             throw new Zend_Crypt_DiffieHellman_Exception('invalid parameter; not a positive natural number');
         }
-        $this->_secretKey = $this->_math->powmod($publicKey, $this->getPrivateKey(), $this->getPrime());
+        if (function_exists('openssl_dh_compute_key') && self::$useOpenssl !== false) {
+            $this->_secretKey = openssl_dh_compute_key($publicKey, $this->getPublicKey());
+        } else {
+            $this->_secretKey = $this->_math->powmod($publicKey, $this->getPrivateKey(), $this->getPrime());
+        }
         return $this->getSharedSecretKey($output);
     }
 
@@ -277,7 +302,7 @@ class Zend_Crypt_DiffieHellman
      */
     public function getPrivateKey($type = self::NUMBER)
     {
-        if (!isset($this->_privateKey)) {
+        if (!$this->hasPrivateKey()) {
             $this->setPrivateKey($this->_generatePrivateKey());
         }
         if ($type == self::BINARY) {
@@ -286,6 +311,16 @@ class Zend_Crypt_DiffieHellman
             return $this->_math->btwoc($this->_math->toBinary($this->_privateKey));
         }
         return $this->_privateKey;
+    }
+
+    /**
+     * Check whether a private key currently exists.
+     *
+     * @return boolean
+     */
+    public function hasPrivateKey()
+    {
+        return isset($this->_privateKey);
     }
 
     /**
