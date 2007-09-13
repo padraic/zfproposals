@@ -11,6 +11,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'ReaderTest.php';
 require_once 'CharacterTest.php';
+require_once 'ParserTest.php';
 
 class Zend_Yaml_AllTests
 {
@@ -25,6 +26,7 @@ class Zend_Yaml_AllTests
 
         $suite->addTestSuite('Zend_Yaml_ReaderTest');
         $suite->addTestSuite('Zend_Yaml_CharacterTest');
+        $suite->addTestSuite('Zend_Yaml_ParserTest');
 
         return $suite;
     }
