@@ -12,8 +12,8 @@ class Zend_Yaml_Character
     const LINEBREAK = 'linebreak';
     const DIGIT = 'digit';
     const INDENT = 'indent';
-    const EOF = 'eof';
-    
+    const EOF = -1;
+
     public function isType($character, $type)
     {
         switch ($type) {
@@ -90,7 +90,7 @@ class Zend_Yaml_Character
             chr(10), chr(13), chr(0x85)
         );
         if (in_array($character, $_lineSpaceChars)) {
-            return true;    
+            return true;
         }
         return false;
     }
@@ -101,7 +101,7 @@ class Zend_Yaml_Character
             chr(9), chr(0x20)
         );
         if (in_array($character, $_spaceChars)) {
-            return true;    
+            return true;
         }
         return false;
     }
@@ -112,7 +112,7 @@ class Zend_Yaml_Character
             chr(10), chr(13)
         );
         if (in_array($character, $_lineBreakChars)) {
-            return true;    
+            return true;
         }
         return false;
     }

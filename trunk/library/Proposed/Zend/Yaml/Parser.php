@@ -31,9 +31,9 @@ class Zend_Yaml_Parser
     protected $_properties = array();
     protected $_pendingEvent = '';
 
-    public function __construct($data, Zend_Yaml_Parser_Event_Interface $event, Zend_Yaml_Character $yamlCharacter = null)
+    public function __construct($input, Zend_Yaml_Parser_Event_Interface $event, Zend_Yaml_Character $yamlCharacter = null)
     {
-        $this->_reader = new Zend_Yaml_Parser_Reader($data);
+        $this->_reader = new Zend_Yaml_Parser_Reader($input);
         $this->_parserEvent = $event;
         if (is_null($yamlCharacter)) {
             $this->_character = new Zend_Yaml_Character;
@@ -44,7 +44,7 @@ class Zend_Yaml_Parser
 
     public static function parse($data)
     {
-        $event = new Zend_Yaml_Parser_Event_Interface;
+        $event = new Zend_Yaml_Parser_Event_Test; // need a proper DI method for Events
         $parser = new self($data, $event);
         $parser->parseYaml();
     }
@@ -54,11 +54,11 @@ class Zend_Yaml_Parser
         while ($this->catchComment(-1, false)) {
         }
         if (!$this->catchHeader()) {
-            $this->documentFirst();
+            $this->catchDocumentFirst();
         } else {
-            $this->valueNa(-1);
+            $this->catchValueNa(-1);
         }
-        while ($this->documentNext()) {
+        while ($this->catchDocumentNext()) {
         }
     }
 
@@ -276,7 +276,7 @@ class Zend_Yaml_Parser
         $q1 = $this->catchStringSingleQuoted();
         $q2 = $this->catchStringDoubleQuoted();
 
-        
+
         if ($q1 || $q2 || $this->catchStringLooseSimple()) {
             // some value worth storing
             $string = trim( (string) $this->_reader );
@@ -298,7 +298,7 @@ class Zend_Yaml_Parser
             $this->unmark();
             return true;
         }
-        
+
         $this->reset();
         return false;
     }
@@ -490,7 +490,7 @@ class Zend_Yaml_Parser
                 throw new Exception('Indentations after a nested key incorrect');
             }
             return true;
-        }   
+        }
         if (!$this->catchValueInline()) {
             return false;
         }
@@ -664,7 +664,7 @@ class Zend_Yaml_Parser
     {
         if (!$this->catchKey($n)) {
             return false;
-        }   
+        }
         if ($this->_reader->read() !== ':') {
             return false;
         }
@@ -753,7 +753,7 @@ class Zend_Yaml_Parser
         if (!$this->catchValue($n + 1)) {
             throw new Exception('No value after : separator in in-list map')
         }
-        
+
         $n = $n + 1;
         $i = 0;
         $indent = $this->countIndent();
@@ -794,7 +794,7 @@ class Zend_Yaml_Parser
         if (!$this->catchNewLine()) {
             throw new Exception('No newline detected after a block definition');
         }
-        
+
         $string = '';
         $blockIndent = $this->getBlockLine($n, -1, $string, $char);
 
@@ -943,7 +943,7 @@ class Zend_Yaml_Parser
     {
         $bool = ($this->catchNlist(-1) || $this->catchNmap(-1));
         $this->mark();
-        if (!$this->catchHeader() && $this->_reader->read() !== Zend_Yaml_Character::EOFTOBECHECKEDSOMEHOW) {
+        if (!$this->catchHeader() && $this->_reader->read() !== Zend_Yaml_Character::EOF) {
             throw new Exception('End of document was expected');
         }
         if (!$bool) {
@@ -952,8 +952,15 @@ class Zend_Yaml_Parser
         return true;
     }
 
-    public function documentNext()
+    public function catchDocumentNext()
     {
+        if (!$this->catchHeader()) {
+            return false;
+        }
+        if (!$this->catchValueNa(-1)) {
+            return false;
+        }
+        return true;
     }
 
     public function mark()
@@ -971,12 +978,16 @@ class Zend_Yaml_Parser
         $this->_reader->unmark();
     }
 
-    public function setEvent()
-    {
+    public function getEvent() {
+        return $this->_event;
     }
 
-    public function getEvent()
-    {
+    public function setEvent(Zend_Yaml_Parser_Event_Interface $event) {
+        $this->_event = $event;
+    }
+
+    public function getLineNumber(){
+        return $this->_line;
     }
 
     protected function getReaderString()
@@ -991,6 +1002,49 @@ class Zend_Yaml_Parser
 
     protected function sendEvents()
     {
-        $string = '';
+        $string = null;
+        if ($this->_pendingEvent == '[') {
+            $this->_event->setEvent(self::LIST_OPEN);
+        }
+        if ($this->_pendingEvent == '{') {
+            $this->_event->setEvent(self::MAP_OPEN);
+        }
+        $this->_pendingEvent = '';
+
+        if (isset($this->_properties['anchor'])) {
+            $string = $this->_properties['anchor'];
+        } else {
+            $string = null;
+        }
+        if ($string !== null) {
+            $this->_event->setProperty('anchor', $string);
+        }
+
+        if (isset($this->_properties['transfer'])) {
+            $string = $this->_properties['transfer'];
+        } else {
+            $string = null;
+        }
+        if ($string !== null) {
+            $this->_event->setProperty('transfer', $string);
+        }
+
+        if (isset($this->_properties['alias'])) {
+            $string = $this->_properties['alias'];
+        } else {
+            $string = null;
+        }
+        if ($string !== null) {
+            $this->_event->setContent('alias', $string);
+        }
+
+        if (isset($this->_properties['string'])) {
+            $this->_event->setContent('string', $this->_properties['string'])
+        }
+        if (isset($this->_properties['value'])) {
+            $this->_event->setContent('value', $this->_properties['value'])
+        }
+
+        $this->_properties = array();
     }
 }
