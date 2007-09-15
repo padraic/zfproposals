@@ -48,6 +48,7 @@ class Zend_Yaml_Character
 
     public function isPrintable($character)
     {
+        // DEBUG INFINITE LOOP ON '#'
         $_otherPrintableChars = array(
             chr(9), chr(10), chr(13), chr(0x85)
         );
@@ -90,9 +91,9 @@ class Zend_Yaml_Character
             chr(10), chr(13), chr(0x85)
         );
         if (in_array($character, $_lineSpaceChars)) {
-            return true;
+            return false;
         }
-        return false;
+        return $this->isPrintable($character);
     }
 
     public function isSpace($character)

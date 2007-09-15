@@ -26,15 +26,15 @@ class Zend_Yaml_Parser
 
     protected $_reader = null;
     protected $_line = 1;
-    protected $_parserEvent = null;
+    protected $_event = null;
     protected $_character = null;
     protected $_properties = array();
     protected $_pendingEvent = '';
 
-    public function __construct($input, Zend_Yaml_Parser_Event_Interface $event, Zend_Yaml_Character $yamlCharacter = null)
+    public function __construct($input, $event, Zend_Yaml_Character $yamlCharacter = null)
     {
         $this->_reader = new Zend_Yaml_Parser_Reader($input);
-        $this->_parserEvent = $event;
+        $this->_event = $event;
         if (is_null($yamlCharacter)) {
             $this->_character = new Zend_Yaml_Character;
         } else {
@@ -178,7 +178,7 @@ class Zend_Yaml_Parser
 
         while (true) {
             $char = $this->_reader->read();
-            if ($char == -1) {
+            if ($char == -1) { // eof
                 break;
             }
             if ($i == 0 && $char == '-') {
@@ -354,7 +354,7 @@ class Zend_Yaml_Parser
         if ($this->_reader->read() != '&') {
             $this->_reader->unread();
             $this->unmark();
-            return false
+            return false;
         }
         if (!$this->catchWord()) {
             $this->reset();
@@ -395,6 +395,7 @@ class Zend_Yaml_Parser
             $this->reset();
             return false;
         }
+        var_dump('comment stripped'); exit;
         $this->unmark();
         return true;
     }
@@ -405,7 +406,7 @@ class Zend_Yaml_Parser
         $char_1 = $this->_reader->read();
         $char_2 = $this->_reader->read();
         $char_3 = $this->_reader->read();
-        if ($char_1 == '-' || $char_2 == '-' || $char_3 == '-') {
+        if ($char_1 != '-' || $char_2 != '-' || $char_3 != '-') {
             $this->reset();
             return false;
         }
@@ -413,7 +414,7 @@ class Zend_Yaml_Parser
             // just skipping through
         }
         $this->unmark();
-        $this->_parserEvent->setEvent(self::DOCUMENT_HEADER);
+        $this->_event->setEvent(self::DOCUMENT_HEADER);
         return true;
     }
 
@@ -437,7 +438,7 @@ class Zend_Yaml_Parser
             $this->reset();
             return false;
         }
-        $this->_parserEvent->setContent('directive', (string) $this->_reader);
+        $this->_event->setContent('directive', (string) $this->_reader);
         $this->unmark();
         return true;
     }
@@ -462,7 +463,7 @@ class Zend_Yaml_Parser
     public function catchProperties()
     {
         // One catch to bind them all, and in the darkness bind them!
-        $this->mark()
+        $this->mark();
         if ($this->catchTransfer()) {
             $this->catchSpace();
             $this->catchAnchor();
@@ -541,7 +542,7 @@ class Zend_Yaml_Parser
             $this->unmark();
             return true;
         }
-        $this->clearEvents();
+        $this->removeEvents();
         $this->reset();
         return false;
     }
@@ -561,7 +562,7 @@ class Zend_Yaml_Parser
             $this->unmark();
             return true;
         }
-        $this->clearEvents();
+        $this->removeEvents();
         $this->reset();
         return false;
     }
@@ -581,7 +582,7 @@ class Zend_Yaml_Parser
             $this->unmark();
             return true;
         }
-        $this->clearEvents();
+        $this->removeEvents();
         $this->reset();
         return false;
     }
@@ -593,7 +594,7 @@ class Zend_Yaml_Parser
             $this->catchSpace();
         }
         if (!$this->catchEnd()) {
-            $this->clearEvents();
+            $this->removeEvents();
             $this->reset();
             return false;
         }
@@ -616,7 +617,7 @@ class Zend_Yaml_Parser
             $this->catchSpace();
         }
         if (!$this->catchBlock($n)) {
-            $this->clearEvents();
+            $this->removeEvents();
             $this->reset();
             return false;
         }
@@ -628,7 +629,7 @@ class Zend_Yaml_Parser
         return true;
     }
 
-    public function catchNmap()
+    public function catchNmap($n)
     {
         $this->mark();
         $i = 0;
@@ -636,9 +637,9 @@ class Zend_Yaml_Parser
         if ($n == -1) {
             $n = $indent;
         } elseif ($indent > $n) {
-                $n = $indent;
-            }
+            $n = $indent;
         }
+
         $this->_pendingEvent = '{';
         while (true) {
             if (!$this->catchIndent($n)) {
@@ -669,7 +670,7 @@ class Zend_Yaml_Parser
             return false;
         }
         $this->_reader->read();
-        $this->_parserEvent->setEvent(MAP_SEPARATOR);
+        $this->_event->setEvent(MAP_SEPARATOR);
         $this->catchSpace();
         if (!$this->catchValueLoose($n + 1)) {
             throw new Exception('No value after : separator');
@@ -751,7 +752,7 @@ class Zend_Yaml_Parser
             return false;
         }
         if (!$this->catchValue($n + 1)) {
-            throw new Exception('No value after : separator in in-list map')
+            throw new Exception('No value after : separator in in-list map');
         }
 
         $n = $n + 1;
@@ -856,12 +857,12 @@ class Zend_Yaml_Parser
         while ($this->catchListEntry()) {
             $char = $this->_reader->current();
             if ($char == ']') {
-                $this->_reader->read()
+                $this->_reader->read();
                 $this->_event->setEvent(self::LIST_CLOSE);
                 return true;
             }
             if ($char !== ',') {
-                throw new Exception('Did not find expected (\',\') within an in-line list')
+                throw new Exception('Did not find expected (\',\') within an in-line list');
             }
             $this->_reader->read();
         }
@@ -872,7 +873,7 @@ class Zend_Yaml_Parser
             $this->_event->setEvent(self::LIST_CLOSE);
             return true;
         } else {
-            throw new Exception('In-line list error found')
+            throw new Exception('In-line list error found');
         }
     }
 
@@ -933,7 +934,7 @@ class Zend_Yaml_Parser
             throw new Exception('No space detected after map separator');
         }
         if (!$this->catchValueLooseInline()) {
-            throw new Exception('No value detected after map separator')
+            throw new Exception('No value detected after map separator');
         }
         $this->catchSpace();
         return true;
@@ -943,6 +944,7 @@ class Zend_Yaml_Parser
     {
         $bool = ($this->catchNlist(-1) || $this->catchNmap(-1));
         $this->mark();
+        exit('end: ' . $this->_reader->read());
         if (!$this->catchHeader() && $this->_reader->read() !== Zend_Yaml_Character::EOF) {
             throw new Exception('End of document was expected');
         }
@@ -1039,10 +1041,10 @@ class Zend_Yaml_Parser
         }
 
         if (isset($this->_properties['string'])) {
-            $this->_event->setContent('string', $this->_properties['string'])
+            $this->_event->setContent('string', $this->_properties['string']);
         }
         if (isset($this->_properties['value'])) {
-            $this->_event->setContent('value', $this->_properties['value'])
+            $this->_event->setContent('value', $this->_properties['value']);
         }
 
         $this->_properties = array();
