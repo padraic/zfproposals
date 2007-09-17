@@ -33,7 +33,6 @@ require_once 'Zend/ViewTest.php';
 require_once 'Zend/View/AllTests.php';
 require_once 'Zend/Yaml/AllTests.php';
 require_once 'Zend/Crypt/AllTests.php';
-//require_once 'Zend/Crypt/Math/AllTests.php';
 
 
 class Zend_AllTests
@@ -50,7 +49,6 @@ class Zend_AllTests
         $suite->addTest(Zend_View_AllTests::suite());
         $suite->addTest(Zend_Yaml_AllTests::suite());
         $suite->addTest(Zend_Crypt_AllTests::suite());
-        //$suite->addTest(Zend_Crypt_Math_AllTests::suite());
         return $suite;
     }
 }

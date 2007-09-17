@@ -12,6 +12,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'DiffieHellmanTest.php';
 require_once 'HmacTest.php';
 require_once 'MathTest.php';
+require_once 'Math/AllTests.php';
 
 class Zend_Crypt_AllTests
 {
@@ -27,6 +28,8 @@ class Zend_Crypt_AllTests
         $suite->addTestSuite('Zend_Crypt_DiffieHellmanTest');
         $suite->addTestSuite('Zend_Crypt_HmacTest');
         $suite->addTestSuite('Zend_Crypt_MathTest');
+        $suite->addTestSuite('Zend_Crypt_MathTest');
+        $suite->addTest(Zend_Crypt_Math_AllTests::suite());
 
         return $suite;
     }
