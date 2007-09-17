@@ -18,27 +18,28 @@
  *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Math_BigInteger_Interface */
-require_once 'Zend/Math/BigInteger/Interface.php';
+/** Zend_Crypt_Math_BigInteger_Interface */
+require_once 'Zend/Crypt/Math/BigInteger/Interface.php';
 
 /**
  * Support for arbitrary precision mathematics in PHP.
  *
- * Zend_Math_BigInteger_Bcmath is a wrapper across the PHP BCMath extension.
+ * Zend_Crypt_Math_BigInteger_Bcmath is a wrapper across the PHP BCMath
+ * extension.
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
+class Zend_Crypt_Math_BigInteger_Bcmath implements Zend_Crypt_Math_BigInteger_Interface
 {
 
     /**
@@ -183,12 +184,6 @@ class Zend_Math_BigInteger_Bcmath implements Zend_Math_BigInteger_Interface
             $operand = substr($operand, 4);
         }
         return $return;
-    }
-    
-
-    public function decimalToHex($operand)
-    {
-    
     }
 
 }

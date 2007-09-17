@@ -1,16 +1,16 @@
 <?php
 
-require_once 'Zend/Math/BigInteger/Bcmath.php';
+require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
-class Zend_Math_BigInteger_BcmathTest extends PHPUnit_Framework_TestCase 
+class Zend_Crypt_Math_BigInteger_BcmathTest extends PHPUnit_Framework_TestCase 
 {
 
     private $_math = null;
 
     public function setUp()
     {
-        $this->_math = new Zend_Math_BigInteger_Bcmath;
+        $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath;
     }
 
     public function testAdd()

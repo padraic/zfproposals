@@ -18,8 +18,8 @@
  *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -27,15 +27,16 @@
 /**
  * Support for arbitrary precision mathematics in PHP.
  *
- * Zend_Math_BigInteger_Bcmath is a wrapper across the PHP BCMath extension.
+ * Interface for a wrapper across any PHP extension supporting arbitrary
+ * precision maths.
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Math_BigInteger_Interface
+interface Zend_Crypt_Math_BigInteger_Interface
 {
 
     public function init($operand, $base = 10);

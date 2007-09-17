@@ -20,9 +20,9 @@
  * @version    $Id$
  */
 
-require_once 'Zend/Math/BigInteger.php';
+require_once 'Zend/Crypt/Math/BigInteger.php';
 
-class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
+class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
 {
 
     /**
@@ -54,6 +54,13 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
         return $rand;
     }
 
+    /**
+     * Get the big endian two's complement of a given big integer in
+     * binary notation
+     *
+     * @param string $long
+     * @return string
+     */
     public function btwoc($long) {
         if (ord($long[0]) > 127) {
             return "\x00" . $long;
@@ -61,6 +68,12 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
         return $long;
     }
 
+    /**
+     * Translate a binary form into a big integer string
+     *
+     * @param string $binary
+     * @return string
+     */
     public function fromBinary($binary) {
         if (!$this instanceof Zend_Math_BigInteger_Gmp) {
             $big = 0;
@@ -75,6 +88,12 @@ class Zend_Crypt_Math_BigInteger extends Zend_Math_BigInteger
         }
     }
 
+    /**
+     * Translate a big integer string into a binary form
+     *
+     * @param string $big
+     * @return string
+     */
     public function toBinary($big)
     {
         $compare = $this->_math->compare($big, 0);

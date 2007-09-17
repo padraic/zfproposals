@@ -33,5 +33,5 @@ require_once 'Zend/Exception.php';
  * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Math_Exception extends Zend_Exception
+class Zend_Crypt_Math_Exception extends Zend_Exception
 {}

@@ -18,20 +18,20 @@
  *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
 
-/** Zend_Math_BigInteger_Interface */
-require_once 'Zend/Math/BigInteger/Interface.php';
+/** Zend_Crypt_Math_BigInteger_Interface */
+require_once 'Zend/Crypt/Math/BigInteger/Interface.php';
 
 /**
  * Support for arbitrary precision mathematics in PHP.
  *
- * Zend_Math_BigInteger is a wrapper across three PHP extensions: bcmath, gmp
+ * Zend_Crypt_Math_BigInteger is a wrapper across three PHP extensions: bcmath, gmp
  * and big_int. Since each offer similar functionality, but availability of
  * each differs across installations of PHP, this wrapper attempts to select
  * the fastest option available and encapsulate a subset of its functionality
@@ -45,12 +45,12 @@ require_once 'Zend/Math/BigInteger/Interface.php';
  * only from PECL (a Windows port is not available).
  *
  * @category   Zend
- * @package    Zend_Math
- * @subpackage BigInteger
+ * @package    Zend_Crypt
+ * @subpackage Math
  * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Math_BigInteger
+class Zend_Crypt_Math_BigInteger
 {
 
     /**
@@ -70,22 +70,22 @@ class Zend_Math_BigInteger
     public function __construct($extension = null)
     {
         if (!is_null($extension) && !in_array($extension, array('bcmath', 'gmp', 'bigint'))) {
-            require_once('Zend/Math/BigInteger/Exception.php');
-            throw new Zend_Math_BigInteger_Exception('Invalid extension type; please use one of bcmath, gmp or bigint');
+            require_once('Zend/Crypt/Math/BigInteger/Exception.php');
+            throw new Zend_Crypt_Math_BigInteger_Exception('Invalid extension type; please use one of bcmath, gmp or bigint');
         }
         if($extension == 'gmp' || extension_loaded('gmp') || @dl('gmp.' . PHP_SHLIB_SUFFIX) || @dl('php_gmp.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Math/BigInteger/Gmp.php';
-            $this->_math = new Zend_Math_BigInteger_Gmp();
+            require_once 'Zend/Crypt/Math/BigInteger/Gmp.php';
+            $this->_math = new Zend_Crypt_Math_BigInteger_Gmp();
         }
         elseif($extension == 'bigint' || extension_loaded('big_int') || @dl('big_int.' . PHP_SHLIB_SUFFIX) || @dl('php_big_int.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Math/BigInteger/Bigint.php';
-            $this->_math = new Zend_Math_BigInteger_Bigint();
+            require_once 'Zend/Crypt_Math/BigInteger/Bigint.php';
+            $this->_math = new Zend_Crypt_Math_BigInteger_Bigint();
         } elseif($extension == 'bcmath' || extension_loaded('bcmath') || @dl('bcmath.' . PHP_SHLIB_SUFFIX) || @dl('php_bcmath.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Math/BigInteger/Bcmath.php';
-            $this->_math = new Zend_Math_BigInteger_Bcmath();
+            require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
+            $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath();
         } else {
-            require_once 'Zend/Math/BigInteger/Exception.php';
-            throw new Zend_Math_BigInteger_Exception('no big integer precision math support detected');
+            require_once 'Zend/Crypt/Math/BigInteger/Exception.php';
+            throw new Zend_Crypt_Math_BigInteger_Exception('no big integer precision math support detected');
         }
     }
 
@@ -94,13 +94,13 @@ class Zend_Math_BigInteger
      *
      * @param   string $methodName
      * @param   array $args
-     * @throws  Zend_Math_BigInteger_Exception
+     * @throws  Zend_Crypt_Math_BigInteger_Exception
      */
     public function __call($methodName, $args)
     {
         if(!method_exists($this->_math, $methodName)) {
-            require_once 'Zend/Math/BigInteger/Exception.php';
-            throw new Zend_Math_BigInteger_Exception('invalid method call: ' . get_class($this->_math) . '::' . $methodName . '() does not exist');
+            require_once 'Zend/Crypt/Math/BigInteger/Exception.php';
+            throw new Zend_Crypt_Math_BigInteger_Exception('invalid method call: ' . get_class($this->_math) . '::' . $methodName . '() does not exist');
         }
         return call_user_func_array(array($this->_math, $methodName), $args);
     }

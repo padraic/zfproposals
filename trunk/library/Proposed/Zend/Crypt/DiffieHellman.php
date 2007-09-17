@@ -19,7 +19,7 @@
  * @version    $Id$
  */
 
-require_once 'Zend/Crypt/Math/BigInteger.php';
+require_once 'Zend/Crypt/Math.php';
 
 /**
  * PHP implementation of the Diffie-Hellman public key encryption algorithm.
@@ -334,7 +334,7 @@ class Zend_Crypt_DiffieHellman
      */
     public function setBigIntegerMath($extension = null)
     {
-        $this->_math = new Zend_Crypt_Math_BigInteger($extension);
+        $this->_math = new Zend_Crypt_Math($extension);
     }
 
     /**
