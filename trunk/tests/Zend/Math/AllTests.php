@@ -1,7 +1,7 @@
 <?php
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Zend_Math_AllTests::main');
+    define('PHPUnit_MAIN_METHOD', 'Zend_Crypt_Math_AllTests::main');
 }
 
 require_once dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'TestHelper.php';
@@ -22,12 +22,12 @@ class Zend_Math_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Math');
 
-        $suite->addTestSuite('Zend_Math_BigInteger_BcmathTest');
+        $suite->addTestSuite('Zend_Crypt_Math_BigInteger_BcmathTest');
 
         return $suite;
     }
 }
 
-if (PHPUnit_MAIN_METHOD == 'Zend_Math_AllTests::main') {
+if (PHPUnit_MAIN_METHOD == 'Zend_Crypt_Math_AllTests::main') {
     Zend_Math_AllTests::main();
 }
