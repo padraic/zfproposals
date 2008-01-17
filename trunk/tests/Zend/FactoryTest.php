@@ -69,7 +69,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase
         }
     }
     
-    public function after()
+    public function tearDown()
     {
        Zend_Factory::clearRegistry(); 
     }
