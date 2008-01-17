@@ -7,14 +7,14 @@
 require_once dirname(dirname(__FILE__)) . '/TestHelper.php';
 
 
-/** Zend_View */
+/** Zend_Factory */
 require_once 'Zend/Factory.php';
 
 
 /** PHPUnit_Framework_TestCase */
 require_once 'PHPUnit/Framework/TestCase.php';
 
-// pre included class
+// pre included class used in tests
 require_once 'Zend/Mail.php';
 
 
@@ -67,6 +67,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase
             $this->fail('Expected exception since replaced class never existed which means replacement could create blind errors');
         } catch (Zend_Exception $e) {
         }
+    }
+    
+    public function after()
+    {
+       Zend_Factory::clearRegistry(); 
     }
 
 }
