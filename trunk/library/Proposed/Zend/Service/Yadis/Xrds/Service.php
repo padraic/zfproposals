@@ -12,16 +12,12 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * This class forms part of a proposal for the Zend Framework. The attached
- * copyright will be transferred to Zend Technologies USA Inc. upon future
- * acceptance of that proposal:
- *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
- *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 /** Zend_Service_Yadis_Xrds */
@@ -34,17 +30,17 @@ require_once 'Zend/Service/Yadis/Service.php';
  * The Zend_Service_Yadis_Xrds_Service class is a wrapper for Service elements
  * of an XRD document which is parsed using SimpleXML, and contains methods for
  * retrieving data about each Service, including Type, Url and other arbitrary
- * data added in a separate namespace, e.g. openid:Delegate.
+ * data added in a separate namespace, e.g. openid:Delegate for OpenID 1.1.
  *
  * This class extends the basic Zend_Service_Yadis_Xrds wrapper to implement a
  * Service object specific to the Yadis Specification 1.0. XRDS itself is not
  * an XML format ruled by Yadis, but by an OASIS proposal.
  *
- * @uses       Iterator
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @author     Pádraic Brady (http://blog.astrumfutura.com)
+ * @uses       Iterator
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements Iterator
@@ -63,12 +59,12 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
      * @var SimpleXMLElement
      */
     protected $_xrdNode = null;
-
+    
     /**
      * The Yadis Services resultset
      *
      * @var array
-     */
+     */ 
     protected $_services = array();
 
     /**
@@ -107,57 +103,57 @@ class Zend_Service_Yadis_Xrds_Service extends Zend_Service_Yadis_Xrds implements
 
     /**
      * Implements Iterator::current()
-     *
+     * 
      * Return the current element.
      *
      * @return Zend_Service_Yadis_Service
-     */
+     */ 
     public function current()
     {
          return current($this->_services);
     }
-
+ 
     /**
      * Implements Iterator::key()
      *
      * Return the key of the current element.
-     *
+     * 
      * @return integer
-     */
+     */ 
     public function key()
     {
          return key($this->_services);
     }
-
+ 
     /**
      * Implements Iterator::next()
-     *
+     * 
      * Increments pointer to next Service object.
      *
      * @return void
-     */
+     */ 
     public function next()
     {
          $this->_valid = (false !== next($this->_services));
     }
-
+ 
     /**
      * Implements Iterator::rewind()
-     *
+     * 
      * Rewinds the Iterator to the first Service object
      *
      * @return boolean
-     */
+     */ 
     public function rewind()
     {
-        $this->_valid = (false !== reset($this->_services));
+        $this->_valid = (false !== reset($this->_services)); 
     }
-
+ 
     /**
      * Implement Iterator::valid()
      *
      * @return boolean
-     */
+     */ 
     public function valid()
     {
          return $this->_valid;

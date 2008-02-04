@@ -12,13 +12,10 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * This class forms part of a proposal for the Zend Framework.
- *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
- *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
@@ -32,10 +29,15 @@ require_once 'Zend/Service/Yadis/Xrds/Service.php';
 /** Zend_Service_Yadis_Xrds_Namespace */
 require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
 
-/** Zend_Uri */
-require_once 'Zend/Uri.php';
+/** HTTP_Request */
+require_once 'HTTP/Request.php';
+
+/** Validate */
+require_once 'Validate.php';
 
 /**
+ * Zend_Service_Yadis class
+ *
  * Zend_Service_Yadis will provide a method of Service Discovery implemented
  * in accordance with the Yadis Specification 1.0. This describes a protocol
  * for locating an XRD document which details Services available. The XRD is
@@ -50,11 +52,30 @@ require_once 'Zend/Uri.php';
  *      http://yadis.org/papers/yadis-v1.0.pdf
  * Departures from the specification should be regarded as bugs ;).
  *
- * @uses       Zend_Service_Abstract
+ * Example usage:
+ *
+ *      Example: OpenID Service Discovery
+ *
+ *      $openid = 'http://padraic.astrumfutura.com';
+ *      $yadis = new Zend_Service_Yadis($openid);
+ *      $yadis->addNamespace('openid', 'http://openid.net/xmlns/1.0');
+ *      $serviceList = $yadis->discover();
+ *
+ *      foreach ($serviceList as $service) {
+ *          $types = $service->getTypes();
+ *          echo $types[0], ' at ', implode(', ', $service->getUris()), PHP_EOL;
+ *          echo 'Priority is ', $service->->getPriority(), PHP_EOL;
+ *      }
+ *
+ *      Possible Result @index[0] (indicates we may send Auth 2.0 requests for OpenID):
+ *
+ *      http://specs.openid.net/auth/2.0/server at http://www.myopenid.com/server
+ *      Priority is 0
+ *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @author     Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis extends Zend_Service_Abstract
@@ -150,6 +171,20 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     );
 
     /**
+     * Just in case someone needs special options, e.g. test proxy
+     *
+     * @var array
+     */
+    protected $_httpRequestOptions = null;
+
+    /**
+     * HTTP_Request object utilised by this class if externally set
+     *
+     * @var Zend_Http_Request
+     */
+    protected $_httpRequest = null;
+
+    /**
      * Class Constructor
      *
      * Allows settings of the initial Yadis ID (an OpenID URL for example) and
@@ -174,6 +209,27 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         if (isset($yadisId)) {
             $this->setYadisId($yadisId);
         }
+    }
+
+    /**
+     * Set options to be passed to the PEAR HTTP_Request constructor
+     *
+     * @param array $options
+     * @return void
+     */
+    public function setHttpRequestOptions(array $options)
+    {
+        $this->_httpRequestOptions = $options;
+    }
+
+    /**
+     * Get options to be passed to the Zend_Http_Request constructor
+     *
+     * @return array
+     */
+    public function getHttpRequestOptions()
+    {
+        return $this->_httpRequestOptions;
     }
 
     /**
@@ -220,7 +276,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     public function setYadisUrl($yadisId)
     {
         /**
-         * This step should validate IDNs (see ZF-881)
+         * This step should in future validate IDNs (see ZF-881)
          */
         if (Zend_Uri::check($yadisId)) {
             $this->_yadisUrl = $yadisId;
@@ -230,23 +286,22 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
         /**
          * Check if the Yadis ID is an XRI
          */
-        if (stripos($yadisId, 'xri://') === 0 || in_array($yadisId[0], $this->_xriIdentifiers))
+        if (stripos($yadisId, 'xri://') == 0 || in_array($yadisId[0], $this->_xriIdentifiers))
         {
             require_once 'Zend/Service/Yadis/Xri.php';
-            $this->_yadisUrl = Zend_Service_Yadis_Xri::getInstance()
+            $xri = Zend_Service_Yadis_Xri::getInstance()
+            $this->_yadisUrl = $xri->setHttpRequestOptions($this->getHttpRequestOptions())
                     ->setNamespace($this->_namespace)
                     ->toUri($yadisId);
 
             $cid = Zend_Service_Yadis_Xri::getInstance()->getCanonicalId();
-            exit(__LINE__ .' '. __FILE__ . '\nNot implemented yet');
-            return $this;
+            throw new Zend_Service_Yadis_Exception('Presently Zend_Service_Yadis Canonical ID support is not implemented.')
+            //return $this;
         }
 
         /**
          * The use of IRIs (International Resource Identifiers) is governed by
-         * RFC 3490. This is currently a Zend Framework issue (ZF-881) with an
-         * implementation version set at 0.9. That's ~March 15 2007 so fingers
-         * crossed ;).
+         * RFC 3490. This is currently a Zend Framework issue (ZF-881).
          */
 
         require_once 'Zend/Service/Yadis/Exception.php';
@@ -255,7 +310,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
 
     /**
      * Returns the Yadis URL. This will usually be identical to the Yadis ID,
-     * unless the Yadis ID (in the future) was one of ILI, XRI or i-name which
+     * unless the Yadis ID (in the future) was one of IRI, XRI or i-name which
      * required transformation to a valid URI.
      *
      * @returns string
@@ -391,7 +446,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * fallback solution in case Yadis fails, and the response came from a
      * user's personal URL acting as an alias.
      *
-     * @return  Zend_Http_Response|boolean
+     * @return Zend_Http_Response|boolean
      */
     public function getUserResponse()
     {
@@ -402,19 +457,42 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
     }
 
     /**
+     * Setter for custom Zend_Http_Request type object
+     *
+     * @param Zend_Http_Request $request
+     * @return void
+     */
+    public function setHttpRequest(Zend_Http_Request $request)
+    {
+        $this->_httpRequest = $request;
+    }
+
+    /**
+     * Setter for custom Zend_Http_Request type object
+     *
+     * @param Zend_Http_Request $request
+     * @return void
+     */
+    public function getHttpRequest()
+    {
+        return $this->_httpRequest;
+    }
+
+    /**
      * Run any instance of Zend_Http_Response through a set of filters to
      * determine the Yadis Response type which in turns determines how the
      * response should be reacted to or dealt with.
      *
+     * @param Zend_Http_Response $request
      * @return  integer
      */
-    protected function _getResponseType(Zend_Http_Response $response)
+    protected function _getResponseType(Zend_Http_Response $request)
     {
-        if ($this->_isXrdsLocationHeader($response)) {
+        if ($this->_isXrdsLocationHeader($request)) {
             return self::XRDS_LOCATION_HEADER;
-        } elseif ($this->_isXrdsContentType($response)) {
+        } elseif ($this->_isXrdsContentType($request)) {
             return self::XRDS_CONTENT_TYPE;
-        } elseif ($this->_isMetaHttpEquiv($response)) {
+        } elseif ($this->_isMetaHttpEquiv($request)) {
             return self::XRDS_META_HTTP_EQUIV;
         }
         return false;
@@ -500,9 +578,11 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
      * @return  boolean
      * @throws  Zend_Service_Yadis_Exception
      */
-    protected function _isMetaHttpEquiv(Zend_Http_Response $response)
+    protected function _isMetaHttpEquiv(HTTP_Request $request)
     {
-        if (!in_array($response->getHeader('Content-Type'), $this->_validHtmlContentTypes)) {
+        $location = null;
+        if (!in_array($response->getHeader('Content-Type'),
+        $this->_validHtmlContentTypes)) {
             return false;
         }
 
@@ -525,7 +605,7 @@ class Zend_Service_Yadis extends Zend_Service_Abstract
             }
         }
 
-        if (empty($location)) {
+        if (is_null($location)) {
             return false;
         } elseif (!Zend_Uri::check($location)) {
             require_once 'Zend/Service/Yadis/Exception.php';

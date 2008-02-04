@@ -12,16 +12,12 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * This class forms part of a proposal for the Zend Framework. The attached
- * copyright will be transferred to Zend Technologies USA Inc. upon future
- * acceptance of that proposal:
- *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
- *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 /** Zend_Service_Yadis_Xrds_Namespace */
@@ -33,21 +29,20 @@ require_once 'Zend/Service/Yadis/Xrds/Namespace.php';
  * retrieving data about the document. The concrete aspects of retrieving
  * specific data elements is left to a concrete subclass.
  *
- * @uses       SeekableIterator
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @author     Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis_Xrds
 {
-
+ 
     /**
      * Current key/pointer for the Iterator
-     *
+     * 
      * @var integer
-     */
+     */ 
     protected $_currentKey = 0;
 
     /**
@@ -64,27 +59,27 @@ class Zend_Service_Yadis_Xrds
      * @var Zend_Service_Yadis_Xrds_Namespace
      */
     protected $_namespace = null;
-
+ 
     /**
      * Constructor; parses and validates an XRD document. All access to
      * the data held in the XML is left to a concrete subclass specific to
      * expected XRD format and data types.
      * Cannot be directly instantiated; must call from subclass.
-     *
+     * 
      * @param   SimpleXMLElement $xrds
      * @param   Zend_Service_Yadis_Xrds_Namespace $namespace
-     */
+     */ 
     protected function __construct(SimpleXMLElement $xrds, Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
         $this->_namespace = $namespace;
         $xrdNodes = $this->_getValidXrdNodes($xrds);
-        if (!$xrdNodes){
+        if (!$xrdNodes) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('The XRD document was found to be invalid');
         }
         $this->_xrdNodes = $xrdNodes;
     }
-
+ 
     /**
      * Add a list (array) of additional namespaces to be utilised by the XML
      * parser when it receives a valid XRD document.
@@ -115,7 +110,7 @@ class Zend_Service_Yadis_Xrds
     /**
      * Return the value of a specific namespace.
      *
-     * @return   string|null
+     * @return string|null
      */
     public function getNamespace($namespace)
     {
@@ -125,7 +120,7 @@ class Zend_Service_Yadis_Xrds
     /**
      * Returns an array of all currently set namespaces.
      *
-     * @return  array
+     * @return array
      */
     public function getNamespaces()
     {
@@ -199,7 +194,7 @@ class Zend_Service_Yadis_Xrds
                 $flattened = array_merge($flattened, $priority);
             } else {
                 $flattened[] = $priority[0];
-            }
+            } 
         }
         return $flattened;
     }

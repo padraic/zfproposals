@@ -12,16 +12,12 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
- * This class forms part of a proposal for the Zend Framework. The attached
- * copyright will be transferred to Zend Technologies USA Inc. upon future
- * acceptance of that proposal:
- *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
- *
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 /** Zend_Service_Abstract */
@@ -33,11 +29,10 @@ require_once 'Zend/Uri.php';
 /**
  * Provides methods for translating an XRI into a URI.
  *
- * @uses       Zend_Service_Abstract
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Yadis
- * @author     Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
@@ -98,6 +93,13 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
     protected $_canonicalId = null;
 
     /**
+     * Just in case someone needs special options, e.g. test proxy
+     *
+     * @var array
+     */
+    protected $_httpRequestOptions = null;
+
+    /**
      * Constructor; protected since this class is a singleton.
      */
     protected function __construct()
@@ -120,8 +122,8 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
      * Set a Namespace object which contains all relevant namespaces
      * for XPath queries on this Yadis resource.
      *
-     * @param Services_Yadis_Xrds_Namespace
-     * @return Services_Yadis_Xri
+     * @param Zend_Service_Yadis_Xrds_Namespace
+     * @return Zend_Service_Yadis_Xri
      */
     public function setNamespace(Zend_Service_Yadis_Xrds_Namespace $namespace)
     {
@@ -150,8 +152,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
     /**
      * Return the URI of the current proxy.
      *
-     * @param   string $proxy
-     * @uses    Zend_Uri
+     * @param string $proxy
      */
     public function getProxy()
     {
@@ -161,9 +162,9 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
     /**
      * Set an XRI to be translated to a URI.
      *
-     * @param   string $url
-     * @return  Zend_Service_Yadis_Xri
-     * @throws  Zend_Service_Yadis_Exception
+     * @param  string $url
+     * @return Zend_Service_Yadis_Xri
+     * @throws Zend_Service_Yadis_Exception
      */
     public function setXri($xri)
     {
@@ -252,7 +253,7 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
             $uri = $this->_uri;
         }
 
-        $response = $this->_get($uri);
+        $response = $this->_get($uri, null, $this->getHttpRequestOptions());
         if (stripos($response->getHeader('Content-Type'), 'application/xrds+xml') === false) {
             require_once 'Zend/Service/Yadis/Exception.php';
             throw new Zend_Service_Yadis_Exception('The response header indicates the response body is not an XRDS document');
@@ -282,18 +283,39 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
     }
 
     /**
+     * Set options to be passed to the Zend_Http_Request constructor
+     *
+     * @param array $options
+     * @return void
+     */
+    public function setHttpRequestOptions(array $options)
+    {
+        $this->_httpRequestOptions = $options;
+    }
+
+    /**
+     * Get options to be passed to the Zend_Http_Request constructor
+     *
+     * @return array
+     */
+    public function getHttpRequestOptions()
+    {
+        return $this->_httpRequestOptions;
+    }
+
+    /**
      * Required to request the root i-name (XRI) XRD which will provide an
      * error message that the i-name does not exist, or else return a valid
      * XRD document containing the i-name's Canonical ID.
      *
      * @param   string $uri
      * @return  Zend_Http_Response
-     * @uses    Zend_Http_Client
-     * @todo    Finish this correctly using the QXRI rules.
+     * @todo    Finish this a bit better using the QXRI rules.
      */
-    protected function _get($url, $serviceType = null)
+    protected function _get($url, $serviceType = null, array $options = null)
     {
         $client = self::getHttpClient();
+        $client->setConfig($options);
         $client->setUri($url);
         $client->setMethod(Zend_Http_Client::GET);
         $client->setHeaders('Accept', 'application/xrds+xml');
@@ -304,18 +326,14 @@ class Zend_Service_Yadis_Xri extends Zend_Service_Abstract
             $client->setParameterGet('_xrd_r', 'application/xrds+xml;sep=false');
         }
 
-        /**
-         * Quick test of URI
-         */
-        if (!Zend_Uri::check($client->getUri()))
-        {
-            throw new Exception('Bad query from XRI Resolution');
+        if (!Zend_Uri::check($client->getUri())) {
+            throw new Zend_Service_Yadis_Exception('Bad query from XRI Resolution');
         }
 
         $response = $client->request();
         if (!$response->isSuccessful()) {
             require_once 'Zend/Service/Yadis/Exception.php';
-            throw new Zend_Service_Yadis_Exception('Invalid response or error received from XRI proxy: ' . $response->getStatus() . ' ' . $response->getMessage());
+            throw new Zend_Service_Yadis_Exception('Invalid response to Yadis protocol received: ' . $response->getStatus() . ' ' . $response->getMessage());
         }
         return $response;
     }

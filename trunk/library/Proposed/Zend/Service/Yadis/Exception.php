@@ -1,37 +1,61 @@
 <?php
 /**
- * Zend Framework
+ * Exception subclass of PEAR_Exception for Zend_Service_Yadis.
  *
- * LICENSE
+ * PHP version 5
  *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
+ * LICENSE:
+ * 
+ * Copyright (c) 2007, Pádraic Brady <padraic.brady@yahoo.com>
+ * All rights reserved.
  *
- * @category   Zend
- * @package    Zend_Service
- * @subpackage Yadis
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the 
+ *      documentation and/or other materials provided with the distribution.
+ *    * The name of the author may not be used to endorse or promote products 
+ *      derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @category    Services
+ * @package     Zend_Service_Yadis
+ * @author      Pádraic Brady <padraic.brady@yahoo.com>
+ * @license     http://opensource.org/licenses/bsd-license.php New BSD License
+ * @version     $Id$
+ * @link        http://
  */
-
 
 /**
- * Zend_Exception
+ * PEAR_Exception
  */
-require_once 'Zend/Service/Exception.php';
-
+require_once 'PEAR/Exception.php';
 
 /**
- * @category   Zend
- * @package    Zend_Service
- * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * Zend_Service_Yadis_Exception
+ *
+ * @category   Services
+ * @package    Zend_Service_Yadis
+ * @author     Pádraic Brady <padraic.brady@yahoo.com>
+ * @license    http://opensource.org/licenses/bsd-license.php New BSD License
+ * @link       http://
+ * @version    @package_version@
+ * @access     public
  */
-class Zend_Service_Yadis_Exception extends Zend_Service_Exception
+class Zend_Service_Yadis_Exception extends PEAR_Exception
 {}
-
