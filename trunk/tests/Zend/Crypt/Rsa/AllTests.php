@@ -9,7 +9,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR 
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
-//require_once 'BigInteger/BcmathTest.php';
+require_once 'RsaTest.php';
 
 class Zend_Crypt_Rsa_AllTests
 {
@@ -29,5 +29,5 @@ class Zend_Crypt_Rsa_AllTests
 }
 
 if (PHPUnit_MAIN_METHOD == 'Zend_Crypt_Rsa_AllTests::main') {
-    Zend_Rsa_Math_AllTests::main();
+    Zend_Crypt_Rsa_AllTests::main();
 }
