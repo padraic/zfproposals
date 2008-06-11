@@ -61,11 +61,15 @@ class Zend_Crypt_Rsa
     public function setPemString($value) 
     {
         $this->_pemString = $value;
+        $this->_privateKey = openssl_get_privatekey($this->_pemString);
+        $details = openssl_pkey_get_details($this->_privateKey);
+        $this->_publicKey = $details['key'];
     }
 
     public function setPemPath($value) 
     {
         $this->_pemPath = $value;
+        $this->setPemString(file_get_contents($this->_pemPath));
     }
 
     public function setPemUrl($value) 
@@ -96,6 +100,16 @@ class Zend_Crypt_Rsa
     public function getHashAlgorithm() 
     {
         return $this->_hashAlgorithm;
+    }
+
+    public function getPrivateKey() 
+    {
+        return $this->_privateKey;
+    }
+
+    public function getPublicKey() 
+    {
+        return $this->_publicKey;
     }
 
 }

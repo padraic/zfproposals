@@ -18,53 +18,59 @@ MF4CAQACEJN4kpcB5WQsKOZNo7dBKh8CAwEAAQIQEIljvsU6qOnRiqXlUDiRmQII
 /+7ezbyrmdsCCJOCcWFQPy4NAgiIPFlx3wrhnQIITO8avVuCKD0CCLlTbhq4BGNH
 -----END RSA PRIVATE KEY-----
 RSAKEY;
-        $this->_testPemPath128 = realpath('./_file/test128.pem');
+
+        $this->_testPemString128Public = <<<RSAKEY
+-----BEGIN PUBLIC KEY-----
+MCwwDQYJKoZIhvcNAQEBBQADGwAwGAIRAJN4kpcB5WQsKOZNo7dBKh8CAwEAAQ==
+-----END PUBLIC KEY-----
+RSAKEY;
+
+        $this->_testPemPath128 = './_files/test128.pem';
     }
 
     public function testConstructorSetsPemString() 
     {
-        $rsa = new Zend_Crypt_Rsa(
-            array(
-                'pemString'=>$this->_testPemString128
-            )
-        );
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString128));
         $this->assertEquals($this->_testPemString128, $rsa->getPemString());
     }
 
     public function testConstructorSetsPemPath() 
     {
-        $rsa = new Zend_Crypt_Rsa(
-            array(
-                'pemPath'=>$this->_testPemPath128
-            )
-        );
-        $this->assertEquals($this->_testPemPath128, $rsa->getPemString());
+        $rsa = new Zend_Crypt_Rsa(array('pemPath'=>$this->_testPemPath128));
+        $this->assertEquals($this->_testPemPath128, $rsa->getPemPath());
+    }
+
+    public function testSetPemPathLoadsPemString() 
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemPath'=>$this->_testPemPath128));
+        $this->assertEquals($this->_testPemString128, $rsa->getPemString());
     }
 
     public function testConstructorSetsPemUrl() 
     {
-        $rsa = new Zend_Crypt_Rsa(
-            array(
-                'pemUrl'=>'http://www.example.com/rsa'
-            )
-        );
+        $rsa = new Zend_Crypt_Rsa(array('pemUrl'=>'http://www.example.com/rsa'));
         $this->assertEquals('http://www.example.com/rsa', $rsa->getPemUrl());
     }
 
     public function testConstructorSetsHashOption() 
     {
-        $rsa = new Zend_Crypt_Rsa(
-            array(
-                'hashAlgorithm'=>'sha256'
-            )
-        );
+        $rsa = new Zend_Crypt_Rsa(array('hashAlgorithm'=>'sha256'));
         $this->assertEquals('sha256', $rsa->getHashAlgorithm());
     }
 
-    public function ttEncryptionOnString() 
+    public function testSetPemStringParsesPemForPrivateKey() 
     {
-        $data = 'I am a plain text string!';
         $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString128));
+        $this->assertEquals('OpenSSL key', get_resource_type($rsa->getPrivateKey()));
     }
+
+    public function testSetPemStringParsesPemForPublicKey() 
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString128));
+        //var_export($rsa->getPublicKey()); exit;
+        $this->assertEquals($this->_testPemString128Public, $rsa->getPublicKey());
+    }
+
+
 
 }
