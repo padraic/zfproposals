@@ -18,14 +18,14 @@ class Zend_Crypt_Rsa
 
     protected $_hashAlgorithm = 'sha1';
 
-    public function __construct(array $options = null) 
+    public function __construct(array $options = null)
     {
         if (isset($options)) {
             $this->setOptions($options);
         }
     }
 
-    public function setOptions(array $options) 
+    public function setOptions(array $options)
     {
         foreach ($options as $option=>$value) {
             switch ($option) {
@@ -45,20 +45,20 @@ class Zend_Crypt_Rsa
         }
     }
 
-    public function createSignature($data) 
+    public function createSignature($data)
     {
         return $this->encrypt(
             $this->_hash($data)
         );
     }
 
-    public function encrypt($data) 
+    public function encrypt($data)
     {
         $key = $this->getPublicKey();
 
     }
 
-    public function setPemString($value) 
+    public function setPemString($value)
     {
         $this->_pemString = $value;
         $this->_privateKey = openssl_get_privatekey($this->_pemString);
@@ -66,48 +66,48 @@ class Zend_Crypt_Rsa
         $this->_publicKey = $details['key'];
     }
 
-    public function setPemPath($value) 
+    public function setPemPath($value)
     {
         $this->_pemPath = $value;
         $this->setPemString(file_get_contents($this->_pemPath));
     }
 
-    public function setPemUrl($value) 
+    public function setPemUrl($value)
     {
         $this->_pemUrl = $value;
     }
 
-    public function setHashAlgorithm($name) 
+    public function setHashAlgorithm($name)
     {
         $this->_hashAlgorithm = $name;
     }
 
-    public function getPemString() 
+    public function getPemString()
     {
         return $this->_pemString;
     }
 
-    public function getPemPath() 
+    public function getPemPath()
     {
         return $this->_pemPath;
     }
 
-    public function getPemUrl() 
+    public function getPemUrl()
     {
         return $this->_pemUrl;
     }
 
-    public function getHashAlgorithm() 
+    public function getHashAlgorithm()
     {
         return $this->_hashAlgorithm;
     }
 
-    public function getPrivateKey() 
+    public function getPrivateKey()
     {
         return $this->_privateKey;
     }
 
-    public function getPublicKey() 
+    public function getPublicKey()
     {
         return $this->_publicKey;
     }
