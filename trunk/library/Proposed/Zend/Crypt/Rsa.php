@@ -4,9 +4,6 @@ require_once 'Zend/Crypt/Rsa/Key/Private.php';
 
 require_once 'Zend/Crypt/Rsa/Key/Public.php';
 
-// Zend_Crypt_Rsa
-// Depends: ext/openssl
-
 class Zend_Crypt_Rsa
 {
 
@@ -47,6 +44,16 @@ class Zend_Crypt_Rsa
         }
     }
 
+    public function getPrivateKey()
+    {
+        return $this->_privateKey;
+    }
+
+    public function getPublicKey()
+    {
+        return $this->_publicKey;
+    }
+
     public function sign($data, $format = null)
     {
         $signature = '';
@@ -70,6 +77,50 @@ class Zend_Crypt_Rsa
             $this->getPublicKey()->getOpensslKeyResource(),
             $this->getHashAlgorithm());
         return $result;
+    }
+
+    public function encrypt($data, Zend_Crypt_Rsa_Key $key, $format = null) 
+    {
+        $encrypted = '';
+        $function = 'openssl_public_encrypt';
+        if ($key instanceof Zend_Crypt_Rsa_Key_Private) {
+            $function = 'openssl_private_encrypt';
+        }
+        $function($data, $encrypted, $key->getOpensslKeyResource());
+        if ($format == self::BASE64) {
+            return base64_encode($encrypted);
+        }
+        return $encrypted;
+    }
+
+    public function decrypt($data, Zend_Crypt_Rsa_Key $key, $format = null) 
+    {
+        $decrypted = '';
+        if ($format == self::BASE64) {
+            $data = base64_decode($data);
+        }
+        $function = 'openssl_private_decrypt';
+        if ($key instanceof Zend_Crypt_Rsa_Key_Public) {
+            $function = 'openssl_public_decrypt';
+        }
+        $function($data, $decrypted, $key->getOpensslKeyResource());
+        return $decrypted;
+    }
+
+    public function generateKeys($configargs = null) 
+    {
+        $privateKey = null;
+        $publicKey = null;
+        $resource = openssl_pkey_new($configargs);
+        openssl_pkey_export($resource, $private);
+        $privateKey = new Zend_Crypt_Rsa_Key_Private($private);
+        $details = openssl_pkey_get_details($resource);
+        $publicKey = new Zend_Crypt_Rsa_Key_Public($details['key']);
+        $return = new ArrayObject(array(
+           'privateKey'=>$privateKey,
+           'publicKey'=>$publicKey
+        ), ArrayObject::ARRAY_AS_PROPS);
+        return $return;
     }
 
     public function setPemString($value)
@@ -113,21 +164,6 @@ class Zend_Crypt_Rsa
     public function getHashAlgorithm()
     {
         return $this->_hashAlgorithm;
-    }
-
-    public function getPrivateKey()
-    {
-        return $this->_privateKey;
-    }
-
-    public function getPublicKey()
-    {
-        return $this->_publicKey;
-    }
-
-    protected function _hash($data) 
-    {
-        // hash something
     }
 
 }

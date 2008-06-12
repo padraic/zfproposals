@@ -33,9 +33,6 @@ zxqlVzz0wy2j4kQVUC4ZRZD80IY+4wIiX2YxKBZKGnd2TtPkcJ/ljkUCAwEAAQ==
 
 RSAKEY;
 
-        $this->_testSignature = 
-        'sMHpp3u6DNecIm5RIkDD3xyKaH6qqP8roUWDs215iOGHehfK1ypqwoETKNP7NaksGS2C1Up813ixlGXkipPVbQ==';
-
         $this->_testPemPath = dirname(__FILE__) . '/_files/test.pem';
     }
 
@@ -93,7 +90,7 @@ RSAKEY;
         $signature);
     }
 
-    public function testVerifyVerifiesBinarySignatures() 
+    public function testVerifyVerifiesBinarySignatures()
     {
         $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
         $signature = $rsa->sign('1234567890');
@@ -101,12 +98,73 @@ RSAKEY;
         $this->assertEquals(1, $result);
     }
 
-    public function testVerifyVerifiesBase64Signatures() 
+    public function testVerifyVerifiesBase64Signatures()
     {
         $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
         $signature = $rsa->sign('1234567890', Zend_Crypt_Rsa::BASE64);
         $result = $rsa->verifySignature('1234567890', $signature, Zend_Crypt_Rsa::BASE64);
         $this->assertEquals(1, $result);
+    }
+
+    public function testEncryptionUsingPublicKeyEncryption()
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
+        $encrypted = $rsa->encrypt('1234567890', $rsa->getPublicKey());
+        $this->assertEquals(
+            '1234567890',
+            $rsa->decrypt($encrypted, $rsa->getPrivateKey())
+        );
+    }
+
+    public function testEncryptionUsingPublicKeyBase64Encryption()
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
+        $encrypted = $rsa->encrypt('1234567890', $rsa->getPublicKey(), Zend_Crypt_Rsa::BASE64);
+        $this->assertEquals(
+            '1234567890',
+            $rsa->decrypt($encrypted, $rsa->getPrivateKey(), Zend_Crypt_Rsa::BASE64)
+        );
+    }
+
+    public function testEncryptionUsingPrivateKeyEncryption()
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
+        $encrypted = $rsa->encrypt('1234567890', $rsa->getPrivateKey());
+        $this->assertEquals(
+            '1234567890',
+            $rsa->decrypt($encrypted, $rsa->getPublicKey())
+        );
+    }
+
+    public function testEncryptionUsingPrivateKeyBase64Encryption()
+    {
+        $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
+        $encrypted = $rsa->encrypt('1234567890', $rsa->getPrivateKey(), Zend_Crypt_Rsa::BASE64);
+        $this->assertEquals(
+            '1234567890',
+            $rsa->decrypt($encrypted, $rsa->getPublicKey(), Zend_Crypt_Rsa::BASE64)
+        );
+    }
+
+    public function testKeyGenerationCreatesArrayObjectResult() 
+    {
+        $rsa = new Zend_Crypt_Rsa;
+        $keys = $rsa->generateKeys(array('private_key_bits'=>512));
+        $this->assertType('ArrayObject', $keys);
+    }
+
+    public function testKeyGenerationCreatesDualPrivateKeyInArrayObject() 
+    {
+        $rsa = new Zend_Crypt_Rsa;
+        $keys = $rsa->generateKeys(array('private_key_bits'=>512));
+        $this->assertType('Zend_Crypt_Rsa_Key_Private', $keys->privateKey);
+    }
+
+    public function testKeyGenerationCreatesDualPublicKeyInArrayObject() 
+    {
+        $rsa = new Zend_Crypt_Rsa;
+        $keys = $rsa->generateKeys(array('private_key_bits'=>512));
+        $this->assertType('Zend_Crypt_Rsa_Key_Public', $keys->publicKey);
     }
 
 }
