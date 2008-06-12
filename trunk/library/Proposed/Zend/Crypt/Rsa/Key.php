@@ -1,6 +1,6 @@
 <?php
 
-class Zend_Crypt_Rsa_Key
+class Zend_Crypt_Rsa_Key implements Countable
 {
     
     protected $_pemString = null;
@@ -22,5 +22,15 @@ class Zend_Crypt_Rsa_Key
     public function __toString() 
     {
         return $this->toString();
+    }
+
+    public function count() 
+    {
+        return $this->_details['bits'];
+    }
+
+    public function getType() 
+    {
+        return $this->_details['type'];
     }
 }
