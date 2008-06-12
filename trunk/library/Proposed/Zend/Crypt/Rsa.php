@@ -67,7 +67,7 @@ class Zend_Crypt_Rsa
             $signature = base64_decode($signature);
         }
         $result = openssl_verify($data, $signature,
-            $this->getPublicKey()->toString(),
+            $this->getPublicKey()->getOpensslKeyResource(),
             $this->getHashAlgorithm());
         return $result;
     }
