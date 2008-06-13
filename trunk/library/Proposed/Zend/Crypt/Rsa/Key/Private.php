@@ -7,10 +7,20 @@ class Zend_Crypt_Rsa_Key_Private extends Zend_Crypt_Rsa_Key
 
     protected $_publicKey = null;
 
-    public function __construct($pemString) 
+    public function __construct($pemString, $passPhrase = null) 
     {
         $this->_pemString = $pemString;
-        $this->_opensslKeyResource = openssl_get_privatekey($pemString);
+        $this->_parse($passPhrase);
+    }
+
+    protected function _parse($passPhrase) 
+    {
+        $result = openssl_get_privatekey($this->_pemString, $passPhrase);
+        if (!$result) {
+            require_once 'Zend/Crypt/Exception.php';
+            throw new Zend_Crypt_Exception('Unable to load private key');
+        }
+        $this->_opensslKeyResource = $result;
         $this->_details = openssl_pkey_get_details($this->_opensslKeyResource);
     }
 

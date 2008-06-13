@@ -18,7 +18,13 @@ class Zend_Crypt_Rsa
 
     protected $_pemPath = null;
 
+    protected $_certificateString = null;
+
+    protected $_certificatePath = null;
+
     protected $_hashAlgorithm = OPENSSL_ALGO_SHA1;
+
+    protected $_passPhrase = null;
 
     public function __construct(array $options = null)
     {
@@ -29,6 +35,9 @@ class Zend_Crypt_Rsa
 
     public function setOptions(array $options)
     {
+        if (isset($options['passPhrase'])) {
+            $this->_passPhrase = $options['passPhrase'];
+        }
         foreach ($options as $option=>$value) {
             switch ($option) {
                 case 'pemString':
@@ -36,6 +45,12 @@ class Zend_Crypt_Rsa
                     break;
                 case 'pemPath':
                     $this->setPemPath($value);
+                    break;
+                case 'certificateString':
+                    $this->setCertificateString($value);
+                    break;
+                case 'certificatePath':
+                    $this->setCertificatePath($value);
                     break;
                 case 'hashAlgorithm':
                     $this->setHashAlgorithm($value);
@@ -54,12 +69,17 @@ class Zend_Crypt_Rsa
         return $this->_publicKey;
     }
 
-    public function sign($data, $format = null)
+    public function sign($data, Zend_Crypt_Rsa_Key_Private $privateKey = null, $format = null)
     {
         $signature = '';
+        if (isset($privateKey)) {
+            $opensslKeyResource = $privateKey->getOpensslKeyResource();
+        } else {
+            $opensslKeyResource = $this->_privateKey->getOpensslKeyResource();
+        }
         $result = openssl_sign(
             $data, $signature, 
-            $this->_privateKey->getOpensslKeyResource(),
+            $opensslKeyResource,
             $this->getHashAlgorithm()
         );
         if ($format == self::BASE64) {
@@ -107,13 +127,22 @@ class Zend_Crypt_Rsa
         return $decrypted;
     }
 
-    public function generateKeys($configargs = null) 
+    public function generateKeys(array $configargs = null) 
     {
+        $config = null;
+        $passPhrase = null;
+        if (!is_null($configargs)) {
+            if (isset($configargs['passPhrase'])) {
+                $passPhrase = $configargs['passPhrase'];
+                unset($configargs['passPhrase']);
+            }
+            $config = $this->_parseConfigArgs($configargs);
+        }
         $privateKey = null;
         $publicKey = null;
-        $resource = openssl_pkey_new($configargs);
-        openssl_pkey_export($resource, $private);
-        $privateKey = new Zend_Crypt_Rsa_Key_Private($private);
+        $resource = openssl_pkey_new($config);
+        openssl_pkey_export($resource, $private, $passPhrase);
+        $privateKey = new Zend_Crypt_Rsa_Key_Private($private, $passPhrase);
         $details = openssl_pkey_get_details($resource);
         $publicKey = new Zend_Crypt_Rsa_Key_Public($details['key']);
         $return = new ArrayObject(array(
@@ -126,7 +155,7 @@ class Zend_Crypt_Rsa
     public function setPemString($value)
     {
         $this->_pemString = $value;
-        $this->_privateKey = new Zend_Crypt_Rsa_Key_Private($this->_pemString);
+        $this->_privateKey = new Zend_Crypt_Rsa_Key_Private($this->_pemString, $this->_passPhrase);
         $this->_publicKey = $this->_privateKey->getPublicKey();
     }
 
@@ -134,6 +163,18 @@ class Zend_Crypt_Rsa
     {
         $this->_pemPath = $value;
         $this->setPemString(file_get_contents($this->_pemPath));
+    }
+
+    public function setCertificateString($value)
+    {
+        $this->_certificateString = $value;
+        $this->_publicKey = new Zend_Crypt_Rsa_Key_Public($this->_certificateString, $this->_passPhrase);
+    }
+
+    public function setCertificatePath($value)
+    {
+        $this->_certificatePath = $value;
+        $this->setCertificateString(file_get_contents($this->_certificatePath));
     }
 
     public function setHashAlgorithm($name)
@@ -161,9 +202,31 @@ class Zend_Crypt_Rsa
         return $this->_pemPath;
     }
 
+    public function getCertificateString()
+    {
+        return $this->_certificateString;
+    }
+
+    public function getCertificatePath()
+    {
+        return $this->_certificatePath;
+    }
+
     public function getHashAlgorithm()
     {
         return $this->_hashAlgorithm;
+    }
+
+    protected function _parseConfigArgs(array $config = null) 
+    {
+        $configs = array();
+        if (isset($config['privateKeyBits'])) {
+            $configs['private_key_bits'] = $config['privateKeyBits'];
+        }
+        if (!empty($configs)) {
+            return $configs;
+        }
+        return null;
     }
 
 }
