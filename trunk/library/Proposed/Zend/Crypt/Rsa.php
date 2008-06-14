@@ -78,7 +78,7 @@ class Zend_Crypt_Rsa
             $opensslKeyResource = $this->_privateKey->getOpensslKeyResource();
         }
         $result = openssl_sign(
-            $data, $signature, 
+            $data, $signature,
             $opensslKeyResource,
             $this->getHashAlgorithm()
         );
@@ -99,7 +99,7 @@ class Zend_Crypt_Rsa
         return $result;
     }
 
-    public function encrypt($data, Zend_Crypt_Rsa_Key $key, $format = null) 
+    public function encrypt($data, Zend_Crypt_Rsa_Key $key, $format = null)
     {
         $encrypted = '';
         $function = 'openssl_public_encrypt';
@@ -113,7 +113,7 @@ class Zend_Crypt_Rsa
         return $encrypted;
     }
 
-    public function decrypt($data, Zend_Crypt_Rsa_Key $key, $format = null) 
+    public function decrypt($data, Zend_Crypt_Rsa_Key $key, $format = null)
     {
         $decrypted = '';
         if ($format == self::BASE64) {
@@ -127,7 +127,7 @@ class Zend_Crypt_Rsa
         return $decrypted;
     }
 
-    public function generateKeys(array $configargs = null) 
+    public function generateKeys(array $configargs = null)
     {
         $config = null;
         $passPhrase = null;
@@ -141,6 +141,7 @@ class Zend_Crypt_Rsa
         $privateKey = null;
         $publicKey = null;
         $resource = openssl_pkey_new($config);
+        // above fails on PHP 5.3
         openssl_pkey_export($resource, $private, $passPhrase);
         $privateKey = new Zend_Crypt_Rsa_Key_Private($private, $passPhrase);
         $details = openssl_pkey_get_details($resource);
@@ -217,7 +218,7 @@ class Zend_Crypt_Rsa
         return $this->_hashAlgorithm;
     }
 
-    protected function _parseConfigArgs(array $config = null) 
+    protected function _parseConfigArgs(array $config = null)
     {
         $configs = array();
         if (isset($config['privateKeyBits'])) {

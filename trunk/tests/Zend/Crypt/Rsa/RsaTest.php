@@ -59,7 +59,7 @@ CERT;
         $this->_testCertificatePath = dirname(__FILE__) . '/_files/test.cert';
     }
 
-    public function testConstructorSetsPemString()
+    /*public function testConstructorSetsPemString()
     {
         $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
         $this->assertEquals($this->_testPemString, $rsa->getPemString());
@@ -227,30 +227,30 @@ CERT;
             '1234567890',
             $rsa->decrypt($encrypted, $rsa->getPublicKey(), Zend_Crypt_Rsa::BASE64)
         );
-    }
+    }*/
 
-    public function testKeyGenerationCreatesArrayObjectResult() 
+    public function testKeyGenerationCreatesArrayObjectResult()
     {
         $rsa = new Zend_Crypt_Rsa;
         $keys = $rsa->generateKeys(array('private_key_bits'=>512));
         $this->assertType('ArrayObject', $keys);
     }
 
-    public function testKeyGenerationCreatesPrivateKeyInArrayObject() 
+    public function testKeyGenerationCreatesPrivateKeyInArrayObject()
     {
         $rsa = new Zend_Crypt_Rsa;
         $keys = $rsa->generateKeys(array('private_key_bits'=>512));
         $this->assertType('Zend_Crypt_Rsa_Key_Private', $keys->privateKey);
     }
 
-    public function testKeyGenerationCreatesPublicKeyInArrayObject() 
+    public function testKeyGenerationCreatesPublicKeyInArrayObject()
     {
         $rsa = new Zend_Crypt_Rsa;
         $keys = $rsa->generateKeys(array('privateKeyBits'=>512));
         $this->assertType('Zend_Crypt_Rsa_Key_Public', $keys->publicKey);
     }
 
-    public function testKeyGenerationCreatesPassphrasedPrivateKey() 
+    public function testKeyGenerationCreatesPassphrasedPrivateKey()
     {
         $rsa = new Zend_Crypt_Rsa;
         $config = array(
@@ -268,7 +268,7 @@ CERT;
         }
     }
 
-    public function testConstructorLoadsPassphrasedKeys() 
+    public function testConstructorLoadsPassphrasedKeys()
     {
         $rsa = new Zend_Crypt_Rsa;
         $config = array(

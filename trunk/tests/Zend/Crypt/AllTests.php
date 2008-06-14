@@ -29,7 +29,6 @@ class Zend_Crypt_AllTests
         $suite->addTestSuite('Zend_Crypt_DiffieHellmanTest');
         $suite->addTestSuite('Zend_Crypt_HmacTest');
         $suite->addTestSuite('Zend_Crypt_MathTest');
-        $suite->addTestSuite('Zend_Crypt_MathTest');
         $suite->addTest(Zend_Crypt_Rsa_AllTests::suite());
         $suite->addTest(Zend_Crypt_Math_AllTests::suite());
 
