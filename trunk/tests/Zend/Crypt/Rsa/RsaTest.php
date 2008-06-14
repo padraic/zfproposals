@@ -59,7 +59,7 @@ CERT;
         $this->_testCertificatePath = dirname(__FILE__) . '/_files/test.cert';
     }
 
-    /*public function testConstructorSetsPemString()
+    public function testConstructorSetsPemString()
     {
         $rsa = new Zend_Crypt_Rsa(array('pemString'=>$this->_testPemString));
         $this->assertEquals($this->_testPemString, $rsa->getPemString());
@@ -227,7 +227,7 @@ CERT;
             '1234567890',
             $rsa->decrypt($encrypted, $rsa->getPublicKey(), Zend_Crypt_Rsa::BASE64)
         );
-    }*/
+    }
 
     public function testKeyGenerationCreatesArrayObjectResult()
     {
