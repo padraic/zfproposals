@@ -10,6 +10,7 @@ require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'BigInteger/BcmathTest.php';
+require_once 'BigInteger/GmpTest.php';
 
 class Zend_Crypt_Math_AllTests
 {
@@ -23,6 +24,7 @@ class Zend_Crypt_Math_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Math');
 
         $suite->addTestSuite('Zend_Crypt_Math_BigInteger_BcmathTest');
+        $suite->addTestSuite('Zend_Crypt_Math_BigInteger_GmpTest');
 
         return $suite;
     }
