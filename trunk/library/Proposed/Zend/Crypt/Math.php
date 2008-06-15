@@ -75,7 +75,8 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
      * @return string
      */
     public function fromBinary($binary) {
-        if (!$this instanceof Zend_Math_BigInteger_Gmp) {
+        return $this->_math->binaryToInteger($binary);
+        /*if (!$this instanceof Zend_Math_BigInteger_Gmp) {
             $big = 0;
             $length = strlen($binary);
             for ($i = 0; $i < $length; $i++) {
@@ -85,18 +86,19 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
             return $big;
         } else {
             return $this->_math->init(bin2hex($binary), 16); // gmp shortcut
-        }
+        }*/
     }
 
     /**
      * Translate a big integer string into a binary form
      *
-     * @param string $big
+     * @param string $integer
      * @return string
      */
-    public function toBinary($big)
+    public function toBinary($integer)
     {
-        $compare = $this->_math->compare($big, 0);
+        return $this->_math->integerToBinary($integer);
+        /**$compare = $this->_math->compare($big, 0);
         if ($compare == 0) {
             return (chr(0));
         } else if ($compare < 0) {
@@ -107,6 +109,6 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
             $binary = chr($this->_math->modulus($big, 256)) . $binary;
             $big = $this->_math->divide($big, 256);
         }
-        return $binary;
+        return $binary;*/
     }
 }
