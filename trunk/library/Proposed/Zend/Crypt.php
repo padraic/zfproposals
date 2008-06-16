@@ -6,7 +6,6 @@ class Zend_Crypt
     const TYPE_OPENSSL = 'openssl';
     const TYPE_HASH = 'hash';
     const TYPE_MHASH = 'mhash';
-    const TYPE_NATIVE = 'native';
 
     protected static $_type = null;
 
@@ -19,7 +18,7 @@ class Zend_Crypt
         'sha1',
         'sha224',
         'sha256',
-        'sha384'
+        'sha384',
         'sha512'
     );
 
@@ -42,20 +41,15 @@ class Zend_Crypt
         'tiger160'
     );
 
-    protected static $_supportedAlgosNative = array(
-        'md5',
-        'sha1'
-    );
-
     public static function hash($algorithm, $data, $binaryOutput = false)
     {
         $algorithm = strtolower($algorithm);
         if (function_exists($algorithm)) {
-            return self::_digestNative($algorithm, $data, $binaryOutput);
+            return $algorithm($data, $binaryOutput);
         }
         self::_detectHashSupport($algorithm);
         $supportedMethod = '_digest' . ucfirst(self::$_type);
-        $result = self::{$supportedMethod}($algorithm, $data, $binaryOutput);
+        $result = self::$supportedMethod($algorithm, $data, $binaryOutput);
     }
 
     protected static function _detectHashSupport($algorithm)
@@ -81,10 +75,6 @@ class Zend_Crypt
                return;
             }
         }
-        if ($algorithm == 'md5' || $algorithm == 'sha1') {
-            self::$_type = self::TYPE_NATIVE;
-            return;
-        }
         require_once 'Zend/Crypt/Exception.php';
         throw new Zend_Crypt_Exception('\'' . $algorithm . '\' is not supported by any available extension or native function');
     }
@@ -106,12 +96,10 @@ class Zend_Crypt
 
     protected static function _digestOpenssl($algorithm, $data, $binaryOutput)
     {
+        if ($algorithm == 'ripemd160') {
+            $algorithm = 'rmd160';
+        }
         return openssl_digest($data, $algorithm, $binaryOutput);
-    }
-
-    protected static function _digestNative($algorithm, $data, $binaryOutput)
-    {
-        return $algorithm($data, $binaryOutput);
     }
 
 }

@@ -19,6 +19,8 @@
  * @version    $Id$
  */
 
+require_once('Zend/Crypt.php');
+
 /**
  * PHP implementation of the RFC 2104 Hash based Message Authentication Code
  * algorithm.
@@ -148,7 +150,7 @@ class Zend_Crypt_Hmac extends Zend_Crypt
             $hashSupported = true;
         }
 
-        if ($hashSupported === false && in_array($hash, self::$_supportedAlgosNative)) {
+        if ($hashSupported === false && function_exists($hash)) {
             $hashSupported = true;
         }
 
