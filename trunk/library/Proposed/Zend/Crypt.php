@@ -5,99 +5,113 @@ class Zend_Crypt
 
     const TYPE_OPENSSL = 'openssl';
     const TYPE_HASH = 'hash';
-    const TYPE_HASH = 'native';
+    const TYPE_MHASH = 'mhash';
+    const TYPE_NATIVE = 'native';
 
     protected static $_type = null;
 
     protected static $_supportedAlgosOpenssl = array(
-        'md2' => 'md2',
-        'md4', => 'md4',
-        'mdc2' => 'mdc2',
-        'ripemd160' => 'rmd160',
-        'sha' => 'sha',
-        'sha1' => 'sha1',
-        'sha224' => 'sha224',
-        'sha256' => 'sha256',
-        'sha384' => 'sha384'
-        'sha512' => 'sha512'
+        'md2',
+        'md4',
+        'mdc2',
+        'rmd160',
+        'sha',
+        'sha1',
+        'sha224',
+        'sha256',
+        'sha384'
+        'sha512'
     );
 
-    protected static $_supportedAlgosHash = array (
-        'md2' => 'md2',
-        'md4' => 'md4',
-        'md5' => 'md5',
-        'sha1' => 'sha1',
-        'sha256' => 'sha256',
-        'sha384' => 'sha384',
-        'sha512' => 'sha512',
-        'ripemd128' => 'ripemd128',
-        'ripemd160' => 'ripemd160',
-        'ripemd256' => 'ripemd256',
-        'ripemd320' => 'ripemd320',
-        'whirlpool' => 'whirlpool',
-        'tiger128,3' => 'tiger128,3',
-        'tiger160,3' => 'tiger160,3',
-        'tiger192,3' => 'tiger192,3',
-        'tiger128,4' => 'tiger128,4',
-        'tiger160,4' => 'tiger160,4',
-        'tiger192,4' => 'tiger192,4',
-        'snefru' => 'snefru',
-        'gost' => 'gost',
-        'adler32' => 'adler32',
-        'crc32' => 'crc32',
-        'crc32b' => 'crc32b',
-        'haval128,3' => 'haval128,3',
-        'haval160,3' => 'haval160,3',
-        'haval192,3' => 'haval192,3',
-        'haval224,3' => 'haval224,3',
-        'haval256,3' => 'haval256,3',
-        'haval128,4' => 'haval128,4',
-        'haval160,4' => 'haval160,4',
-        'haval192,4' => 'haval192,4',
-        'haval224,4' => 'haval224,4',
-        'haval256,4' => 'haval256,4',
-        'haval128,5' => 'haval128,5',
-        'haval160,5' => 'haval160,5',
-        'haval192,5' => 'haval192,5',
-        'haval224,5' => 'haval224,5',
-        'haval256,5' => 'haval256,5'
+    protected static $_supportedAlgosMhash = array(
+        'adler32',
+        'crc32',
+        'crc32b',
+        'gost',
+        'haval128',
+        'haval160',
+        'haval192',
+        'haval256',
+        'md4',
+        'md5',
+        'ripemd160',
+        'sha1',
+        'sha256',
+        'tiger',
+        'tiger128',
+        'tiger160'
     );
 
-    public static function hash($algorithm, $data, $returnBinary = false) 
+    protected static $_supportedAlgosNative = array(
+        'md5',
+        'sha1'
+    );
+
+    public static function hash($algorithm, $data, $binaryOutput = false)
     {
-        if (!is_null(self::$_type)) {
-            $algorithmAlias = $this->_getAlias($algorithm);
-        } else {
-            $algorithmAlias = self::_detectHashSupport($algorithm);
+        $algorithm = strtolower($algorithm);
+        if (function_exists($algorithm)) {
+            return self::_digestNative($algorithm, $data, $binaryOutput);
         }
+        self::_detectHashSupport($algorithm);
+        $supportedMethod = '_digest' . ucfirst(self::$_type);
+        $result = self::{$supportedMethod}($algorithm, $data, $binaryOutput);
     }
 
-    protected static function _detectHashSupport($algorithm) 
+    protected static function _detectHashSupport($algorithm)
     {
         if (function_exists('hash')) {
             self::$_type = self::TYPE_HASH;
-            if (in_array($algorithm, array_keys(self::$_supportedAlgosHash))) {
-               return $this->_getAlias($algorithm); 
+            if (in_array($algorithm, hash_algos())) {
+               return;
+            }
+        }
+        if (function_exists('mhash')) {
+            self::$_type = self::TYPE_MHASH;
+            if (in_array($algorithm, self::$_supportedAlgosMhash)) {
+               return;
             }
         }
         if (function_exists('openssl_digest')) {
-            self::$_type = self::TYPE_OPENSSL;
-            if (in_array($algorithm, array_keys(self::$_supportedAlgosOpenssl))) {
-               return $this->_getAlias($algorithm); 
+            if ($algorithm == 'ripemd160') {
+                $algorithm = 'rmd160';
             }
-        } else {
-            
+            self::$_type = self::TYPE_OPENSSL;
+            if (in_array($algorithm, self::$_supportedAlgosOpenssl)) {
+               return;
+            }
         }
-        // exception unsupported algo
+        if ($algorithm == 'md5' || $algorithm == 'sha1') {
+            self::$_type = self::TYPE_NATIVE;
+            return;
+        }
+        require_once 'Zend/Crypt/Exception.php';
+        throw new Zend_Crypt_Exception('\'' . $algorithm . '\' is not supported by any available extension or native function');
     }
 
-    protected static function _getAlias($algorithm) 
+    protected static function _digestHash($algorithm, $data, $binaryOutput)
     {
-        $supportArrayName = '_supportedAlgos' . unfirst(strtolower(self::$_type));
-        if (isset($$supportArrayName[$algorithm])) {
-            return $$supportArrayName[$algorithm];
+        return hash($algorithm, $data, $binaryOutput);
+    }
+
+    protected static function _digestMhash($algorithm, $data, $binaryOutput)
+    {
+        $constant = constant('MHASH_' . strtoupper($algorithm));
+        $binary = mhash($constant, $data);
+        if ($binaryOutput) {
+            return $binary;
         }
-        // exception
+        return bin2hex($binary);
+    }
+
+    protected static function _digestOpenssl($algorithm, $data, $binaryOutput)
+    {
+        return openssl_digest($data, $algorithm, $binaryOutput);
+    }
+
+    protected static function _digestNative($algorithm, $data, $binaryOutput)
+    {
+        return $algorithm($data, $binaryOutput);
     }
 
 }

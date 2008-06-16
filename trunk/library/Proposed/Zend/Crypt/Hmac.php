@@ -30,7 +30,7 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @todo       Check if mhash() is a required alternative (will be PECL-only soon)
  */
-class Zend_Crypt_Hmac
+class Zend_Crypt_Hmac extends Zend_Crypt
 {
 
     /**
@@ -82,8 +82,8 @@ class Zend_Crypt_Hmac
      *
      * @var array
      */
-    protected static $_supportedMhashAlgorithms = array('adler32',' crc32', 'crc32b', 'gost', 
-            'haval128', 'haval160', 'haval192', 'haval256', 'md4', 'md5', 'ripemd160', 
+    protected static $_supportedMhashAlgorithms = array('adler32',' crc32', 'crc32b', 'gost',
+            'haval128', 'haval160', 'haval192', 'haval256', 'md4', 'md5', 'ripemd160',
             'sha1', 'sha256', 'tiger', 'tiger128', 'tiger160');
 
     /**
@@ -144,11 +144,11 @@ class Zend_Crypt_Hmac
             $hashSupported = true;
         }
 
-        if ($hashSupported === false && function_exists('mhash') && in_array($hash, self::$_supportedMhashAlgorithms)) {
+        if ($hashSupported === false && function_exists('mhash') && in_array($hash, self::$_supportedAlgosMhash)) {
             $hashSupported = true;
         }
 
-        if ($hashSupported === false && in_array($hash, self::$_supportedHashNativeFunctions)) {
+        if ($hashSupported === false && in_array($hash, self::$_supportedAlgosNative)) {
             $hashSupported = true;
         }
 
@@ -195,7 +195,7 @@ class Zend_Crypt_Hmac
         }
         $padInner = (substr($key, 0, 64) ^ str_repeat(chr(0x36), 64));
         $padOuter = (substr($key, 0, 64) ^ str_repeat(chr(0x5C), 64));
-        
+
         return self::_digest($hash, $padOuter . pack(self::$_packFormat, self::_digest($hash, $padInner . $data, $output)), $output);
     }
 
