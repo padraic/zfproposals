@@ -92,15 +92,24 @@ class Zend_Crypt_Math_BigInteger
         return call_user_func_array(array($this->_math, $methodName), $args);
     }
 
-    protected function _loadAdapter($extension)
+    protected function _loadAdapter($extension = null)
     {
-        if($extension == 'gmp' || extension_loaded('gmp')) {
+        if (is_null($extension)) {
+            if (extension_loaded('gmp')) {
+                $extension = 'gmp';
+            //} elseif (extension_loaded('big_int')) {
+            //    $extension = 'big_int';
+            } else {
+                $extension = 'bcmath';
+            }
+        }
+        if($extension == 'gmp' && extension_loaded('gmp')) {
             require_once 'Zend/Crypt/Math/BigInteger/Gmp.php';
             $this->_math = new Zend_Crypt_Math_BigInteger_Gmp();
-        } elseif($extension == 'bigint' || extension_loaded('big_int')) {
-            require_once 'Zend/Crypt_Math/BigInteger/Bigint.php';
-            $this->_math = new Zend_Crypt_Math_BigInteger_Bigint();
-        } elseif (is_null($extension) || $extension == 'bcmath') {
+        //} elseif($extension == 'bigint' && extension_loaded('big_int')) {
+        //    require_once 'Zend/Crypt_Math/BigInteger/Bigint.php';
+        //    $this->_math = new Zend_Crypt_Math_BigInteger_Bigint();
+        } elseif ($extension == 'bcmath') {
             require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
             $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath();
         } else {
