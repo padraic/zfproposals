@@ -9,7 +9,8 @@ require_once dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'TestHe
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
-require_once 'TokenTest.php';
+require_once 'OauthTest.php';
+require_once 'Oauth/ConsumerTest.php';
 
 class Zend_Oauth_AllTests
 {
@@ -22,7 +23,8 @@ class Zend_Oauth_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Oauth');
 
-        $suite->addTestSuite('Zend_Crypt_TokenTest');
+        $suite->addTestSuite('Zend_OauthTest');
+        $suite->addTestSuite('Zend_Oauth_ConsumerTest');
 
         return $suite;
     }

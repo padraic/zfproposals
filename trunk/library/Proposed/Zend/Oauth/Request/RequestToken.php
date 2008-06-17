@@ -1,5 +1,7 @@
 <?php
 
+require_once 'Zend/Oauth/Token/Request.php';
+
 class Zend_Oauth_Request_RequestToken extends Zend_Oauth
 {
 
@@ -7,15 +9,15 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
 
     protected $_parameters = array();
 
-    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = array()) 
+    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
     {
         $this->_consumer = $consumer;
-        if (!empty($parameters)) {
+        if (!is_null($parameters)) {
             $this->_parameters = $parameters;
         }
     }
 
-    public function execute() 
+    public function execute()
     {
         $params = $this->_assembleParams();
         switch ($this->_consumer->getRequestScheme()) {
@@ -25,7 +27,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         }
     }
 
-    protected function _assembleParams() 
+    protected function _assembleParams()
     {
         $params = array();
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
@@ -43,7 +45,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         return $params;
     }
 
-    protected function _requestSchemeHeader() 
+    protected function _requestSchemeHeader()
     {
         // make request and return tokenised response
     }

@@ -24,19 +24,22 @@ class Zend_Oauth
         self::$httpClient = $httpClient;
     }
 
-    public static function getHttpClient(Zend_Http_Client $httpClient)
+    public static function getHttpClient()
     {
         if (!isset(self::$httpClient)) {
             self::$httpClient = new Zend_Http_Client;
         } else {
             self::$httpClient->resetParameters();
         }
-        $method = constant('Zend_Http_Client::' . strtoupper($this->_method));
-        self::$httpClient->setMethod($method);
         return self::$httpClient;
     }
 
-    public function sign(array $params, $method, $consumerSecret, $accessTokenSecret = null) 
+    public static function clearHttpClient()
+    {
+        self::$httpClient = null;
+    }
+
+    public function sign(array $params, $method, $consumerSecret, $accessTokenSecret = null)
     {
         $className = '';
         $hashAlgo = null;
@@ -51,12 +54,12 @@ class Zend_Oauth
         return $signatureObject->sign($params);
     }
 
-    public function generateNonce() 
+    public function generateNonce()
     {
         return sha1(uniqid(rand(), true));
     }
 
-    public function generateTimestamp() 
+    public function generateTimestamp()
     {
         return time();
     }
