@@ -182,4 +182,5 @@ class Test_Request_RequestToken_48231 extends Zend_Oauth_Request_RequestToken
         $return = new Zend_Oauth_Token_Request;
         return $return;
     }
+    public function setParameters(array $customServiceParameters){}
 }

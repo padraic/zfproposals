@@ -9,6 +9,8 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
 
     protected $_parameters = array();
 
+    protected $_httpClient = null;
+
     public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
     {
         $this->_consumer = $consumer;
@@ -27,10 +29,17 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
             case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
                 $httpClient = $this->_getRequestSchemePostBodyClient($params);
                 break;
+            case Zend_Oauth::REQUEST_SCHEME_QUERYSTRING:
+                $httpClient = $this->_getRequestSchemeQueryStringClient($params);
+                break;
         }
-        $httpClient->setUri($this->_consumer->getRequestTokenUrl());
-        $response = $client->request();
-        var_dump($response);
+        $response = $httpClient->request();
+        var_dump($response); exit;
+    }
+
+    public function setParameters(array $customServiceParameters)
+    {
+        $this->_parameters = $customServiceParameters;
     }
 
     protected function _assembleParams()
@@ -53,21 +62,41 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
 
     protected function _getRequestSchemeHeaderClient(array $params)
     {
+        // seems to get no valid reponse from tests...:( OAuth SP bug?
         $headerValue = $this->_toAuthorizationHeader($params);
         $client = Zend_Oauth::getHttpClient();
+        $client->setUri($this->_consumer->getRequestTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
         return $client;
     }
 
     protected function _getRequestSchemePostBodyClient(array $params)
     {
-        $headerValue = $this->_toAuthorizationHeader($params);
         $client = Zend_Oauth::getHttpClient();
-        $client->setHeaders('Authorization', $headerValue);
+        $client->setUri($this->_consumer->getRequestTokenUrl());
+        $encodedParams = array();
+        foreach ($params as $key => $value) {
+            $encodedParams[Zend_Oauth::urlEncode($key)] = Zend_Oauth::urlEncode($value);
+        }
+        $client->setMethod(Zend_Http_Client::POST);
+        $client->setRawData(implode('&', $encodedParams));
         return $client;
     }
 
-    protected function _toAuthorizationHeader(array $params, $realm = null) 
+    protected function _getRequestSchemeQueryStringClient(array $params)
+    {
+        $client = Zend_Oauth::getHttpClient();
+        $client->setUri($this->_consumer->getRequestTokenUrl());
+        $encodedParams = array();
+        foreach ($params as $key => $value) {
+            $encodedParams[Zend_Oauth::urlEncode($key)] = Zend_Oauth::urlEncode($value);
+        }
+        $client->setMethod(Zend_Http_Client::GET);
+        $client->getUri()->setQuery(implode('&', $encodedParams));
+        return $client;
+    }
+
+    protected function _toAuthorizationHeader(array $params, $realm = null)
     {
         $headerValue = array();
         if (is_null($realm)) {
@@ -76,10 +105,10 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
             $headerValue[] = 'OAuth realm="' . $realm . '"';
         }
         foreach ($params as $key => $value) {
-            $headerValue[] = 
+            $headerValue[] =
                 Zend_Oauth::urlEncode($key)
                 . '="'
-                . Zend_Oauth::urlEncode($key) 
+                . Zend_Oauth::urlEncode($key)
                 . '"';
         }
         return implode(",\n", $headerValue);
