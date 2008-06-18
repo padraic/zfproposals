@@ -29,6 +29,7 @@ class Zend_Oauth
         if (!isset(self::$httpClient)) {
             self::$httpClient = new Zend_Http_Client;
         } else {
+            self::$httpClient->setHeaders('Authorization', null);
             self::$httpClient->resetParameters();
         }
         return self::$httpClient;
@@ -37,6 +38,15 @@ class Zend_Oauth
     public static function clearHttpClient()
     {
         self::$httpClient = null;
+    }
+
+    public static function urlEncode($string) 
+    {
+        $return = urlencode($string);
+        /* 5.1. Parameter Encoding
+           'Characters in the unreserved character set MUST NOT be encoded.' */
+        $return = str_replace('%7E', '~', $string);
+        return $return;
     }
 
     public function sign(array $params, $method, $consumerSecret, $accessTokenSecret = null)

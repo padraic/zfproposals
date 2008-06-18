@@ -22,9 +22,15 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         $params = $this->_assembleParams();
         switch ($this->_consumer->getRequestScheme()) {
             case Zend_Oauth::REQUEST_SCHEME_HEADER:
-                $response = $this->_requestSchemeHeader();
+                $httpClient = $this->_getRequestSchemeHeaderClient($params);
+                break;
+            case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
+                $httpClient = $this->_getRequestSchemePostBodyClient($params);
                 break;
         }
+        $httpClient->setUri($this->_consumer->getRequestTokenUrl());
+        $response = $client->request();
+        var_dump($response);
     }
 
     protected function _assembleParams()
@@ -45,9 +51,38 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         return $params;
     }
 
-    protected function _requestSchemeHeader()
+    protected function _getRequestSchemeHeaderClient(array $params)
     {
-        // make request and return tokenised response
+        $headerValue = $this->_toAuthorizationHeader($params);
+        $client = Zend_Oauth::getHttpClient();
+        $client->setHeaders('Authorization', $headerValue);
+        return $client;
+    }
+
+    protected function _getRequestSchemePostBodyClient(array $params)
+    {
+        $headerValue = $this->_toAuthorizationHeader($params);
+        $client = Zend_Oauth::getHttpClient();
+        $client->setHeaders('Authorization', $headerValue);
+        return $client;
+    }
+
+    protected function _toAuthorizationHeader(array $params, $realm = null) 
+    {
+        $headerValue = array();
+        if (is_null($realm)) {
+            $headerValue[] = 'OAuth';
+        } else {
+            $headerValue[] = 'OAuth realm="' . $realm . '"';
+        }
+        foreach ($params as $key => $value) {
+            $headerValue[] = 
+                Zend_Oauth::urlEncode($key)
+                . '="'
+                . Zend_Oauth::urlEncode($key) 
+                . '"';
+        }
+        return implode(",\n", $headerValue);
     }
 
 }

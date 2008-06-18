@@ -39,10 +39,7 @@ abstract class Zend_Oauth_Signature_Abstract
 
     protected function _urlEncode($string) 
     {
-        $return = urlencode($string);
-        // RFC 3986 2.3 (Unreserved Characters)
-        $return = str_replace('%7E', '~', $string);
-        return $return;
+        return Zend_Oauth::urlEncode($string);
     }
 
     protected function _getBaseSignatureString(array $params, $method = null, $url = null) 
@@ -72,6 +69,7 @@ abstract class Zend_Oauth_Signature_Abstract
         uksort($params, 'strnatcmp');
         foreach ($params as $key => $value) {
             if (is_array($value)) {
+                // I think this could be wrong reading "5. Parameters"
                 natsort($value);
                 foreach ($value as $keyduplicate) {
                     $return[] = $key . '=' . $keyduplicate;
