@@ -17,7 +17,7 @@ abstract class Zend_Oauth_Signature_Abstract
         if (isset($accessTokenSecret)) {
             $this->_accessTokenSecret = $accessTokenSecret;
         }
-        $this->_key = $this->_assembleKey($consumerSecret, $accessTokenSecret);
+        $this->_key = $this->_assembleKey();
         if (isset($hashAlgo)) {
             $this->_hashAlgorithm = $hashAlgo;
         }
@@ -25,11 +25,11 @@ abstract class Zend_Oauth_Signature_Abstract
 
     public abstract function sign(array $params);
 
-    protected function _assembleKey($consumerSecret, $accessTokenSecret = null) 
+    protected function _assembleKey() 
     {
-        $parts = array($consumerSecret);
-        if (!is_null($accessTokenSecret)) {
-            $parts[] = $accessTokenSecret;
+        $parts = array($this->_consumerSecret);
+        if (!is_null($this->_accessTokenSecret)) {
+            $parts[] = $this->_accessTokenSecret;
         }
         foreach ($parts as $key=>$secret) {
             $parts[$key] = $this->_urlEncode($secret);
@@ -49,16 +49,38 @@ abstract class Zend_Oauth_Signature_Abstract
     {
         $baseStrings = array();
         if (isset($method)) {
-            $baseStrings[] = strtoupper($method);
+            $baseStrings[] = $this->_urlEncode(strtoupper($method));
         }
         if (isset($url)) {
             $baseStrings[] = $this->_urlEncode($url);
         }
+        $encodedParams = array();
         foreach ($params as $key=>$value) {
-            $value = $this->_urlEncode($value);
-            $baseStrings[] = $key . '=' . $value;
+            $encodedParams[$this->_urlEncode($key)] = $this->_urlEncode($value);
         }
+        if (isset($encodedParams['oauth_signature'])) {
+            unset($encodedParams['oauth_signature']);
+        }
+        $keyValuePairs = $this->_toByteValueOrderedKeyValuePairs($encodedParams);
+        $baseStrings = $baseStrings + $keyValuePairs;
         return implode('&', $baseStrings);
+    }
+
+    protected function _toByteValueOrderedKeyValuePairs(array $params) 
+    {
+        $return = array();
+        uksort($params, 'strnatcmp');
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                natsort($value);
+                foreach ($value as $keyduplicate) {
+                    $return[] = $key . '=' . $keyduplicate;
+                }
+            } else {
+                $return[] = $key . '=' . $value;
+            }
+        }
+        return $return;
     }
 
 }

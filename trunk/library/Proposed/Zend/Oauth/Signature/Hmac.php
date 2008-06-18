@@ -9,7 +9,6 @@ class Zend_Oauth_Signature_Hmac extends Zend_Oauth_Signature_Abstract
 
     public function sign(array $params) 
     {
-        var_dump($this); exit;
         $binaryHash = Zend_Crypt_Hmac::compute(
             $this->_key,
             $this->_hashAlgorithm,

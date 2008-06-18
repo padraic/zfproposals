@@ -12,6 +12,10 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'OauthTest.php';
 require_once 'Oauth/ConsumerTest.php';
 
+require_once 'Oauth/Signature/PlaintextTest.php';
+require_once 'Oauth/Signature/HmacTest.php';
+require_once 'Oauth/Signature/RsaTest.php';
+
 class Zend_Oauth_AllTests
 {
     public static function main()
@@ -25,6 +29,10 @@ class Zend_Oauth_AllTests
 
         $suite->addTestSuite('Zend_OauthTest');
         $suite->addTestSuite('Zend_Oauth_ConsumerTest');
+
+        $suite->addTestSuite('Zend_Oauth_Signature_PlaintextTest');
+        $suite->addTestSuite('Zend_Oauth_Signature_HmacTest');
+        $suite->addTestSuite('Zend_Oauth_Signature_RsaTest');
 
         return $suite;
     }
