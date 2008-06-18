@@ -29,4 +29,19 @@ class Zend_OauthTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://www.example.com:80', $resetClient->getUri(true));
     }
 
+    public function testGetHttpClientResetsAuthorizationHeader()
+    {
+        $client = new Test_Http_Client_19485876();
+        $client->setHeaders('Authorization', 'realm="http://www.example.com",oauth_version="1.0"');
+        Zend_Oauth::setHttpClient($client);
+        $resetClient = Zend_Oauth::getHttpClient();
+        $this->assertEquals(null, $resetClient->getHeader('Authorization'));
+    }
+
+    public function testUrlEncodeDoesNotEncodeReservedCharacters() 
+    {
+        $string = '.-_~alpha12345 ,+&';
+        $this->assertEquals('.-_~alpha12345+%2C%2B%26', Zend_Oauth::urlEncode($string));
+    }
+
 }

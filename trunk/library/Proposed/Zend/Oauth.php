@@ -45,7 +45,7 @@ class Zend_Oauth
         $return = urlencode($string);
         /* 5.1. Parameter Encoding
            'Characters in the unreserved character set MUST NOT be encoded.' */
-        $return = str_replace('%7E', '~', $string);
+        $return = str_replace('%7E', '~', $return);
         return $return;
     }
 
