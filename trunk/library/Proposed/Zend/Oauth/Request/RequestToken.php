@@ -11,6 +11,8 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
 
     protected $_httpClient = null;
 
+    protected $_preferredRequestScheme = null;
+
     public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
     {
         $this->_consumer = $consumer;
@@ -22,7 +24,50 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
     public function execute()
     {
         $params = $this->_assembleParams();
-        switch ($this->_consumer->getRequestScheme()) {
+        $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
+        $response = $this->_startRequestCycle($params);
+        var_dump($response); exit;
+    }
+
+    public function setParameters(array $customServiceParameters)
+    {
+        $this->_parameters = $customServiceParameters;
+    }
+
+    protected function _startRequestCycle(array $params)
+    {
+        $response = null;
+        try {
+            $response = $this->_attemptRequest($params);
+        } catch (Zend_Http_Client_Exception $e) {
+            $this->_assessRequestAttempt();
+        }
+        if (is_null($response)) {
+            $response = $this->_startRequestCycle($params);
+        }
+        return $response;
+    }
+
+    protected function _assessRequestAttempt()
+    {
+        switch ($this->_preferredRequestScheme) {
+            case Zend_Oauth::REQUEST_SCHEME_HEADER:
+                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_POSTBODY;
+                break;
+            case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
+                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_QUERYSTRING;
+                break;
+            default:
+                require_once 'Zend/Oauth/Exception.php';
+                throw new Zend_Oauth_Exception(
+                    'Could not retrieve a valid Request Token response from Request Token URL'
+                );
+        }
+    }
+
+    protected function _attemptRequest(array $params)
+    {
+        switch ($this->_preferredRequestScheme) {
             case Zend_Oauth::REQUEST_SCHEME_HEADER:
                 $httpClient = $this->_getRequestSchemeHeaderClient($params);
                 break;
@@ -33,13 +78,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
                 $httpClient = $this->_getRequestSchemeQueryStringClient($params);
                 break;
         }
-        $response = $httpClient->request();
-        var_dump($response); exit;
-    }
-
-    public function setParameters(array $customServiceParameters)
-    {
-        $this->_parameters = $customServiceParameters;
+        return $httpClient->request();
     }
 
     protected function _assembleParams()
@@ -111,7 +150,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
                 . Zend_Oauth::urlEncode($key)
                 . '"';
         }
-        return implode(",\n", $headerValue);
+        return implode(",", $headerValue);
     }
 
 }
