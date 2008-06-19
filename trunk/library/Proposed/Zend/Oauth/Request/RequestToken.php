@@ -16,17 +16,17 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
     public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
     {
         $this->_consumer = $consumer;
+        $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
         if (!is_null($parameters)) {
-            $this->_parameters = $parameters;
+            $this->setParameters($parameters);
         }
     }
 
-    public function execute()
+    public function execute(array $params = null)
     {
-        $params = $this->_assembleParams();
-        $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
-        $response = $this->_startRequestCycle($params);
-        var_dump($response); exit;
+        $params = $this->assembleParams($params);
+        $response = $this->startRequestCycle($params);
+        return $response;
     }
 
     public function setParameters(array $customServiceParameters)
@@ -34,15 +34,92 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         $this->_parameters = $customServiceParameters;
     }
 
-    protected function _startRequestCycle(array $params)
+    public function assembleParams(array $params = null)
+    {
+        if (is_null($params)) {
+            $params = array();
+            $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
+            $params['oauth_nonce'] = $this->generateNonce();
+            $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
+            $params['oauth_timestamp'] = $this->generateTimestamp();
+            $params['oauth_version'] = $this->_consumer->getVersion();
+        } else {
+            uksort($params, 'strnatcmp');
+            $requiredKeys = array('oauth_consumer_key','oauth_nonce',
+                'oauth_signature_method','oauth_timestamp');
+        }
+        if (!empty($this->_parameters)) {
+            $params = array_merge($params, $this->_parameters);
+        }
+        $params['oauth_signature'] = $this->sign(
+            $params,
+            $this->_consumer->getSignatureMethod(),
+            $this->_consumer->getConsumerSecret(),
+            null,
+            $this->_consumer->getRequestMethod(),
+            $this->_consumer->getRequestTokenUrl()
+        );
+        return $params;
+    }
+
+    public function getRequestSchemeHeaderClient(array $params)
+    {
+        // seems to get no valid reponse from tests...:( OAuth SP bug?
+        $headerValue = $this->_toAuthorizationHeader($params);
+        $client = Zend_Oauth::getHttpClient();
+        $client->setUri($this->_consumer->getRequestTokenUrl());
+        $client->setHeaders('Authorization', $headerValue);
+        return $client;
+    }
+
+    public function getRequestSchemePostBodyClient(array $params)
+    {
+        $client = Zend_Oauth::getHttpClient();
+        $client->setUri($this->_consumer->getRequestTokenUrl());
+        $encodedParams = array();
+        foreach ($params as $key => $value) {
+            $encodedParams[] =
+                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
+        }
+        $client->setMethod(Zend_Http_Client::POST);
+        $client->setRawData(implode('&', $encodedParams));
+        return $client;
+    }
+
+    public function getRequestSchemeQueryStringClient(array $params)
+    {
+        $client = Zend_Oauth::getHttpClient();
+        $client->setUri($this->_consumer->getRequestTokenUrl());
+        $encodedParams = array();
+        foreach ($params as $key => $value) {
+            $encodedParams[] =
+                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
+        }
+        $client->setMethod(Zend_Http_Client::GET);
+        $client->getUri()->setQuery(implode('&', $encodedParams));
+        return $client;
+    }
+
+    public function startRequestCycle(array $params)
     {
         $response = null;
+        $body = null;
+        $status = null;
         try {
             $response = $this->_attemptRequest($params);
         } catch (Zend_Http_Client_Exception $e) {
-            $this->_assessRequestAttempt();
         }
-        if (is_null($response)) {
+        if (!is_null($response)) {
+            $body = $response->getBody();
+            $status = $response->getStatus();
+        }
+        if (is_null($response)// Request failure/exception
+            || $status == 500 // Internal Server Error
+            || $status == 400 // Bad Request
+            || $status == 401 // Unauthorized
+            || empty($body)   // Missing request token
+            ) {
+            $this->_assessRequestAttempt();
             $response = $this->_startRequestCycle($params);
         }
         return $response;
@@ -69,70 +146,16 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
     {
         switch ($this->_preferredRequestScheme) {
             case Zend_Oauth::REQUEST_SCHEME_HEADER:
-                $httpClient = $this->_getRequestSchemeHeaderClient($params);
+                $httpClient = $this->getRequestSchemeHeaderClient($params);
                 break;
             case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
-                $httpClient = $this->_getRequestSchemePostBodyClient($params);
+                $httpClient = $this->getRequestSchemePostBodyClient($params);
                 break;
             case Zend_Oauth::REQUEST_SCHEME_QUERYSTRING:
-                $httpClient = $this->_getRequestSchemeQueryStringClient($params);
+                $httpClient = $this->getRequestSchemeQueryStringClient($params);
                 break;
         }
         return $httpClient->request();
-    }
-
-    protected function _assembleParams()
-    {
-        $params = array();
-        $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
-        $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
-        $params['oauth_timestamp'] = $this->generateTimestamp();
-        $params['oauth_nonce'] = $this->generateNonce();
-        $params['oauth_version'] = $this->_consumer->getVersion();
-        if (!empty($this->_parameters)) {
-            $params = $params + $this->_parameters;
-        }
-        $params['oauth_signature'] = $this->sign(
-            $params, $this->_consumer->getSignatureMethod(),
-            $this->_consumer->getConsumerSecret()
-        );
-        return $params;
-    }
-
-    protected function _getRequestSchemeHeaderClient(array $params)
-    {
-        // seems to get no valid reponse from tests...:( OAuth SP bug?
-        $headerValue = $this->_toAuthorizationHeader($params);
-        $client = Zend_Oauth::getHttpClient();
-        $client->setUri($this->_consumer->getRequestTokenUrl());
-        $client->setHeaders('Authorization', $headerValue);
-        return $client;
-    }
-
-    protected function _getRequestSchemePostBodyClient(array $params)
-    {
-        $client = Zend_Oauth::getHttpClient();
-        $client->setUri($this->_consumer->getRequestTokenUrl());
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[Zend_Oauth::urlEncode($key)] = Zend_Oauth::urlEncode($value);
-        }
-        $client->setMethod(Zend_Http_Client::POST);
-        $client->setRawData(implode('&', $encodedParams));
-        return $client;
-    }
-
-    protected function _getRequestSchemeQueryStringClient(array $params)
-    {
-        $client = Zend_Oauth::getHttpClient();
-        $client->setUri($this->_consumer->getRequestTokenUrl());
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[Zend_Oauth::urlEncode($key)] = Zend_Oauth::urlEncode($value);
-        }
-        $client->setMethod(Zend_Http_Client::GET);
-        $client->getUri()->setQuery(implode('&', $encodedParams));
-        return $client;
     }
 
     protected function _toAuthorizationHeader(array $params, $realm = null)
@@ -151,6 +174,21 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
                 . '"';
         }
         return implode(",", $headerValue);
+    }
+
+    protected function _normaliseRequestUrl($url) 
+    {
+        $uri = Zend_Uri::fromString($url);
+        // remove default port numbers to maintain equivelance
+        if ($uri->getScheme() == 'http' && $uri->getPort() == '80') {
+            $uri->setPort('');
+        } elseif ($uri->getScheme() == 'https' && $uri->getPort() == '443') {
+            $uri->setPort('');
+        }
+        //
+        $uri->setQuery('');
+        $uri->setFragment('');
+        return $uri->getUri(true);
     }
 
 }

@@ -9,7 +9,7 @@ abstract class Zend_Oauth_Signature_Abstract
 
     protected $_consumerSecret = null;
 
-    protected $_accessTokenSecret = null;
+    protected $_accessTokenSecret = '';
 
     public function __construct($consumerSecret, $accessTokenSecret = null, $hashAlgo = null) 
     {
@@ -23,7 +23,7 @@ abstract class Zend_Oauth_Signature_Abstract
         }
     }
 
-    public abstract function sign(array $params);
+    public abstract function sign(array $params, $method = null, $url = null);
 
     protected function _assembleKey() 
     {
@@ -32,7 +32,7 @@ abstract class Zend_Oauth_Signature_Abstract
             $parts[] = $this->_accessTokenSecret;
         }
         foreach ($parts as $key=>$secret) {
-            $parts[$key] = $this->_urlEncode($secret);
+            $parts[$key] = Zend_Oauth::urlEncode($secret);
         }
         return implode('&', $parts);
     }
@@ -46,24 +46,22 @@ abstract class Zend_Oauth_Signature_Abstract
     {
         $baseStrings = array();
         if (isset($method)) {
-            $baseStrings[] = $this->_urlEncode(strtoupper($method));
+            $baseStrings[] = strtoupper($method);
         }
         if (isset($url)) {
-            $baseStrings[] = $this->_urlEncode($url);
+            // should normalise later
+            $baseStrings[] = Zend_Oauth::urlEncode($url);
         }
-        $encodedParams = array();
-        foreach ($params as $key=>$value) {
-            $encodedParams[$this->_urlEncode($key)] = $this->_urlEncode($value);
+        if (isset($params['oauth_signature'])) {
+            unset($params['oauth_signature']);
         }
-        if (isset($encodedParams['oauth_signature'])) {
-            unset($encodedParams['oauth_signature']);
-        }
-        $keyValuePairs = $this->_toByteValueOrderedKeyValuePairs($encodedParams);
-        $baseStrings = $baseStrings + $keyValuePairs;
+        $baseStrings[] = Zend_Oauth::urlEncode(
+            $this->_toByteValueOrderedQueryString($params)
+        );
         return implode('&', $baseStrings);
     }
 
-    protected function _toByteValueOrderedKeyValuePairs(array $params) 
+    protected function _toByteValueOrderedQueryString(array $params) 
     {
         $return = array();
         uksort($params, 'strnatcmp');
@@ -78,7 +76,7 @@ abstract class Zend_Oauth_Signature_Abstract
                 $return[] = $key . '=' . $value;
             }
         }
-        return $return;
+        return implode('&', $return);
     }
 
 }

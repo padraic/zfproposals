@@ -49,27 +49,27 @@ class Zend_Oauth
         return $return;
     }
 
-    public function sign(array $params, $method, $consumerSecret, $accessTokenSecret = null)
+    public static function sign(array $params, $signatureMethod, $consumerSecret, $accessTokenSecret = null, $method = null, $url = null)
     {
         $className = '';
         $hashAlgo = null;
-        $parts = explode('-', $method);
+        $parts = explode('-', $signatureMethod);
         if (count($parts) > 1) {
             $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($parts[0]));
             $hashAlgo = $parts[1];
         } else {
-            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($method));
+            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($signatureMethod));
         }
         $signatureObject = new $className($consumerSecret, $accessTokenSecret, $hashAlgo);
-        return $signatureObject->sign($params);
+        return $signatureObject->sign($params, $method, $url);
     }
 
-    public function generateNonce()
+    public static function generateNonce()
     {
-        return sha1(uniqid(rand(), true));
+        return md5(uniqid(rand(), true));
     }
 
-    public function generateTimestamp()
+    public static function generateTimestamp()
     {
         return time();
     }

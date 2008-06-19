@@ -46,9 +46,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth
                 case 'requestMethod':
                     $this->setRequestMethod($value);
                     break;
-                case 'requestScheme':
-                    $this->setRequestScheme($value);
-                    break;
                 case 'version':
                     $this->setVersion($value);
                     break;
@@ -65,6 +62,9 @@ class Zend_Oauth_Consumer extends Zend_Oauth
                     $this->setUserAuthorisationUrl($value);
                     break;
             }
+        }
+        if (isset($options['requestScheme'])) {
+            $this->setRequestScheme($options['requestScheme']);
         }
     }
 
@@ -141,6 +141,9 @@ class Zend_Oauth_Consumer extends Zend_Oauth
             throw new Zend_Oauth_Exception(
                 '\'' . $scheme . '\' is an unsupported request scheme'
             );
+        }
+        if ($scheme == self::REQUEST_SCHEME_QUERYSTRING) {
+            $this->setRequestMethod('GET');
         }
         $this->_requestScheme = $scheme;
     }

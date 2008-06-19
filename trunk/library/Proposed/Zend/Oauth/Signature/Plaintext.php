@@ -5,7 +5,7 @@ require_once 'Zend/Oauth/Signature/Abstract.php';
 class Zend_Oauth_Signature_Plaintext extends Zend_Oauth_Signature_Abstract
 {
 
-    public function sign(array $params) 
+    public function sign(array $params, $method = null, $url = null) 
     {
         if (is_null($this->_accessTokenSecret)) {
             return $this->_consumerSecret;
