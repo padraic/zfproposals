@@ -29,9 +29,7 @@ require_once 'TestHelper.php';
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
-require_once 'Zend/ViewTest.php';
-require_once 'Zend/View/AllTests.php';
-require_once 'Zend/Yaml/AllTests.php';
+require_once 'Zend/Oauth/AllTests.php';
 require_once 'Zend/Crypt/AllTests.php';
 
 
@@ -45,9 +43,7 @@ class Zend_AllTests
     public static function suite()
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend');
-        $suite->addTestSuite('Zend_ViewTest');
-        $suite->addTest(Zend_View_AllTests::suite());
-        $suite->addTest(Zend_Yaml_AllTests::suite());
+        $suite->addTest(Zend_Oauth_AllTests::suite());
         $suite->addTest(Zend_Crypt_AllTests::suite());
         return $suite;
     }
