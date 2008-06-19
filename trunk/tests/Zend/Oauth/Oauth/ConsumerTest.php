@@ -177,7 +177,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 class Test_Request_RequestToken_48231 extends Zend_Oauth_Request_RequestToken
 {
     public function __construct(){}
-    public function execute()
+    public function execute(array $params = null)
     {
         $return = new Zend_Oauth_Token_Request;
         return $return;

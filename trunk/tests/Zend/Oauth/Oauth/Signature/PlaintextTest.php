@@ -6,7 +6,7 @@ require_once 'Zend/Oauth/Signature/Plaintext.php';
 class Zend_Oauth_Signature_PlaintextTest extends PHPUnit_Framework_TestCase
 {
 
-    public function testSignatureWithoutAccessSecretIsOnlyConsumerSecretString() 
+    public function testSignatureWithoutAccessSecretIsOnlyConsumerSecretString()
     {
         $params = array(
             'oauth_version' => '1.0',
@@ -17,10 +17,10 @@ class Zend_Oauth_Signature_PlaintextTest extends PHPUnit_Framework_TestCase
             'oauth_version' => '1.0'
         );
         $signature = new Zend_Oauth_Signature_Plaintext('1234567890');
-        $this->assertEquals('1234567890', $signature->sign($params));
+        $this->assertEquals('1234567890&', $signature->sign($params));
     }
 
-    public function testSignatureWithAccessSecretIsConsumerAndAccessSecretStringsConcatWithAmp() 
+    public function testSignatureWithAccessSecretIsConsumerAndAccessSecretStringsConcatWithAmp()
     {
         $params = array(
             'oauth_version' => '1.0',

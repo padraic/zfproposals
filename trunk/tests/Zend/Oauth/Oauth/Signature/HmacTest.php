@@ -6,7 +6,7 @@ require_once 'Zend/Oauth/Signature/Hmac.php';
 class Zend_Oauth_Signature_HmacTest extends PHPUnit_Framework_TestCase
 {
 
-    public function testSignatureWithoutAccessSecretIsHashedWithConsumerSecret() 
+    public function testSignatureWithoutAccessSecretIsHashedWithConsumerSecret()
     {
         $params = array(
             'oauth_version' => '1.0',
@@ -17,10 +17,10 @@ class Zend_Oauth_Signature_HmacTest extends PHPUnit_Framework_TestCase
             'oauth_version' => '1.0'
         );
         $signature = new Zend_Oauth_Signature_Hmac('1234567890', null, 'SHA1');
-        $this->assertEquals('PmzEuo5l6sTqaTwvoUByZNKS3Ro=', $signature->sign($params));
+        $this->assertEquals('XYkaERjLVjp2yP/klDCGQ+hZ2So=', $signature->sign($params));
     }
 
-    public function testSignatureWithAccessSecretIsHashedWithConsumerAndAccessSecret() 
+    public function testSignatureWithAccessSecretIsHashedWithConsumerAndAccessSecret()
     {
         $params = array(
             'oauth_version' => '1.0',
@@ -31,7 +31,7 @@ class Zend_Oauth_Signature_HmacTest extends PHPUnit_Framework_TestCase
             'oauth_version' => '1.0'
         );
         $signature = new Zend_Oauth_Signature_Hmac('1234567890', '0987654321', 'SHA1');
-        $this->assertEquals('KfjqNxIxorfj+Kn3FNpGqjMGhSc=', $signature->sign($params));
+        $this->assertEquals('b0J6H0jCEo+tvzVJy2G615sM6/M=', $signature->sign($params));
     }
 
 }

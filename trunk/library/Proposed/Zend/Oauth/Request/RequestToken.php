@@ -34,24 +34,23 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         $this->_parameters = $customServiceParameters;
     }
 
-    public function assembleParams(array $params = null)
+    public function getParameters()
     {
-        if (is_null($params)) {
-            $params = array();
-            $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
-            $params['oauth_nonce'] = $this->generateNonce();
-            $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
-            $params['oauth_timestamp'] = $this->generateTimestamp();
-            $params['oauth_version'] = $this->_consumer->getVersion();
-        } else {
-            uksort($params, 'strnatcmp');
-            $requiredKeys = array('oauth_consumer_key','oauth_nonce',
-                'oauth_signature_method','oauth_timestamp');
-        }
+        return $this->_parameters;
+    }
+
+    public function assembleParams()
+    {
+        $params = array();
+        $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
+        $params['oauth_nonce'] = $this->_consumer->generateNonce();
+        $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
+        $params['oauth_timestamp'] = $this->_consumer->generateTimestamp();
+        $params['oauth_version'] = $this->_consumer->getVersion();
         if (!empty($this->_parameters)) {
             $params = array_merge($params, $this->_parameters);
         }
-        $params['oauth_signature'] = $this->sign(
+        $params['oauth_signature'] = $this->_consumer->sign(
             $params,
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
@@ -62,6 +61,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         return $params;
     }
 
+    // TEST
     public function getRequestSchemeHeaderClient(array $params)
     {
         // seems to get no valid reponse from tests...:( OAuth SP bug?
@@ -125,6 +125,11 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         return $response;
     }
 
+    public function getConsumer()
+    {
+        return $this->_consumer;
+    }
+
     protected function _assessRequestAttempt()
     {
         switch ($this->_preferredRequestScheme) {
@@ -176,7 +181,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
         return implode(",", $headerValue);
     }
 
-    protected function _normaliseRequestUrl($url) 
+    protected function _normaliseRequestUrl($url)
     {
         $uri = Zend_Uri::fromString($url);
         // remove default port numbers to maintain equivelance

@@ -16,6 +16,8 @@ require_once 'Oauth/Signature/PlaintextTest.php';
 require_once 'Oauth/Signature/HmacTest.php';
 require_once 'Oauth/Signature/RsaTest.php';
 
+require_once 'Oauth/Request/RequestTokenTest.php';
+
 class Zend_Oauth_AllTests
 {
     public static function main()
@@ -33,6 +35,8 @@ class Zend_Oauth_AllTests
         $suite->addTestSuite('Zend_Oauth_Signature_PlaintextTest');
         $suite->addTestSuite('Zend_Oauth_Signature_HmacTest');
         $suite->addTestSuite('Zend_Oauth_Signature_RsaTest');
+
+        $suite->addTestSuite('Zend_Oauth_Request_RequestTokenTest');
 
         return $suite;
     }

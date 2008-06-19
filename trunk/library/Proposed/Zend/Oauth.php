@@ -40,7 +40,7 @@ class Zend_Oauth
         self::$httpClient = null;
     }
 
-    public static function urlEncode($string) 
+    public static function urlEncode($string)
     {
         $return = urlencode($string);
         /* 5.1. Parameter Encoding
@@ -49,7 +49,7 @@ class Zend_Oauth
         return $return;
     }
 
-    public static function sign(array $params, $signatureMethod, $consumerSecret, $accessTokenSecret = null, $method = null, $url = null)
+    public function sign(array $params, $signatureMethod, $consumerSecret, $accessTokenSecret = null, $method = null, $url = null)
     {
         $className = '';
         $hashAlgo = null;
@@ -64,12 +64,12 @@ class Zend_Oauth
         return $signatureObject->sign($params, $method, $url);
     }
 
-    public static function generateNonce()
+    public function generateNonce()
     {
         return md5(uniqid(rand(), true));
     }
 
-    public static function generateTimestamp()
+    public function generateTimestamp()
     {
         return time();
     }
