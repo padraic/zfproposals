@@ -175,25 +175,10 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
             $headerValue[] =
                 Zend_Oauth::urlEncode($key)
                 . '="'
-                . Zend_Oauth::urlEncode($key)
+                . Zend_Oauth::urlEncode($value)
                 . '"';
         }
         return implode(",", $headerValue);
-    }
-
-    protected function _normaliseRequestUrl($url)
-    {
-        $uri = Zend_Uri::fromString($url);
-        // remove default port numbers to maintain equivelance
-        if ($uri->getScheme() == 'http' && $uri->getPort() == '80') {
-            $uri->setPort('');
-        } elseif ($uri->getScheme() == 'https' && $uri->getPort() == '443') {
-            $uri->setPort('');
-        }
-        //
-        $uri->setQuery('');
-        $uri->setFragment('');
-        return $uri->getUri(true);
     }
 
 }

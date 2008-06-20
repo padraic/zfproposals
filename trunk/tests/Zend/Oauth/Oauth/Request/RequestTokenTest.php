@@ -58,6 +58,29 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expectedParams, $request->assembleParams());
     }
 
+    public function testGetRequestSchemeHeaderClientSetsCorrectlyEncodedAuthorizationHeader()
+    {
+        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $params = array (
+            'oauth_consumer_key' => '1234567890',
+            'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
+            'oauth_signature_method' => 'HMAC-SHA1',
+            'oauth_timestamp' => '12345678901',
+            'oauth_version' => '1.0',
+            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c~',
+            'custom_param1' => 'foo',
+            'custom_param2' => 'bar'
+        );
+        $client = $request->getRequestSchemeHeaderClient($params);
+        $this->assertEquals(
+        'OAuth,oauth_consumer_key="1234567890",oauth_nonce="e807f1fcf82d132f9b'
+        .'b018ca6738a19f",oauth_signature_method="HMAC-SHA1",oauth_timestamp="'
+        .'12345678901",oauth_version="1.0",oauth_signature="6fb42da0e32e07b61c'
+        .'9f0251fe627a9c~",custom_param1="foo",custom_param2="bar"',
+            $client->getHeader('Authorization')
+        );
+    }
+
     public function testGetRequestSchemePostBodyClientSetsCorrectlyEncodedRawData()
     {
         $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);

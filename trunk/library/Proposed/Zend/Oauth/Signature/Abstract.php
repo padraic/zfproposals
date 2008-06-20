@@ -25,6 +25,21 @@ abstract class Zend_Oauth_Signature_Abstract
 
     public abstract function sign(array $params, $method = null, $url = null);
 
+    public function normaliseBaseSignatureUrl($url)
+    {
+        $uri = Zend_Uri_Http::fromString($url);
+        if ($uri->getScheme() == 'http' && $uri->getPort() == '80') {
+            $uri->setPort('');
+        } elseif ($uri->getScheme() == 'https' && $uri->getPort() == '443') {
+            $uri->setPort('');
+        }
+        $uri->setQuery('');
+        $uri->setFragment('');
+        $uri->setHost(strtolower($uri->getHost()));
+        $uri->setPath(strtolower($uri->getPath()));
+        return $uri->getUri(true);
+    }
+
     protected function _assembleKey() 
     {
         $parts = array($this->_consumerSecret);
@@ -37,11 +52,6 @@ abstract class Zend_Oauth_Signature_Abstract
         return implode('&', $parts);
     }
 
-    protected function _urlEncode($string) 
-    {
-        return Zend_Oauth::urlEncode($string);
-    }
-
     protected function _getBaseSignatureString(array $params, $method = null, $url = null) 
     {
         $baseStrings = array();
@@ -50,7 +60,7 @@ abstract class Zend_Oauth_Signature_Abstract
         }
         if (isset($url)) {
             // should normalise later
-            $baseStrings[] = Zend_Oauth::urlEncode($url);
+            $baseStrings[] = Zend_Oauth::urlEncode($this->normaliseBaseSignatureUrl($url));
         }
         if (isset($params['oauth_signature'])) {
             unset($params['oauth_signature']);
@@ -67,7 +77,6 @@ abstract class Zend_Oauth_Signature_Abstract
         uksort($params, 'strnatcmp');
         foreach ($params as $key => $value) {
             if (is_array($value)) {
-                // I think this could be wrong reading "5. Parameters"
                 natsort($value);
                 foreach ($value as $keyduplicate) {
                     $return[] = $key . '=' . $keyduplicate;
