@@ -68,7 +68,7 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         }
     }
 
-    public function getRequestToken(array $customServiceParameters = null, Zend_Oauth_Request_RequestToken $request = null)
+    public function getRequestToken(array $customServiceParameters = null, Zend_Oauth_Http_RequestToken $request = null)
     {
         if (is_null($request)) {
             $request = new Zend_Oauth_Http_RequestToken($this, $customServiceParameters);
