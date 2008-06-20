@@ -6,6 +6,8 @@ require_once 'Zend/Uri.php';
 
 require_once 'Zend/Oauth/Http/RequestToken.php';
 
+require_once 'Zend/Oauth/Http/UserAuthorisation.php';
+
 class Zend_Oauth_Consumer extends Zend_Oauth
 {
 
