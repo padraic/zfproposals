@@ -26,7 +26,8 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
     {
         $params = $this->assembleParams($params);
         $response = $this->startRequestCycle($params);
-        return $response;
+        $return = new Zend_Oauth_Token_Request($response);
+        return $return;
     }
 
     public function setParameters(array $customServiceParameters)
@@ -61,10 +62,8 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
         return $params;
     }
 
-    // TEST
     public function getRequestSchemeHeaderClient(array $params)
     {
-        // seems to get no valid reponse from tests...:( OAuth SP bug?
         $headerValue = $this->_toAuthorizationHeader($params);
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
