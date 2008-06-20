@@ -168,13 +168,13 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
     public function testGetRequestTokenReturnsInstanceOfOauthTokenRequest()
     {
         $consumer = new Zend_Oauth_Consumer('12345', '54321');
-        $token = $consumer->getRequestToken(null, new Test_Request_RequestToken_48231);
+        $token = $consumer->getRequestToken(null, new Test_Http_RequestToken_48231);
         $this->assertType('Zend_Oauth_Token_Request', $token);
     }
 
 }
 
-class Test_Request_RequestToken_48231 extends Zend_Oauth_Request_RequestToken
+class Test_Http_RequestToken_48231 extends Zend_Oauth_Http_RequestToken
 {
     public function __construct(){}
     public function execute(array $params = null)
