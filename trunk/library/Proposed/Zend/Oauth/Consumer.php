@@ -29,6 +29,8 @@ class Zend_Oauth_Consumer extends Zend_Oauth
 
     protected $_consumerSecret = null;
 
+    protected $_requestToken = null;
+
     public function __construct($consumerKey, $consumerSecret, array $options = array())
     {
         $this->setConsumerKey($consumerKey);
@@ -75,7 +77,29 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         } elseif(!is_null($customServiceParameters)) {
             $request->setParameters($customServiceParameters);
         }
-        return $request->execute();
+        $this->_requestToken = $request->execute();
+        return $this->_requestToken;
+    }
+
+    public function getRedirectUrl(array $customServiceParameters = null, Zend_Oauth_Http_UserAuthorisation $redirect = null)
+    {
+        if (is_null($redirect)) {
+            $redirect = new Zend_Oauth_Http_UserAuthorisation($this, $customServiceParameters);
+        } elseif(!is_null($customServiceParameters)) {
+            $redirect->setParameters($customServiceParameters);
+        }
+        return $redirect->getUrl();
+    }
+
+    public function redirect(array $customServiceParameters = null, Zend_Oauth_Http_UserAuthorisation $request = null)
+    {
+        $redirectUrl = $this->getRedirectUrl($customServiceParameters, $request);
+        header('Location: ' . $redirectUrl);
+    }
+
+    public function getLastRequestToken()
+    {
+        return $this->_requestToken;
     }
 
     public function setConsumerKey($key)

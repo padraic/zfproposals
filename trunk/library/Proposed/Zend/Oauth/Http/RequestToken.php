@@ -1,26 +1,12 @@
 <?php
 
+require_once 'Zend/Oauth/Http.php';
 require_once 'Zend/Oauth/Token/Request.php';
 
-class Zend_Oauth_Http_RequestToken extends Zend_Oauth
+class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
 {
 
-    protected $_consumer = null;
-
-    protected $_parameters = array();
-
     protected $_httpClient = null;
-
-    protected $_preferredRequestScheme = null;
-
-    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
-    {
-        $this->_consumer = $consumer;
-        $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
-        if (!is_null($parameters)) {
-            $this->setParameters($parameters);
-        }
-    }
 
     public function execute(array $params = null)
     {
@@ -28,16 +14,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
         $response = $this->startRequestCycle($params);
         $return = new Zend_Oauth_Token_Request($response);
         return $return;
-    }
-
-    public function setParameters(array $customServiceParameters)
-    {
-        $this->_parameters = $customServiceParameters;
-    }
-
-    public function getParameters()
-    {
-        return $this->_parameters;
     }
 
     public function assembleParams()
@@ -85,20 +61,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
         return $client;
     }
 
-    public function getRequestSchemeQueryStringClient(array $params)
-    {
-        $client = Zend_Oauth::getHttpClient();
-        $client->setUri($this->_consumer->getRequestTokenUrl());
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[] =
-                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
-        }
-        $client->setMethod(Zend_Http_Client::GET);
-        $client->getUri()->setQuery(implode('&', $encodedParams));
-        return $client;
-    }
-
     public function startRequestCycle(array $params)
     {
         $response = null;
@@ -122,11 +84,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
             $response = $this->startRequestCycle($params);
         }
         return $response;
-    }
-
-    public function getConsumer()
-    {
-        return $this->_consumer;
     }
 
     protected function _assessRequestAttempt()
@@ -156,7 +113,8 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth
                 $httpClient = $this->getRequestSchemePostBodyClient($params);
                 break;
             case Zend_Oauth::REQUEST_SCHEME_QUERYSTRING:
-                $httpClient = $this->getRequestSchemeQueryStringClient($params);
+                $httpClient = $this->getRequestSchemeQueryStringClient($params,
+                    $this->_consumer->getRequestTokenUrl());
                 break;
         }
         return $httpClient->request();

@@ -14,6 +14,11 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
         Zend_Oauth::setHttpClient(new Test_Client_32874);
     }
 
+    public function teardown()
+    {
+        Zend_Oauth::clearHttpClient();
+    }
+
     public function testConstructorSetsConsumerInstance()
     {
         $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
@@ -117,7 +122,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
             'custom_param1' => 'foo',
             'custom_param2' => 'bar'
         );
-        $client = $request->getRequestSchemeQueryStringClient($params);
+        $client = $request->getRequestSchemeQueryStringClient($params, 'http://www.example.com');
         $this->assertEquals(
             'oauth_consumer_key=1234567890&oauth_nonce=e807f1fcf82d132f9bb018c'
             .'a6738a19f&oauth_signature_method=HMAC-SHA1&oauth_timestamp=12345'
