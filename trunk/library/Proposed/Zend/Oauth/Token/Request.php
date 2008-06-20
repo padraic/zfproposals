@@ -5,9 +5,9 @@ require_once 'Zend/Oauth/Token.php';
 class Zend_Oauth_Token_Request extends Zend_Oauth_Token
 {
 
-    protected $_response = null;
+    const TOKEN_SECRET_PARAM_KEY = 'oauth_token_secret';
 
-    protected $_params = array();
+    protected $_response = null;
 
     public function __construct(Zend_Http_Response $response = null)
     {
@@ -22,80 +22,25 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         return $this->_response;
     }
 
-    public function setParam($key, $value)
-    {
-        $this->_params[$key] = $value;
-    }
-
-    public function setParams(array $params)
-    {
-        foreach ($params as $key=>$value) {
-            $this->setParam($key, $value);
-        }
-    }
-
-    public function getParam($key)
-    {
-        if (isset($this->_params[$key])) {
-            return $this->_params[$key];
-        }
-        return null;
-    }
-
-    public function setToken($token)
-    {
-        $this->setParam('oauth_token', $token);
-    }
-
-    public function getToken()
-    {
-        return $this->getParam('oauth_token');
-    }
-
     public function setTokenSecret($secret)
     {
-        $this->setParam('oauth_token_secret', $secret);
+        $this->setParam(self::TOKEN_SECRET_PARAM_KEY, $secret);
     }
 
     public function getTokenSecret()
     {
-        return $this->getParam('oauth_token_secret');
+        return $this->getParam(self::TOKEN_SECRET_PARAM_KEY);
     }
 
     public function isValid()
     {
-        if (isset($this->_params['oauth_token'])
-            && !empty($this->_params['oauth_token'])
-            && isset($this->_params['oauth_token_secret'])
-            && !empty($this->_params['oauth_token_secret'])) {
+        if (isset($this->_params[self::TOKEN_PARAM_KEY])
+            && !empty($this->_params[self::TOKEN_PARAM_KEY])
+            && isset($this->_params[self::TOKEN_SECRET_PARAM_KEY])
+            && !empty($this->_params[self::TOKEN_SECRET_PARAM_KEY])) {
             return true;
         }
         return false;
-    }
-
-    public function __get($key)
-    {
-        return $this->getParam($key);
-    }
-
-    public function __set($key, $value)
-    {
-        $this->setParam($key, $value);
-    }
-
-    public function toString()
-    {
-        $baseStrings = array();
-        foreach ($this->_params as $key=>$value) {
-            $baseStrings[] = Zend_Oauth::urlEncode($key)
-                . '=' . Zend_Oauth::urlEncode($value);
-        }
-        return implode('&', $baseStrings);
-    }
-
-    public function __toString()
-    {
-        return $this->toString();
     }
 
     protected function _parseParameters()

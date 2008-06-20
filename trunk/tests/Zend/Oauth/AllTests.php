@@ -21,6 +21,7 @@ require_once 'Oauth/Http/RequestTokenTest.php';
 require_once 'Oauth/Http/UserAuthorisationTest.php';
 
 require_once 'Oauth/Token/RequestTest.php';
+require_once 'Oauth/Token/AccessTest.php';
 
 class Zend_Oauth_AllTests
 {
@@ -45,6 +46,7 @@ class Zend_Oauth_AllTests
         $suite->addTestSuite('Zend_Oauth_Http_UserAuthorisationTest');
 
         $suite->addTestSuite('Zend_Oauth_Token_RequestTest');
+        $suite->addTestSuite('Zend_Oauth_Token_AccessTest');
 
         return $suite;
     }

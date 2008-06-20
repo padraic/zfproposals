@@ -99,6 +99,11 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         header('Location: ' . $redirectUrl);
     }
 
+    public function getAccessToken($queryData, Zend_Oauth_Token_Request $token)
+    {
+
+    }
+
     public function getLastRequestToken()
     {
         return $this->_requestToken;
