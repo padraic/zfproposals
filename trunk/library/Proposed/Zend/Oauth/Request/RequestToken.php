@@ -120,7 +120,7 @@ class Zend_Oauth_Request_RequestToken extends Zend_Oauth
             || empty($body)   // Missing request token
             ) {
             $this->_assessRequestAttempt();
-            $response = $this->_startRequestCycle($params);
+            $response = $this->startRequestCycle($params);
         }
         return $response;
     }
