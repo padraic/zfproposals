@@ -13,56 +13,56 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
     {
         if (!is_null($response)) {
             $this->_response = $response;
-            $params = $this->_parseParameters();
+            $this->setParams($this->_parseParameters());
         }
     }
 
-    public function getResponse() 
+    public function getResponse()
     {
         return $this->_response;
     }
 
-    public function setParam($key, $value) 
+    public function setParam($key, $value)
     {
         $this->_params[$key] = $value;
     }
 
-    public function setParams(array $params) 
+    public function setParams(array $params)
     {
         foreach ($params as $key=>$value) {
             $this->setParam($key, $value);
         }
     }
 
-    public function getParam($key) 
+    public function getParam($key)
     {
         if (isset($this->_params[$key])) {
             return $this->_params[$key];
         }
         return null;
     }
-   
-    public function setToken($token) 
+
+    public function setToken($token)
     {
         $this->setParam('oauth_token', $token);
     }
 
-    public function getToken() 
+    public function getToken()
     {
         return $this->getParam('oauth_token');
     }
 
-    public function setTokenSecret($secret) 
+    public function setTokenSecret($secret)
     {
         $this->setParam('oauth_token_secret', $secret);
     }
 
-    public function getTokenSecret() 
+    public function getTokenSecret()
     {
         return $this->getParam('oauth_token_secret');
     }
 
-    public function isValid() 
+    public function isValid()
     {
         if (isset($this->_params['oauth_token'])
             && !empty($this->_params['oauth_token'])
@@ -73,17 +73,17 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         return false;
     }
 
-    public function __get($key) 
+    public function __get($key)
     {
         return $this->getParam($key);
     }
 
-    public function __set($key, $value) 
+    public function __set($key, $value)
     {
         $this->setParam($key, $value);
     }
 
-    public function toString() 
+    public function toString()
     {
         $baseStrings = array();
         foreach ($this->_params as $key=>$value) {
@@ -93,7 +93,7 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         return implode('&', $baseStrings);
     }
 
-    public function __toString() 
+    public function __toString()
     {
         return $this->toString();
     }
@@ -103,7 +103,7 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         $params = array();
         $body = $this->_response->getBody();
         if (empty($body)) {
-            return false;
+            return;
         }
         $parts = explode('&', $body);
         foreach ($parts as $kvpair) {
