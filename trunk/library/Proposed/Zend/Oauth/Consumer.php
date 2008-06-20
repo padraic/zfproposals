@@ -4,7 +4,7 @@ require_once 'Zend/Oauth.php';
 
 require_once 'Zend/Uri.php';
 
-require_once 'Zend/Oauth/Request/RequestToken.php';
+require_once 'Zend/Oauth/Http/RequestToken.php';
 
 class Zend_Oauth_Consumer extends Zend_Oauth
 {
@@ -71,7 +71,7 @@ class Zend_Oauth_Consumer extends Zend_Oauth
     public function getRequestToken(array $customServiceParameters = null, Zend_Oauth_Request_RequestToken $request = null)
     {
         if (is_null($request)) {
-            $request = new Zend_Oauth_Request_RequestToken($this, $customServiceParameters);
+            $request = new Zend_Oauth_Http_RequestToken($this, $customServiceParameters);
         } elseif(!is_null($customServiceParameters)) {
             $request->setParameters($customServiceParameters);
         }

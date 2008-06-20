@@ -2,7 +2,7 @@
 
 require_once 'Zend/Oauth/Token/Request.php';
 
-class Zend_Oauth_Request_RequestToken extends Zend_Oauth
+class Zend_Oauth_Http_RequestToken extends Zend_Oauth
 {
 
     protected $_consumer = null;

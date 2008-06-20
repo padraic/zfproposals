@@ -1,9 +1,9 @@
 <?php
 
 require_once 'PHPUnit/Framework/TestCase.php';
-require_once 'Zend/Oauth/Request/RequestToken.php';
+require_once 'Zend/Oauth/Http/RequestToken.php';
 
-class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
+class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 {
 
     protected $stubConsumer = null;
@@ -16,19 +16,19 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorSetsConsumerInstance()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $this->assertType('Test_Consumer_32874', $request->getConsumer());
     }
 
     public function testConstructorSetsCustomServiceParameters()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer, array(1,2,3));
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(1,2,3));
         $this->assertEquals(array(1,2,3), $request->getParameters());
     }
 
     public function testAssembleParametersCorrectlyAggregatesOauthParameters()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -41,7 +41,7 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
     }
     public function testAssembleParametersCorrectlyAggregatesCustomParameters()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer, array(
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(
             'custom_param1'=>'foo',
             'custom_param2'=>'bar'
         ));
@@ -60,7 +60,7 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeHeaderClientSetsCorrectlyEncodedAuthorizationHeader()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -83,7 +83,7 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemePostBodyClientSetsCorrectlyEncodedRawData()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -106,7 +106,7 @@ class Zend_Oauth_Request_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeQueryStringClientSetsCorrectlyEncodedQueryString()
     {
-        $request = new Zend_Oauth_Request_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
