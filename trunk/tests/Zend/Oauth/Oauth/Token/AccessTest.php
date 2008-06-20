@@ -6,64 +6,68 @@ require_once 'Zend/Oauth/Token/Access.php';
 class Zend_Oauth_Token_AccessTest extends PHPUnit_Framework_TestCase
 {
 
-    public function testConstructorSetsInputData()
+    public function testConstructorSetsResponseObject()
     {
-        $data = array('foo'=>'bar');
-        $token = new Zend_Oauth_Token_Access($data);
-        $this->assertEquals($data, $token->getData());
+        $response = new Zend_Http_Response(200, array());
+        $token = new Zend_Oauth_Token_Access($response);
+        $this->assertType('Zend_Http_Response', $token->getResponse());
     }
 
-    public function testConstructorParsesAccessTokenFromInputData()
+    public function testConstructorParsesRequestTokenFromResponseBody()
     {
-        $data = array(
-            'oauth_token'=>'jZaee4GF52O3lUb9'
-        );
-        $token = new Zend_Oauth_Token_Access($data);
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
+        $response = new Zend_Http_Response(200, array(), $body);
+        $token = new Zend_Oauth_Token_Access($response);
         $this->assertEquals('jZaee4GF52O3lUb9', $token->getToken());
+    }
+
+    public function testConstructorParsesRequestTokenSecretFromResponseBody()
+    {
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
+        $response = new Zend_Http_Response(200, array(), $body);
+        $token = new Zend_Oauth_Token_Access($response);
+        $this->assertEquals('J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri', $token->getTokenSecret());
     }
 
     public function testPropertyAccessWorks()
     {
-        $data = array(
-            'oauth_token'=>'jZaee4GF52O3lUb9'
-        );
-        $token = new Zend_Oauth_Token_Access($data);
-        $this->assertEquals('jZaee4GF52O3lUb9', $token->oauth_token);
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri&foo=bar';
+        $response = new Zend_Http_Response(200, array(), $body);
+        $token = new Zend_Oauth_Token_Access($response);
+        $this->assertEquals('J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri', $token->oauth_token_secret);
     }
 
-    public function testTokenCastsToEncodedQueryString()
+    public function testTokenCastsToEncodedResponseBody()
     {
-        $queryString = 'oauth_token=jZaee4GF52O3lUb9&foo+=bar~';
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
         $token = new Zend_Oauth_Token_Access();
         $token->setToken('jZaee4GF52O3lUb9');
-        $token->setParam('foo ', 'bar~');
-        $this->assertEquals($queryString, (string) $token);
+        $token->setTokenSecret('J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri');
+        $this->assertEquals($body, (string) $token);
     }
 
-    public function testToStringReturnsEncodedQueryString()
+    public function testToStringReturnsEncodedResponseBody()
     {
-        $queryString = 'oauth_token=jZaee4GF52O3lUb9';
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
         $token = new Zend_Oauth_Token_Access();
         $token->setToken('jZaee4GF52O3lUb9');
-        $this->assertEquals($queryString, $token->toString());
+        $token->setTokenSecret('J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri');
+        $this->assertEquals($body, $token->toString());
     }
 
     public function testIsValidDetectsBadResponse()
     {
-        $data = array(
-            'missing_oauth_token'=>'jZaee4GF52O3lUb9'
-        );
-        $token = new Zend_Oauth_Token_Access($data);
+        $body = 'oauthtoken=jZaee4GF52O3lUb9&oauthtokensecret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
+        $response = new Zend_Http_Response(200, array(), $body);
+        $token = new Zend_Oauth_Token_Access($response);
         $this->assertFalse($token->isValid());
     }
 
     public function testIsValidDetectsGoodResponse()
     {
-        $data = array(
-            'oauth_token'=>'jZaee4GF52O3lUb9',
-            'foo'=>'bar'
-        );
-        $token = new Zend_Oauth_Token_Access($data);
+        $body = 'oauth_token=jZaee4GF52O3lUb9&oauth_token_secret=J4Ms4n8sxjYc0A8K0KOQFCTL0EwUQTri';
+        $response = new Zend_Http_Response(200, array(), $body);
+        $token = new Zend_Oauth_Token_Access($response);
         $this->assertTrue($token->isValid());
     }
 

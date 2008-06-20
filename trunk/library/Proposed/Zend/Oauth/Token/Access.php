@@ -5,39 +5,29 @@ require_once 'Zend/Oauth/Token.php';
 class Zend_Oauth_Token_Access extends Zend_Oauth_Token
 {
 
-    protected $_data = array();
+    protected $_response = null;
 
-    public function __construct(array $data = null)
+    public function __construct(Zend_Http_Response $response = null)
     {
-        if (!is_null($data)) {
-            $this->_data = $data;
-            $this->setParams($this->_parseParameters());
+        if (!is_null($response)) {
+            $this->_response = $response;
+            $this->setParams($this->_parseParameters($response));
         }
     }
 
-    public function getData()
+    public function getResponse()
     {
-        return $this->_data;
+        return $this->_response;
     }
 
-    public function isValid()
+    public function setTokenSecret($secret)
     {
-        if (isset($this->_params[self::TOKEN_PARAM_KEY])
-            && !empty($this->_params[self::TOKEN_PARAM_KEY])) {
-            return true;
-        }
-        return false;
+        $this->setParam(self::TOKEN_SECRET_PARAM_KEY, $secret);
     }
 
-    protected function _parseParameters()
+    public function getTokenSecret()
     {
-        if (empty($this->_data)) {
-            return;
-        }
-        foreach ($this->_data as $key=>$value) {
-            $params[urldecode($key)] = urldecode($value);
-        }
-        return $params;
+        return $this->getParam(self::TOKEN_SECRET_PARAM_KEY);
     }
 
 }

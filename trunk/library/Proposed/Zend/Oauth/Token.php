@@ -5,9 +5,20 @@ abstract class Zend_Oauth_Token
 
     const TOKEN_PARAM_KEY = 'oauth_token';
 
+    const TOKEN_SECRET_PARAM_KEY = 'oauth_token_secret';
+
     protected $_params = array();
 
-    public abstract function isValid();
+    public function isValid()
+    {
+        if (isset($this->_params[self::TOKEN_PARAM_KEY])
+            && !empty($this->_params[self::TOKEN_PARAM_KEY])
+            && isset($this->_params[self::TOKEN_SECRET_PARAM_KEY])
+            && !empty($this->_params[self::TOKEN_SECRET_PARAM_KEY])) {
+            return true;
+        }
+        return false;
+    }
 
     public function setParam($key, $value)
     {
@@ -62,6 +73,21 @@ abstract class Zend_Oauth_Token
     public function __toString()
     {
         return $this->toString();
+    }
+
+    protected function _parseParameters(Zend_Http_Response $response)
+    {
+        $params = array();
+        $body = $response->getBody();
+        if (empty($body)) {
+            return;
+        }
+        $parts = explode('&', $body);
+        foreach ($parts as $kvpair) {
+            $pair = explode('=', $kvpair);
+            $params[urldecode($pair[0])] = urldecode($pair[1]);
+        }
+        return $params;
     }
 
 }
