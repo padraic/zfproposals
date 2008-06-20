@@ -17,6 +17,11 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         }
     }
 
+    public function getResponse() 
+    {
+        return $this->_response;
+    }
+
     public function setParam($key, $value) 
     {
         $this->_params[$key] = $value;
@@ -36,13 +41,23 @@ class Zend_Oauth_Token_Request extends Zend_Oauth_Token
         }
         return null;
     }
+   
+    public function setToken($token) 
+    {
+        $this->setParam('oauth_token', $token);
+    }
 
     public function getToken() 
     {
         return $this->getParam('oauth_token');
     }
 
-    public function getSecret() 
+    public function setTokenSecret($secret) 
+    {
+        $this->setParam('oauth_token_secret', $secret);
+    }
+
+    public function getTokenSecret() 
     {
         return $this->getParam('oauth_token_secret');
     }
