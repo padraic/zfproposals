@@ -42,15 +42,6 @@ abstract class Zend_Oauth_Http
 
     public function getRequestSchemeQueryStringClient(array $params, $url)
     {
-        if ($this->_preferredRequestMethod == 'POST') {
-            $params['oauth_signature'] = null;
-            $params['oauth_signature'] = $this->_consumer->sign(
-            $params,
-            $this->_consumer->getSignatureMethod(),
-            $this->_consumer->getConsumerSecret(),
-            null, 'GET', $url
-        );
-        }
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($url);
         $encodedParams = array();
@@ -58,7 +49,7 @@ abstract class Zend_Oauth_Http
             $encodedParams[] =
                 Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
         }
-        $client->setMethod(Zend_Http_Client::GET);
+        $client->setMethod(Zend_Http_Client::POST);
         $client->getUri()->setQuery(implode('&', $encodedParams));
         return $client;
     }

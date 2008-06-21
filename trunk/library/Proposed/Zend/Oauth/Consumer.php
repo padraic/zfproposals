@@ -53,9 +53,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth
                 case 'signatureMethod':
                     $this->setSignatureMethod($value);
                     break;
-                case 'requestMethod':
-                    $this->setRequestMethod($value);
-                    break;
                 case 'version':
                     $this->setVersion($value);
                     break;
@@ -176,18 +173,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth
     public function getSignatureMethod()
     {
         return $this->_signatureMethod;
-    }
-
-    public function setRequestMethod($method)
-    {
-        $method = strtoupper($method);
-        if (!in_array($method, array('POST', 'GET'))) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                $method . ' is an unsupported request method'
-            );
-        }
-        $this->_requestMethod = $method;
     }
 
     public function getRequestMethod()

@@ -32,14 +32,14 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('RSA-SHA1', $consumer->getSignatureMethod());
     }
 
-    public function testSetsRequestMethodFromOptionsArray()
+    /*public function testSetsRequestMethodFromOptionsArray()
     {
         $options = array(
             'requestMethod' => 'get'
         );
         $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
         $this->assertEquals('GET', $consumer->getRequestMethod());
-    }
+    }*/
 
     public function testSetsRequestSchemeFromOptionsArray()
     {
@@ -105,7 +105,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function testSetRequestMethodThrowsExceptionForInvalidMethod()
+    /*public function testSetRequestMethodThrowsExceptionForInvalidMethod()
     {
         $consumer = new Zend_Oauth_Consumer('12345', '54321');
         try {
@@ -113,7 +113,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
             $this->fail('Invalid request method accepted by setRequestMethod');
         } catch (Zend_Oauth_Exception $e) {
         }
-    }
+    }*/
 
     public function testSetRequestSchemeThrowsExceptionForInvalidMethod()
     {
