@@ -33,7 +33,7 @@ class Zend_Oauth_Token_AuthorisedRequestTest extends PHPUnit_Framework_TestCase
 
     public function testTokenCastsToEncodedQueryString()
     {
-        $queryString = 'oauth_token=jZaee4GF52O3lUb9&foo+=bar~';
+        $queryString = 'oauth_token=jZaee4GF52O3lUb9&foo%20=bar~';
         $token = new Zend_Oauth_Token_AuthorisedRequest();
         $token->setToken('jZaee4GF52O3lUb9');
         $token->setParam('foo ', 'bar~');

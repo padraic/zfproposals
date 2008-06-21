@@ -29,27 +29,27 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
             $params,
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
-            null,
+            $this->_consumer->getLastRequestToken()->getTokenSecret(),
             $this->_consumer->getRequestMethod(),
             $this->_consumer->getAccessTokenUrl()
         );
-        //var_dump($params); exit;
         return $params;
     }
 
     public function getRequestSchemeHeaderClient(array $params)
     {
-        $params = $this->_cleanParams($params);
+        $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         $headerValue = $this->_toAuthorizationHeader($params);
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
+        $client->setMethod(Zend_Http_Client::POST);
         return $client;
     }
 
     public function getRequestSchemePostBodyClient(array $params)
     {
-        $params = $this->_cleanParams($params);
+        $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
         $encodedParams = array();
@@ -64,7 +64,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
 
     public function getRequestSchemeQueryStringClient(array $params, $url)
     {
-        $params = $this->_cleanParams($params);
+        $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         return parent::getRequestSchemeQueryStringClient($params, $url);
     }
 
@@ -93,23 +93,6 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         return $response;
     }
 
-    protected function _assessRequestAttempt()
-    {
-        switch ($this->_preferredRequestScheme) {
-            case Zend_Oauth::REQUEST_SCHEME_HEADER:
-                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_POSTBODY;
-                break;
-            case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
-                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_QUERYSTRING;
-                break;
-            default:
-                require_once 'Zend/Oauth/Exception.php';
-                throw new Zend_Oauth_Exception(
-                    'Could not retrieve a valid Access Token response from Access Token URL'
-                );
-        }
-    }
-
     protected function _attemptRequest(array $params)
     {
         switch ($this->_preferredRequestScheme) {
@@ -127,21 +110,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         return $httpClient->request();
     }
 
-    protected function _toAuthorizationHeader(array $params, $realm = null)
-    {
-        $headerValue = array();
-        $headerValue[] = 'OAuth realm="' . $realm . '"';
-        foreach ($params as $key => $value) {
-            $headerValue[] =
-                Zend_Oauth::urlEncode($key)
-                . '="'
-                . Zend_Oauth::urlEncode($value)
-                . '"';
-        }
-        return implode(",", $headerValue);
-    }
-
-    protected function _cleanParams(array $params)
+    protected function _cleanParamsOfIllegalCustomParameters(array $params)
     {
         foreach ($params as $key=>$value) {
             if (!preg_match("/^oauth_/", $key)) {

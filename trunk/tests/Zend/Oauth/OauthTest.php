@@ -38,10 +38,10 @@ class Zend_OauthTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $resetClient->getHeader('Authorization'));
     }
 
-    public function testUrlEncodeDoesNotEncodeReservedCharacters() 
+    public function testUrlEncodeDoesNotEncodeReservedCharacters()
     {
         $string = '.-_~alpha12345 ,+&';
-        $this->assertEquals('.-_~alpha12345+%2C%2B%26', Zend_Oauth::urlEncode($string));
+        $this->assertEquals('.-_~alpha12345%20%2C%2B%26', Zend_Oauth::urlEncode($string));
     }
 
 }

@@ -62,49 +62,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
         return $client;
     }
 
-    public function startRequestCycle(array $params)
-    {
-        $response = null;
-        $body = null;
-        $status = null;
-        try {
-            $response = $this->_attemptRequest($params);
-            var_dump($response); var_dump($response->getBody()); exit;
-        } catch (Zend_Http_Client_Exception $e) {
-        }
-        if (!is_null($response)) {
-            $body = $response->getBody();
-            $status = $response->getStatus();
-        }
-        if (is_null($response)// Request failure/exception
-            || $status == 500 // Internal Server Error
-            || $status == 400 // Bad Request
-            || $status == 401 // Unauthorized
-            || empty($body)   // Missing request token
-            ) {
-            $this->_assessRequestAttempt();
-            $response = $this->startRequestCycle($params);
-        }
-        return $response;
-    }
-
-    protected function _assessRequestAttempt()
-    {
-        switch ($this->_preferredRequestScheme) {
-            case Zend_Oauth::REQUEST_SCHEME_HEADER:
-                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_POSTBODY;
-                break;
-            case Zend_Oauth::REQUEST_SCHEME_POSTBODY:
-                $this->_preferredRequestScheme = Zend_Oauth::REQUEST_SCHEME_QUERYSTRING;
-                break;
-            default:
-                require_once 'Zend/Oauth/Exception.php';
-                throw new Zend_Oauth_Exception(
-                    'Could not retrieve a valid Request Token response from Request Token URL'
-                );
-        }
-    }
-
     protected function _attemptRequest(array $params)
     {
         switch ($this->_preferredRequestScheme) {
@@ -120,20 +77,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
                 break;
         }
         return $httpClient->request();
-    }
-
-    protected function _toAuthorizationHeader(array $params, $realm = null)
-    {
-        $headerValue = array();
-        $headerValue[] = 'OAuth realm="' . $realm . '"';
-        foreach ($params as $key => $value) {
-            $headerValue[] =
-                Zend_Oauth::urlEncode($key)
-                . '="'
-                . Zend_Oauth::urlEncode($value)
-                . '"';
-        }
-        return implode(",", $headerValue);
     }
 
 }

@@ -85,7 +85,7 @@ abstract class Zend_Oauth_Token
         $parts = explode('&', $body);
         foreach ($parts as $kvpair) {
             $pair = explode('=', $kvpair);
-            $params[urldecode($pair[0])] = urldecode($pair[1]);
+            $params[rawurldecode($pair[0])] = rawurldecode($pair[1]);
         }
         return $params;
     }

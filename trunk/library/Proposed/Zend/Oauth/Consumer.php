@@ -104,14 +104,17 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         header('Location: ' . $redirectUrl);
     }
 
-    public function getAccessToken($queryData, array $customServiceParameters = null,
-        Zend_Oauth_Token_Request $token = null, Zend_Oauth_Http_AccessToken $request = null)
+    public function getAccessToken($queryData, Zend_Oauth_Token_Request $token = null,
+        Zend_Oauth_Http_AccessToken $request = null)
     {
         $authorisedToken = new Zend_Oauth_Token_AuthorisedRequest($queryData);
         if (!$authorisedToken->isValid()) {
             require_once 'Zend/Oauth/Exception.php';
             throw new Zend_Oauth_Exception(
                 'Response from Service Provider is not a valid authorised request token');
+        }
+        if (is_null($request)) {
+            $request = new Zend_Oauth_Http_AccessToken($this);
         }
         if (isset($token)) {
             if ($authorisedToken->getToken() !== $token->getToken()) {
@@ -123,11 +126,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth
             // retrieve token from storage solution
         }
         $this->_requestToken = $token;
-        if (is_null($request)) {
-            $request = new Zend_Oauth_Http_AccessToken($this, $customServiceParameters);
-        } elseif(!is_null($customServiceParameters)) {
-            $request->setParameters($customServiceParameters);
-        }
         $this->_accessToken = $request->execute();
         return $this->_accessToken;
     }
@@ -135,6 +133,11 @@ class Zend_Oauth_Consumer extends Zend_Oauth
     public function getLastRequestToken()
     {
         return $this->_requestToken;
+    }
+
+    public function getLastAccessToken()
+    {
+        return $this->_accessToken;
     }
 
     public function setConsumerKey($key)
@@ -192,9 +195,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth
             throw new Zend_Oauth_Exception(
                 '\'' . $scheme . '\' is an unsupported request scheme'
             );
-        }
-        if ($scheme == self::REQUEST_SCHEME_QUERYSTRING) {
-            $this->setRequestMethod('GET');
         }
         $this->_requestScheme = $scheme;
     }

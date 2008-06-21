@@ -42,14 +42,14 @@ class Zend_Oauth
 
     public static function urlEncode($string)
     {
-        $return = urlencode($string);
+        $return = rawurlencode($string);
         /* 5.1. Parameter Encoding
            'Characters in the unreserved character set MUST NOT be encoded.' */
         $return = str_replace('%7E', '~', $return);
         return $return;
     }
 
-    public function sign(array $params, $signatureMethod, $consumerSecret, $accessTokenSecret = null, $method = null, $url = null)
+    public function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
     {
         $className = '';
         $hashAlgo = null;
@@ -60,7 +60,7 @@ class Zend_Oauth
         } else {
             $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($signatureMethod));
         }
-        $signatureObject = new $className($consumerSecret, $accessTokenSecret, $hashAlgo);
+        $signatureObject = new $className($consumerSecret, $tokenSecret, $hashAlgo);
         return $signatureObject->sign($params, $method, $url);
     }
 

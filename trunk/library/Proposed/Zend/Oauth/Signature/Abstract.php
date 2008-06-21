@@ -1,5 +1,9 @@
 <?php
 
+require_once 'Zend/Oauth.php';
+
+require_once 'Zend/Uri/Http.php';
+
 abstract class Zend_Oauth_Signature_Abstract
 {
 
@@ -9,13 +13,13 @@ abstract class Zend_Oauth_Signature_Abstract
 
     protected $_consumerSecret = null;
 
-    protected $_accessTokenSecret = '';
+    protected $_tokenSecret = '';
 
-    public function __construct($consumerSecret, $accessTokenSecret = null, $hashAlgo = null) 
+    public function __construct($consumerSecret, $tokenSecret = null, $hashAlgo = null)
     {
         $this->_consumerSecret = $consumerSecret;
-        if (isset($accessTokenSecret)) {
-            $this->_accessTokenSecret = $accessTokenSecret;
+        if (isset($tokenSecret)) {
+            $this->_tokenSecret = $tokenSecret;
         }
         $this->_key = $this->_assembleKey();
         if (isset($hashAlgo)) {
@@ -40,11 +44,11 @@ abstract class Zend_Oauth_Signature_Abstract
         return $uri->getUri(true);
     }
 
-    protected function _assembleKey() 
+    protected function _assembleKey()
     {
         $parts = array($this->_consumerSecret);
-        if (!is_null($this->_accessTokenSecret)) {
-            $parts[] = $this->_accessTokenSecret;
+        if (!is_null($this->_tokenSecret)) {
+            $parts[] = $this->_tokenSecret;
         }
         foreach ($parts as $key=>$secret) {
             $parts[$key] = Zend_Oauth::urlEncode($secret);
@@ -52,7 +56,7 @@ abstract class Zend_Oauth_Signature_Abstract
         return implode('&', $parts);
     }
 
-    protected function _getBaseSignatureString(array $params, $method = null, $url = null) 
+    protected function _getBaseSignatureString(array $params, $method = null, $url = null)
     {
         $baseStrings = array();
         if (isset($method)) {
@@ -71,7 +75,7 @@ abstract class Zend_Oauth_Signature_Abstract
         return implode('&', $baseStrings);
     }
 
-    protected function _toByteValueOrderedQueryString(array $params) 
+    protected function _toByteValueOrderedQueryString(array $params)
     {
         $return = array();
         uksort($params, 'strnatcmp');

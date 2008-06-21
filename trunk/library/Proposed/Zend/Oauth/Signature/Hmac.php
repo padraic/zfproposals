@@ -7,7 +7,7 @@ require_once 'Zend/Crypt/Hmac.php';
 class Zend_Oauth_Signature_Hmac extends Zend_Oauth_Signature_Abstract
 {
 
-    public function sign(array $params, $method = null, $url = null) 
+    public function sign(array $params, $method = null, $url = null)
     {
         $binaryHash = Zend_Crypt_Hmac::compute(
             $this->_key,

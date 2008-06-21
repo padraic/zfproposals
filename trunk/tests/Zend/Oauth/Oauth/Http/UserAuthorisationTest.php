@@ -40,7 +40,7 @@ class Zend_Oauth_Http_UserAuthorisationTest extends PHPUnit_Framework_TestCase
     {
         $redirect = new Zend_Oauth_Http_UserAuthorisation($this->stubConsumer, array('foo '=>'bar~'));
         $expected =
-            'http://www.example.com/authorise?oauth_token=1234567890&oauth_callback=http%3A%2F%2Fwww.example.com%2Flocal&foo+=bar~';
+            'http://www.example.com/authorise?oauth_token=1234567890&oauth_callback=http%3A%2F%2Fwww.example.com%2Flocal&foo%20=bar~';
         $this->assertEquals($expected, $redirect->getUrl());
     }
 
