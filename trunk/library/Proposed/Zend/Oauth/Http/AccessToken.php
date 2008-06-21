@@ -30,7 +30,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
             null,
-            $this->_consumer->getRequestMethod(), //should change with scheme changes!!!
+            $this->_consumer->getRequestMethod(),
             $this->_consumer->getAccessTokenUrl()
         );
         //var_dump($params); exit;

@@ -121,7 +121,7 @@ class Zend_Oauth_Http_AccessTokenTest extends PHPUnit_Framework_TestCase
             'oauth_timestamp' => '12345678901',
             'oauth_token' => '0987654321',
             'oauth_version' => '1.0',
-            'oauth_signature' => ' 6fb42da0e32e07b61c9f0251fe627a9c~',
+            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c',
             'custom_param1' => 'foo',
             'custom_param2' => 'bar'
         );
@@ -130,7 +130,7 @@ class Zend_Oauth_Http_AccessTokenTest extends PHPUnit_Framework_TestCase
             'oauth_consumer_key=1234567890&oauth_nonce=e807f1fcf82d132f9bb018c'
             .'a6738a19f&oauth_signature_method=HMAC-SHA1&oauth_timestamp=12345'
             .'678901&oauth_token=0987654321&oauth_version=1.0&oauth_signature='
-            .'+6fb42da0e32e07b61c9f0251fe627a9c~',
+            .'6fb42da0e32e07b61c9f0251fe627a9c',
             $client->getUri()->getQuery()
         );
     }

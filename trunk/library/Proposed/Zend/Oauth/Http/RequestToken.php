@@ -32,7 +32,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
             null,
-            $this->_consumer->getRequestMethod(),
+            $this->_preferredRequestMethod,
             $this->_consumer->getRequestTokenUrl()
         );
         return $params;
@@ -44,6 +44,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
+        $client->setMethod(Zend_Http_Client::POST);
         return $client;
     }
 
@@ -68,6 +69,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
         $status = null;
         try {
             $response = $this->_attemptRequest($params);
+            var_dump($response); var_dump($response->getBody()); exit;
         } catch (Zend_Http_Client_Exception $e) {
         }
         if (!is_null($response)) {
