@@ -8,9 +8,9 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
 
     protected $_httpClient = null;
 
-    public function execute(array $params = null)
+    public function execute()
     {
-        $params = $this->assembleParams($params);
+        $params = $this->assembleParams();
         $response = $this->startRequestCycle($params);
         $return = new Zend_Oauth_Token_Request($response);
         return $return;
