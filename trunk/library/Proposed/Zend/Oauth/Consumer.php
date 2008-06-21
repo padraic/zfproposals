@@ -8,6 +8,10 @@ require_once 'Zend/Oauth/Http/RequestToken.php';
 
 require_once 'Zend/Oauth/Http/UserAuthorisation.php';
 
+require_once 'Zend/Oauth/Http/AccessToken.php';
+
+require_once 'Zend/Oauth/Token/AuthorisedRequest.php';
+
 class Zend_Oauth_Consumer extends Zend_Oauth
 {
 
@@ -32,6 +36,8 @@ class Zend_Oauth_Consumer extends Zend_Oauth
     protected $_consumerSecret = null;
 
     protected $_requestToken = null;
+
+    protected $_accessToken = null;
 
     public function __construct($consumerKey, $consumerSecret, array $options = array())
     {
@@ -83,7 +89,8 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $this->_requestToken;
     }
 
-    public function getRedirectUrl(array $customServiceParameters = null, Zend_Oauth_Http_UserAuthorisation $redirect = null)
+    public function getRedirectUrl(array $customServiceParameters = null,
+        Zend_Oauth_Http_UserAuthorisation $redirect = null)
     {
         if (is_null($redirect)) {
             $redirect = new Zend_Oauth_Http_UserAuthorisation($this, $customServiceParameters);
@@ -93,15 +100,39 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $redirect->getUrl();
     }
 
-    public function redirect(array $customServiceParameters = null, Zend_Oauth_Http_UserAuthorisation $request = null)
+    public function redirect(array $customServiceParameters = null,
+        Zend_Oauth_Http_UserAuthorisation $request = null)
     {
         $redirectUrl = $this->getRedirectUrl($customServiceParameters, $request);
         header('Location: ' . $redirectUrl);
     }
 
-    public function getAccessToken($queryData, Zend_Oauth_Token_Request $token)
+    public function getAccessToken($queryData, array $customServiceParameters = null,
+        Zend_Oauth_Token_Request $token = null, Zend_Oauth_Http_AccessToken $request = null)
     {
-
+        $authorisedToken = new Zend_Oauth_Token_AuthorisedRequest($queryData);
+        if (!$authorisedToken->isValid()) {
+            require_once 'Zend/Oauth/Exception.php';
+            throw new Zend_Oauth_Exception(
+                'Response from Service Provider is not a valid authorised request token');
+        }
+        if (isset($token)) {
+            if ($authorisedToken->getToken() !== $token->getToken()) {
+                require_once 'Zend/Oauth/Exception.php';
+                throw new Zend_Oauth_Exception(
+                    'Authorised token from Service Provider does not match supplied Request Token details');
+            }
+        } else {
+            // retrieve token from storage solution
+        }
+        $this->_requestToken = $token;
+        if (is_null($request)) {
+            $request = new Zend_Oauth_Http_AccessToken($this, $customServiceParameters);
+        } elseif(!is_null($customServiceParameters)) {
+            $request->setParameters($customServiceParameters);
+        }
+        $this->_accessToken = $request->execute();
+        return $this->_accessToken;
     }
 
     public function getLastRequestToken()
@@ -167,7 +198,11 @@ class Zend_Oauth_Consumer extends Zend_Oauth
     public function setRequestScheme($scheme)
     {
         $scheme = strtolower($scheme);
-        if (!in_array($scheme, array(self::REQUEST_SCHEME_HEADER, self::REQUEST_SCHEME_POSTBODY, self::REQUEST_SCHEME_QUERYSTRING))) {
+        if (!in_array($scheme, array(
+                self::REQUEST_SCHEME_HEADER,
+                self::REQUEST_SCHEME_POSTBODY,
+                self::REQUEST_SCHEME_QUERYSTRING
+            ))) {
             require_once 'Zend/Oauth/Exception.php';
             throw new Zend_Oauth_Exception(
                 '\'' . $scheme . '\' is an unsupported request scheme'
