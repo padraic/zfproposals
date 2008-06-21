@@ -79,7 +79,7 @@ class Zend_Oauth_Http_AccessTokenTest extends PHPUnit_Framework_TestCase
         );
         $client = $request->getRequestSchemeHeaderClient($params);
         $this->assertEquals(
-        'OAuth,oauth_consumer_key="1234567890",oauth_nonce="e807f1fcf82d132f9b'
+        'OAuth realm="",oauth_consumer_key="1234567890",oauth_nonce="e807f1fcf82d132f9b'
         .'b018ca6738a19f",oauth_signature_method="HMAC-SHA1",oauth_timestamp="'
         .'12345678901",oauth_token="0987654321",oauth_version="1.0",oauth_sign'
         .'ature="6fb42da0e32e07b61c9f0251fe627a9c~"',

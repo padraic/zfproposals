@@ -130,11 +130,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
     protected function _toAuthorizationHeader(array $params, $realm = null)
     {
         $headerValue = array();
-        if (is_null($realm)) {
-            $headerValue[] = 'OAuth';
-        } else {
-            $headerValue[] = 'OAuth realm="' . $realm . '"';
-        }
+        $headerValue[] = 'OAuth realm="' . $realm . '"';
         foreach ($params as $key => $value) {
             $headerValue[] =
                 Zend_Oauth::urlEncode($key)
