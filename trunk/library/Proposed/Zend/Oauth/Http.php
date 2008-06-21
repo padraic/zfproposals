@@ -2,7 +2,7 @@
 
 require_once 'Zend/Oauth.php';
 
-abstract class Zend_Oauth_Http
+class Zend_Oauth_Http
 {
 
     protected $_parameters = array();
@@ -37,8 +37,6 @@ abstract class Zend_Oauth_Http
     {
         return $this->_consumer;
     }
-
-    public abstract function assembleParams();
 
     public function startRequestCycle(array $params)
     {
