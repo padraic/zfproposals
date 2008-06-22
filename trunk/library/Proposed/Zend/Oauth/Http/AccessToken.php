@@ -25,7 +25,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $params['oauth_timestamp'] = $this->_consumer->generateTimestamp();
         $params['oauth_token'] = $this->_consumer->getLastRequestToken()->getToken();
         $params['oauth_version'] = $this->_consumer->getVersion();
-        $params['oauth_signature'] = $this->_consumer->sign(
+        $params['oauth_signature'] = $this->sign(
             $params,
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),

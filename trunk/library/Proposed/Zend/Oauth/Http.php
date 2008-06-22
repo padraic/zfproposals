@@ -77,6 +77,21 @@ class Zend_Oauth_Http
         return $client;
     }
 
+    public function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
+    {
+        $className = '';
+        $hashAlgo = null;
+        $parts = explode('-', $signatureMethod);
+        if (count($parts) > 1) {
+            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($parts[0]));
+            $hashAlgo = $parts[1];
+        } else {
+            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($signatureMethod));
+        }
+        $signatureObject = new $className($consumerSecret, $tokenSecret, $hashAlgo);
+        return $signatureObject->sign($params, $method, $url);
+    }
+
     protected function _assessRequestAttempt()
     {
         switch ($this->_preferredRequestScheme) {

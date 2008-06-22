@@ -86,13 +86,16 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $this->_requestToken;
     }
 
-    public function getRedirectUrl(array $customServiceParameters = null,
+    public function getRedirectUrl(array $customServiceParameters = null, Zend_Oauth_Token_Request $token = null,
         Zend_Oauth_Http_UserAuthorisation $redirect = null)
     {
         if (is_null($redirect)) {
             $redirect = new Zend_Oauth_Http_UserAuthorisation($this, $customServiceParameters);
         } elseif(!is_null($customServiceParameters)) {
             $redirect->setParameters($customServiceParameters);
+        }
+        if (!is_null($token)) {
+            $this->_requestToken = $token;
         }
         return $redirect->getUrl();
     }

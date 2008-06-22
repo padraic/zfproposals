@@ -172,15 +172,73 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $this->assertType('Zend_Oauth_Token_Request', $token);
     }
 
+    public function testGetRedirectUrlReturnsUserAuthorisationUrlWithParameters()
+    {
+        $consumer = new Test_Consumer_48231('12345', '54321', array(
+            'userAuthorisationUrl'=>'http://www.example.com/authorise'
+        ));
+        $params = array('foo'=>'bar');
+        $uauth = new Zend_Oauth_Http_UserAuthorisation($consumer, $params);
+        $token = new Zend_Oauth_Token_Request;
+        $token->setParams(array('oauth_token'=>'123456', 'oauth_token_secret'=>'654321'));
+        $redirectUrl = $consumer->getRedirectUrl($params, $token, $uauth);
+        $this->assertEquals(
+            'http://www.example.com/authorise?oauth_token=123456&oauth_callback=http%3A%2F%2Fwww.example.com%2Flocal&foo=bar',
+            $redirectUrl
+        );
+    }
+
+    public function testGetAccessTokenReturnsInstanceOfOauthTokenAccess()
+    {
+        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $rtoken = new Zend_Oauth_Token_Request;
+        $rtoken->setToken('token');
+        $token = $consumer->getAccessToken(array('oauth_token'=>'token'), $rtoken, new Test_Http_AccessToken_48231);
+        $this->assertType('Zend_Oauth_Token_Access', $token);
+    }
+
+    public function testGetLastRequestTokenReturnsInstanceWhenExists()
+    {
+        $consumer = new Test_Consumer_48231('12345', '54321');
+        $this->assertType('Zend_Oauth_Token_Request', $consumer->getLastRequestToken());
+    }
+
+    public function testGetLastAccessTokenReturnsInstanceWhenExists()
+    {
+        $consumer = new Test_Consumer_48231('12345', '54321');
+        $this->assertType('Zend_Oauth_Token_Access', $consumer->getLastAccessToken());
+    }
+
 }
 
 class Test_Http_RequestToken_48231 extends Zend_Oauth_Http_RequestToken
 {
     public function __construct(){}
-    public function execute(array $params = null)
-    {
+    public function execute(array $params = null){
         $return = new Zend_Oauth_Token_Request;
-        return $return;
-    }
-    public function setParameters(array $customServiceParameters){}
+        return $return;}
+    public function setParams(array $customServiceParameters){}
+}
+
+class Test_Http_AccessToken_48231 extends Zend_Oauth_Http_AccessToken
+{
+    public function __construct(){}
+    public function execute(array $params = null){
+        $return = new Zend_Oauth_Token_Access;
+        return $return;}
+    public function setParams(array $customServiceParameters){}
+}
+
+class Test_Consumer_48231 extends Zend_Oauth_Consumer
+{
+    public function __construct($consumerKey, $consumerSecret, array $options = array()){
+        $this->_requestToken = new Zend_Oauth_Token_Request;
+        $this->_accessToken = new Zend_Oauth_Token_Access;
+        parent::__construct($consumerKey, $consumerSecret, $options);}
+    public function generateTimestamp(){
+        return '120412041';}
+    public function generateNonce(){
+        return 'abcd';}
+    public function getLocalUrl(){
+        return 'http://www.example.com/local';}
 }

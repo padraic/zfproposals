@@ -40,7 +40,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
             'oauth_signature_method' => 'HMAC-SHA1',
             'oauth_timestamp' => '12345678901',
             'oauth_version' => '1.0',
-            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c'
+            'oauth_signature' => 'iRXhXHV3N4uJMqXtlAKO/S+a5Ow='
         );
         $this->assertEquals($expectedParams, $request->assembleParams());
     }
@@ -56,7 +56,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
             'oauth_signature_method' => 'HMAC-SHA1',
             'oauth_timestamp' => '12345678901',
             'oauth_version' => '1.0',
-            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c',
+            'oauth_signature' => 'gop5+27V7XxJxPDuOkkgOzFvTqA=',
             'custom_param1' => 'foo',
             'custom_param2' => 'bar'
         );
