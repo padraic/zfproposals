@@ -2,6 +2,8 @@
 
 require_once 'Zend/Oauth/Token.php';
 
+require_once 'Zend/Oauth/Http.php';
+
 require_once 'Zend/Uri/Http.php';
 
 class Zend_Oauth_Token_Access extends Zend_Oauth_Token
@@ -76,7 +78,7 @@ class Zend_Oauth_Token_Access extends Zend_Oauth_Token
         if (!is_null($serviceProviderParams)) {
             $params = array_merge($params, $serviceProviderParams);
         }
-        $params['oauth_signature'] = $consumer->sign(
+        $params['oauth_signature'] = Zend_Oauth_Http::sign(
             $params,
             $consumer->getSignatureMethod(),
             $consumer->getConsumerSecret(),

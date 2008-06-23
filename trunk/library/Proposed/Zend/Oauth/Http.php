@@ -2,6 +2,12 @@
 
 require_once 'Zend/Oauth.php';
 
+require_once 'Zend/Oauth/Signature/Hmac.php';
+
+require_once 'Zend/Oauth/Signature/Rsa.php';
+
+require_once 'Zend/Oauth/Signature/Plaintext.php';
+
 class Zend_Oauth_Http
 {
 
@@ -77,7 +83,7 @@ class Zend_Oauth_Http
         return $client;
     }
 
-    public function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
+    public static function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
     {
         $className = '';
         $hashAlgo = null;
