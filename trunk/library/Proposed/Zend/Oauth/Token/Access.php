@@ -13,7 +13,10 @@ class Zend_Oauth_Token_Access extends Zend_Oauth_Token
     {
         if (!is_null($response)) {
             $this->_response = $response;
-            $this->setParams($this->_parseParameters($response));
+            $params = $this->_parseParameters($response);
+            if (count($params) > 0) {
+                $this->setParams($params);
+            }
         }
     }
 

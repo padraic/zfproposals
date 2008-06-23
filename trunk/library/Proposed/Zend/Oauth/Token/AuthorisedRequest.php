@@ -11,7 +11,10 @@ class Zend_Oauth_Token_AuthorisedRequest extends Zend_Oauth_Token
     {
         if (!is_null($data)) {
             $this->_data = $data;
-            $this->setParams($this->_parseData());
+            $params = $this->_parseData();
+            if (count($params) > 0) {
+                $this->setParams($params);
+            }
         }
     }
 
@@ -31,6 +34,7 @@ class Zend_Oauth_Token_AuthorisedRequest extends Zend_Oauth_Token
 
     protected function _parseData()
     {
+        $params = array();
         if (empty($this->_data)) {
             return;
         }
