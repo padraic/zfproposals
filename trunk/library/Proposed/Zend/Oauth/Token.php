@@ -9,6 +9,27 @@ abstract class Zend_Oauth_Token
 
     protected $_params = array();
 
+    protected $_response = null;
+
+    protected $_httpUtility = null;
+
+    public function __construct(Zend_Http_Response $response = null,
+        Zend_Oauth_Http_Utility $utility = null)
+    {
+        if (!is_null($response)) {
+            $this->_response = $response;
+            $params = $this->_parseParameters($response);
+            if (count($params) > 0) {
+                $this->setParams($params);
+            }
+        }
+        if (!is_null($utility)) {
+            $this->_httpUtility = $utility;
+        } else {
+            $this->_httpUtility = new Zend_Oauth_Http_Utility;
+        }
+    }
+
     public function isValid()
     {
         if (isset($this->_params[self::TOKEN_PARAM_KEY])
@@ -18,6 +39,21 @@ abstract class Zend_Oauth_Token
             return true;
         }
         return false;
+    }
+
+    public function getResponse()
+    {
+        return $this->_response;
+    }
+
+    public function setTokenSecret($secret)
+    {
+        $this->setParam(self::TOKEN_SECRET_PARAM_KEY, $secret);
+    }
+
+    public function getTokenSecret()
+    {
+        return $this->getParam(self::TOKEN_SECRET_PARAM_KEY);
     }
 
     public function setParam($key, $value)
