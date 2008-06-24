@@ -1,5 +1,7 @@
 <?php
 
+require_once 'Zend/Oauth/Http/Utility.php';
+
 abstract class Zend_Oauth_Token
 {
 
@@ -98,12 +100,7 @@ abstract class Zend_Oauth_Token
 
     public function toString()
     {
-        $baseStrings = array();
-        foreach ($this->_params as $key=>$value) {
-            $baseStrings[] = Zend_Oauth::urlEncode($key)
-                . '=' . Zend_Oauth::urlEncode($value);
-        }
-        return implode('&', $baseStrings);
+        return $this->_httpUtility->toEncodedQueryString($this->_params);
     }
 
     public function __toString()

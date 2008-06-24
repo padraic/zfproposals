@@ -6,8 +6,6 @@ require_once 'Zend/Oauth/Http.php';
 
 require_once 'Zend/Uri/Http.php';
 
-require_once 'Zend/Oauth/Http/Utility.php';
-
 class Zend_Oauth_Token_Access extends Zend_Oauth_Token
 {
 

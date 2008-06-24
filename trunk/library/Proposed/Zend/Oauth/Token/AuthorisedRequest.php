@@ -7,7 +7,8 @@ class Zend_Oauth_Token_AuthorisedRequest extends Zend_Oauth_Token
 
     protected $_data = array();
 
-    public function __construct(array $data = null)
+    public function __construct(array $data = null,
+        Zend_Oauth_Http_Utility $utility = null)
     {
         if (!is_null($data)) {
             $this->_data = $data;
@@ -15,6 +16,11 @@ class Zend_Oauth_Token_AuthorisedRequest extends Zend_Oauth_Token
             if (count($params) > 0) {
                 $this->setParams($params);
             }
+        }
+        if (!is_null($utility)) {
+            $this->_httpUtility = $utility;
+        } else {
+            $this->_httpUtility = new Zend_Oauth_Http_Utility;
         }
     }
 
