@@ -20,9 +20,9 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
     {
         $params = array();
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
-        $params['oauth_nonce'] = $this->_consumer->generateNonce();
+        $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
-        $params['oauth_timestamp'] = $this->_consumer->generateTimestamp();
+        $params['oauth_timestamp'] = $this->_httpUtility->generateTimestamp();
         $params['oauth_token'] = $this->_consumer->getLastRequestToken()->getToken();
         $params['oauth_version'] = $this->_consumer->getVersion();
         $params['oauth_signature'] = $this->_httpUtility->sign(

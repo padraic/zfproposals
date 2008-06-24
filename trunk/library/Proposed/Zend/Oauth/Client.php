@@ -4,6 +4,8 @@ require_once 'Zend/Oauth.php';
 
 require_once 'Zend/Http/Client.php';
 
+require_once 'Zend/Oauth/Http/Utility.php';
+
 require_once 'Zend/Oauth/Config/Interface.php';
 
 class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_Interface
@@ -37,15 +39,29 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         parent::__construct($uri, $config);
     }
 
+    public function setMethod($method = self::GET)
+    {
+        $return = parent::setMethod($method);
+        if ($method == self::GET) {
+            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
+            $this->_requestMethod = 'GET';
+        } elseif($method == self::POST) {
+            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_POSTBODY);
+            $this->_requestMethod = 'POST';
+        }
+        return $return;
+    }
+
+    // There are no unit tests for what follows - it's plain hackish to verify an approach
+
     public function request($method = null)
     {
-
         if ($method) $this->setMethod($method);
         do {
             $uri = clone $this->uri;
             if (!empty($this->paramsGet)) {
-                $query = $uri->getQuery(); // what about paramsGet!
-                // add OAuth parameters to Query String if required
+                $query = $uri->getQuery();
+
                 if ($this->getRequestScheme() == Zend_Oauth::REQUEST_SCHEME_QUERYSTRING) {
                     if (!empty($query)) {
                         $params = array();
@@ -54,11 +70,12 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                             $pair = explode('=', $part);
                             $params[$pair[0]] = $pair[1];
                         }
+                        $params = array_merge($params, $this->paramsGet);
                     }
+                    // reset query to the signed OAuth parameter style
+                    $uri->setQuery('');
                     $query = $this->getToken()->toQueryString(
-                        $this->getUrl(),
-                        $this,
-                        $params
+                        $this->getUrl(), $this, $params
                     );
                 } else {
                     if (!empty($query)) $query .= '&';
@@ -68,9 +85,12 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                 $uri->setQuery($query);
             }
 
-            // OAUTH PROGRESSION ENDS HERE
+            // OAUTH PROGRESSION STARTS HERE
 
             $body = $this->prepareBody();
+
+            // OAUTH PROGRESSION ENDS HERE
+
             $headers = $this->prepareHeaders();
 
             // Open the connection, send the request and read the response
@@ -145,14 +165,80 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         return $response;
     }
 
-    public function setMethod($method = self::GET)
+    protected function prepareBody()
     {
-        $return = parent::setMethod($method);
-        if ($method == self::GET) {
-            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
-            $this->_requestMethod = 'GET';
+        // According to RFC2616, a TRACE request should not have a body.
+        if ($this->method == self::TRACE) {
+            return '';
         }
-        return $return;
+
+        // If we have raw_post_data set, just use it as the body.
+        // If it's preset, we might have to sign the body, but presumably until
+        // any xoauth extensions are deployed, all we can do is assume someone
+        // pre-signed this and return it.
+        if (isset($this->raw_post_data)) {
+            $this->setHeaders('Content-length', strlen($this->raw_post_data));
+            return $this->raw_post_data;
+        }
+
+        $body = '';
+
+        // If we have files to upload, force enctype to multipart/form-data
+        if (count ($this->files) > 0) $this->setEncType(self::ENC_FORMDATA);
+
+        // If we have POST parameters or files, encode and add them to the body
+        if (count($this->paramsPost) > 0 || count($this->files) > 0) {
+            switch($this->enctype) {
+                case self::ENC_FORMDATA:
+                    // Encode body as multipart/form-data
+          // OAuth signing does not apply to multipart form data
+      // or rather it's not addressed in the Core spec...
+                    $boundary = '---ZENDHTTPCLIENT-' . md5(microtime());
+                    $this->setHeaders('Content-type', self::ENC_FORMDATA . "; boundary={$boundary}");
+
+                    // Get POST parameters and encode them
+                    $params = $this->_getParametersRecursive($this->paramsPost);
+                    foreach ($params as $pp) {
+                        $body .= self::encodeFormData($boundary, $pp[0], $pp[1]);
+                    }
+
+                    // Encode files
+                    foreach ($this->files as $name => $file) {
+                        $fhead = array('Content-type' => $file[1]);
+                        $body .= self::encodeFormData($boundary, $name, $file[2], $file[0], $fhead);
+                    }
+
+                    $body .= "--{$boundary}--\r\n";
+                    break;
+
+                case self::ENC_URLENCODED:
+                    // Encode body as application/x-www-form-urlencoded
+                    $this->setHeaders('Content-type', self::ENC_URLENCODED);
+                    if ($this->getRequestSchemeMethod() == Zend_Oauth::REQUEST_SCHEME_POSTBODY) {
+                        $body = $this->getToken()->toQueryString(
+                            $this->getUrl(), $this, $this->paramsPost
+                        );
+                    } else {
+                        $body = http_build_query($this->paramsPost, '', '&');
+                    }
+                    
+                    break;
+
+                default:
+                    /** @see Zend_Http_Client_Exception */
+                    require_once 'Zend/Http/Client/Exception.php';
+                    throw new Zend_Http_Client_Exception("Cannot handle content type '{$this->enctype}' automatically." .
+                        " Please use Zend_Http_Client::setRawData to send this kind of content.");
+                    break;
+            }
+        }
+        
+        // Set the content-length if we have a body or if request is POST/PUT
+        if ($body || $this->method == self::POST || $this->method == self::PUT) {
+            $this->setHeaders('Content-length', strlen($body));
+        }
+
+        return $body;
     }
 
     public function setOptions(array $options)

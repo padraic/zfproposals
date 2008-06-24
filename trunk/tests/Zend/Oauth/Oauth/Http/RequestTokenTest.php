@@ -11,6 +11,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
     public function setup()
     {
         $this->stubConsumer = new Test_Consumer_32874;
+        $this->stubHttpUtility = new Test_Http_Utility_32874;
         Zend_Oauth::setHttpClient(new Test_Client_32874);
     }
 
@@ -21,19 +22,19 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorSetsConsumerInstance()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer,null,$this->stubHttpUtility);
         $this->assertType('Test_Consumer_32874', $request->getConsumer());
     }
 
     public function testConstructorSetsCustomServiceParameters()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(1,2,3));
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(1,2,3), $this->stubHttpUtility);
         $this->assertEquals(array(1,2,3), $request->getParameters());
     }
 
     public function testAssembleParametersCorrectlyAggregatesOauthParameters()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -49,7 +50,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
         $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(
             'custom_param1'=>'foo',
             'custom_param2'=>'bar'
-        ));
+        ), $this->stubHttpUtility);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -65,7 +66,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeHeaderClientSetsCorrectlyEncodedAuthorizationHeader()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -88,7 +89,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemePostBodyClientSetsCorrectlyEncodedRawData()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -111,7 +112,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeQueryStringClientSetsCorrectlyEncodedQueryString()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -138,16 +139,21 @@ class Test_Consumer_32874 extends Zend_Oauth_Consumer
 {
     public function __construct(){}
     public function getConsumerKey(){return '1234567890';}
-    public function generateNonce(){return md5('1234567890');}
     public function getSignatureMethod(){return 'HMAC-SHA1';}
-    public function generateTimestamp(){return '12345678901';}
     public function getVersion(){return '1.0';}
-    public function sign(array $params, $signatureMethod, $consumerSecret,
+    public function getRequestTokenUrl(){return 'http://www.example.com/request';}
+}
+
+class Test_Http_Utility_32874 extends Zend_Oauth_Http_Utility
+{
+    public function __construct(){}
+    public static function generateNonce(){return md5('1234567890');}
+    public static function generateTimestamp(){return '12345678901';}
+    public static function sign(array $params, $signatureMethod, $consumerSecret,
         $accessTokenSecret = null, $method = null, $url = null)
     {
         return md5('0987654321');
     }
-    public function getRequestTokenUrl(){return 'http://www.example.com/request';}
 }
 
 class Test_Client_32874 extends Zend_Http_Client

@@ -81,12 +81,9 @@ class Zend_Oauth_Http
     {
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($url);
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[] =
-                Zend_Oauth_Http_Utility::urlEncode($key) . '=' . Zend_Oauth_Http_Utility::urlEncode($value);
-        }
-        $client->getUri()->setQuery(implode('&', $encodedParams));
+        $client->getUri()->setQuery(
+            $this->_httpUtility->toEncodedQueryString($params)    
+        );
         $client->setMethod(Zend_Http_Client::POST);
         return $client;
     }
