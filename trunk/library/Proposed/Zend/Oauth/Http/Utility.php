@@ -19,7 +19,7 @@ class Zend_Oauth_Http_Utility
         if (!is_null($serviceProviderParams)) {
             $params = array_merge($params, $serviceProviderParams);
         }
-        $params['oauth_signature'] = Zend_Http::sign(
+        $params['oauth_signature'] = self::sign(
             $params,
             $config->getSignatureMethod(),
             $config->getConsumerSecret(),
