@@ -33,7 +33,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_consumerSecret = null;
 
-    public function __construct(array $oauthOptions, $uri = null, $config = null) 
+    public function __construct(array $oauthOptions, $uri = null, $config = null)
     {
         parent::__construct($uri, $config);
         $this->setOptions($oauthOptions);
@@ -233,7 +233,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                     } else {
                         $body = http_build_query($this->paramsPost, '', '&');
                     }
-                    
+
                     break;
 
                 default:
@@ -244,7 +244,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                     break;
             }
         }
-        
+
         // Set the content-length if we have a body or if request is POST/PUT
         if ($body || $this->method == self::POST || $this->method == self::PUT) {
             $this->setHeaders('Content-length', strlen($body));
@@ -257,8 +257,15 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
     {
         foreach ($options as $key=>$value) {
             switch ($key) {
+                case 'consumerKey':
+                    $this->setConsumerKey($value);
+                    break;
+                case 'consumerSecret':
+                    $this->setConsumerSecret($value);
+                    break;
                 case 'accessToken':
                     $this->setToken($value);
+                    break;
                 case 'signatureMethod':
                     $this->setSignatureMethod($value);
                     break;
@@ -284,12 +291,12 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         }
     }
 
-    public function setToken(Zend_Oauth_Token_Access $token) 
+    public function setToken(Zend_Oauth_Token_Access $token)
     {
         $this->_token = $token;
     }
 
-    public function getToken() 
+    public function getToken()
     {
         return $this->_token;
     }

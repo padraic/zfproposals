@@ -41,17 +41,24 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
 
     protected $_accessToken = null;
 
-    public function __construct($consumerKey, $consumerSecret, array $options = array())
+    public function __construct(array $options = null)
     {
-        $this->setConsumerKey($consumerKey);
-        $this->setConsumerSecret($consumerSecret);
-        $this->setOptions($options);
+        if (!is_null($options)) {
+            $this->setOptions($options);
+        }
+        // add Zend_Config support later
     }
 
     public function setOptions(array $options)
     {
         foreach ($options as $key=>$value) {
             switch ($key) {
+                case 'consumerKey':
+                    $this->setConsumerKey($value);
+                    break;
+                case 'consumerSecret':
+                    $this->setConsumerSecret($value);
+                    break;
                 case 'signatureMethod':
                     $this->setSignatureMethod($value);
                     break;
