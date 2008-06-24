@@ -235,10 +235,6 @@ class Test_Consumer_48231 extends Zend_Oauth_Consumer
         $this->_requestToken = new Zend_Oauth_Token_Request;
         $this->_accessToken = new Zend_Oauth_Token_Access;
         parent::__construct($consumerKey, $consumerSecret, $options);}
-    public function generateTimestamp(){
-        return '120412041';}
-    public function generateNonce(){
-        return 'abcd';}
     public function getLocalUrl(){
         return 'http://www.example.com/local';}
 }

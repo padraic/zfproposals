@@ -21,7 +21,7 @@ class Zend_Oauth_Token_Access extends Zend_Oauth_Token
         return $this->_httpUtility->toAuthorizationHeader($params, $realm);
     }
 
-    public function toQueryString($url, Zend_Oauth_Consumer $consumer, array $params = null)
+    public function toQueryString($url, $consumer, array $params = null)
     {
         if (!Zend_Uri::check($url)) {
             require_once 'Zend/Oauth/Exception.php';

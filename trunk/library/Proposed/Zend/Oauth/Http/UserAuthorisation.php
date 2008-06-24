@@ -9,12 +9,10 @@ class Zend_Oauth_Http_UserAuthorisation extends Zend_Oauth_Http
     public function getUrl()
     {
         $params = $this->assembleParams();
-        foreach ($params as $key => $value) {
-            $encodedParams[] =
-                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
-        }
         $uri = Zend_Uri_Http::fromString($this->_consumer->getUserAuthorisationUrl());
-        $uri->setQuery(implode('&', $encodedParams));
+        $uri->setQuery(
+            $this->_httpUtility->toEncodedQueryString($params)
+        );
         return $uri->getUri();
     }
 

@@ -12,14 +12,16 @@ require_once 'Zend/Oauth/Http/AccessToken.php';
 
 require_once 'Zend/Oauth/Token/AuthorisedRequest.php';
 
-class Zend_Oauth_Consumer extends Zend_Oauth
+require_once 'Zend/Oauth/Config/Interface.php';
+
+class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interface
 {
 
     protected $_signatureMethod = 'HMAC-SHA1';
 
     protected $_requestMethod = 'POST';
 
-    protected $_requestScheme = self::REQUEST_SCHEME_HEADER;
+    protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
 
     protected $_version = '1.0';
 

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Zend/Oauth.php';
+require_once 'Zend/Oauth/Http/Utility.php';
 
 require_once 'Zend/Uri/Http.php';
 
@@ -51,7 +51,7 @@ abstract class Zend_Oauth_Signature_Abstract
             $parts[] = $this->_tokenSecret;
         }
         foreach ($parts as $key=>$secret) {
-            $parts[$key] = Zend_Oauth::urlEncode($secret);
+            $parts[$key] = Zend_Oauth_Http_Utility::urlEncode($secret);
         }
         return implode('&', $parts);
     }
@@ -64,12 +64,14 @@ abstract class Zend_Oauth_Signature_Abstract
         }
         if (isset($url)) {
             // should normalise later
-            $baseStrings[] = Zend_Oauth::urlEncode($this->normaliseBaseSignatureUrl($url));
+            $baseStrings[] = Zend_Oauth_Http_Utility::urlEncode(
+                $this->normaliseBaseSignatureUrl($url)
+            );
         }
         if (isset($params['oauth_signature'])) {
             unset($params['oauth_signature']);
         }
-        $baseStrings[] = Zend_Oauth::urlEncode(
+        $baseStrings[] = Zend_Oauth_Http_Utility::urlEncode(
             $this->_toByteValueOrderedQueryString($params)
         );
         return implode('&', $baseStrings);

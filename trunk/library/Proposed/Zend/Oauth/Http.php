@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Zend/Oauth.php';
+require_once 'Zend/Oauth/Http/Utility.php';
 
 require_once 'Zend/Oauth/Signature/Hmac.php';
 
@@ -19,13 +19,21 @@ class Zend_Oauth_Http
 
     protected $_preferredRequestMethod = null;
 
-    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null)
+    protected $_httpUtility = null;
+
+    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null,
+        Zend_Oauth_Http_Utility $utility = null)
     {
         $this->_consumer = $consumer;
         $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
         $this->_preferredRequestMethod = $this->_consumer->getRequestMethod();
         if (!is_null($parameters)) {
             $this->setParameters($parameters);
+        }
+        if (!is_null($utility)) {
+            $this->_httpUtility = $utility;
+        } else {
+            $this->_httpUtility = new Zend_Oauth_Http_Utility;
         }
     }
 
@@ -76,26 +84,11 @@ class Zend_Oauth_Http
         $encodedParams = array();
         foreach ($params as $key => $value) {
             $encodedParams[] =
-                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
+                Zend_Oauth_Http_Utility::urlEncode($key) . '=' . Zend_Oauth_Http_Utility::urlEncode($value);
         }
         $client->getUri()->setQuery(implode('&', $encodedParams));
         $client->setMethod(Zend_Http_Client::POST);
         return $client;
-    }
-
-    public static function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
-    {
-        $className = '';
-        $hashAlgo = null;
-        $parts = explode('-', $signatureMethod);
-        if (count($parts) > 1) {
-            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($parts[0]));
-            $hashAlgo = $parts[1];
-        } else {
-            $className = 'Zend_Oauth_Signature_' . ucfirst(strtolower($signatureMethod));
-        }
-        $signatureObject = new $className($consumerSecret, $tokenSecret, $hashAlgo);
-        return $signatureObject->sign($params, $method, $url);
     }
 
     protected function _assessRequestAttempt()
@@ -121,9 +114,9 @@ class Zend_Oauth_Http
         $headerValue[] = 'OAuth realm="' . $realm . '"';
         foreach ($params as $key => $value) {
             $headerValue[] =
-                Zend_Oauth::urlEncode($key)
+                Zend_Oauth_Http_Utility::urlEncode($key)
                 . '="'
-                . Zend_Oauth::urlEncode($value)
+                . Zend_Oauth_Http_Utility::urlEncode($value)
                 . '"';
         }
         return implode(",", $headerValue);

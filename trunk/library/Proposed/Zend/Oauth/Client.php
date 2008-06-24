@@ -4,16 +4,18 @@ require_once 'Zend/Oauth.php';
 
 require_once 'Zend/Http/Client.php';
 
-class Zend_Oauth_Client extends Zend_Http_Client
+require_once 'Zend/Oauth/Config/Interface.php';
+
+class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_Interface
 {
 
     protected $_token = null;
 
     protected $_signatureMethod = 'HMAC-SHA1';
 
-    protected $_requestMethod = 'POST';
+    protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_POSTBODY;
 
-    protected $_requestScheme = self::REQUEST_SCHEME_HEADER;
+    protected $_requestMethod = 'POST';
 
     protected $_version = '1.0';
 
@@ -37,30 +39,36 @@ class Zend_Oauth_Client extends Zend_Http_Client
 
     public function request($method = null)
     {
-        if (! $this->uri instanceof Zend_Uri_Http) {
-            /** @see Zend_Http_Client_Exception */
-            require_once 'Zend/Http/Client/Exception.php';
-            throw new Zend_Http_Client_Exception('No valid URI has been passed to the client');
-        }
 
         if ($method) $this->setMethod($method);
-        $this->redirectCounter = 0;
-        $response = null;
-
-        // Make sure the adapter is loaded
-        if ($this->adapter == null) $this->setAdapter($this->config['adapter']);
-
-        // Send the first request. If redirected, continue.
         do {
-            // Clone the URI and add the additional GET parameters to it
             $uri = clone $this->uri;
-            if (! empty($this->paramsGet)) {
-                $query = $uri->getQuery();
-                   if (! empty($query)) $query .= '&';
-                $query .= http_build_query($this->paramsGet, null, '&');
+            if (!empty($this->paramsGet)) {
+                $query = $uri->getQuery(); // what about paramsGet!
+                // add OAuth parameters to Query String if required
+                if ($this->getRequestScheme() == Zend_Oauth::REQUEST_SCHEME_QUERYSTRING) {
+                    if (!empty($query)) {
+                        $params = array();
+                        $parts = explode('&', $query); // yes, yes, test ;)
+                        foreach ($parts as $part) {
+                            $pair = explode('=', $part);
+                            $params[$pair[0]] = $pair[1];
+                        }
+                    }
+                    $query = $this->getToken()->toQueryString(
+                        $this->getUrl(),
+                        $this,
+                        $params
+                    );
+                } else {
+                    if (!empty($query)) $query .= '&';
+                    $query .= http_build_query($this->paramsGet, null, '&');
+                }
 
                 $uri->setQuery($query);
             }
+
+            // OAUTH PROGRESSION ENDS HERE
 
             $body = $this->prepareBody();
             $headers = $this->prepareHeaders();
@@ -135,6 +143,16 @@ class Zend_Oauth_Client extends Zend_Http_Client
         } while ($this->redirectCounter < $this->config['maxredirects']);
 
         return $response;
+    }
+
+    public function setMethod($method = self::GET)
+    {
+        $return = parent::setMethod($method);
+        if ($method == self::GET) {
+            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
+            $this->_requestMethod = 'GET';
+        }
+        return $return;
     }
 
     public function setOptions(array $options)
@@ -216,11 +234,6 @@ class Zend_Oauth_Client extends Zend_Http_Client
         return $this->_signatureMethod;
     }
 
-    public function getRequestMethod()
-    {
-        return $this->_requestMethod;
-    }
-
     public function setRequestScheme($scheme)
     {
         $scheme = strtolower($scheme);
@@ -240,6 +253,11 @@ class Zend_Oauth_Client extends Zend_Http_Client
     public function getRequestScheme()
     {
         return $this->_requestScheme;
+    }
+
+    public function getRequestMethod()
+    {
+        return $this->_requestMethod;
     }
 
     public function setVersion($version)

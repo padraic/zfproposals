@@ -25,7 +25,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $params['oauth_timestamp'] = $this->_consumer->generateTimestamp();
         $params['oauth_token'] = $this->_consumer->getLastRequestToken()->getToken();
         $params['oauth_version'] = $this->_consumer->getVersion();
-        $params['oauth_signature'] = $this->sign(
+        $params['oauth_signature'] = $this->_httpUtility->sign(
             $params,
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
@@ -52,13 +52,10 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[] =
-                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
-        }
         $client->setMethod(Zend_Http_Client::POST);
-        $client->setRawData(implode('&', $encodedParams));
+        $client->setRawData(
+            $this->_httpUtility->toEncodedQueryString($params)  
+        );
         return $client;
     }
 

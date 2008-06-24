@@ -34,23 +34,4 @@ class Zend_Oauth
         self::$httpClient = null;
     }
 
-    public static function urlEncode($string)
-    {
-        $return = rawurlencode($string);
-        /* 5.1. Parameter Encoding
-           'Characters in the unreserved character set MUST NOT be encoded.' */
-        $return = str_replace('%7E', '~', $return);
-        return $return;
-    }
-
-    public function generateNonce()
-    {
-        return md5(uniqid(rand(), true));
-    }
-
-    public function generateTimestamp()
-    {
-        return time();
-    }
-
 }

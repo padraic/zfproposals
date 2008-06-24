@@ -27,7 +27,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
         if (!empty($this->_parameters)) {
             $params = array_merge($params, $this->_parameters);
         }
-        $params['oauth_signature'] = $this->sign(
+        $params['oauth_signature'] = $this->_httpUtility->sign(
             $params,
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
@@ -52,13 +52,10 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     {
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
-        $encodedParams = array();
-        foreach ($params as $key => $value) {
-            $encodedParams[] =
-                Zend_Oauth::urlEncode($key) . '=' . Zend_Oauth::urlEncode($value);
-        }
         $client->setMethod(Zend_Http_Client::POST);
-        $client->setRawData(implode('&', $encodedParams));
+        $client->setRawData(
+            $this->_httpUtility->toEncodedQueryString($params)
+        );
         return $client;
     }
 

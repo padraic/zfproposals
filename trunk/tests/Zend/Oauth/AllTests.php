@@ -18,6 +18,7 @@ require_once 'Oauth/Signature/RsaTest.php';
 require_once 'Oauth/Http/RequestTokenTest.php';
 require_once 'Oauth/Http/UserAuthorisationTest.php';
 require_once 'Oauth/Http/AccessTokenTest.php';
+require_once 'Oauth/Http/UtilityTest.php';
 require_once 'Oauth/Token/RequestTest.php';
 require_once 'Oauth/Token/AuthorisedRequestTest.php';
 require_once 'Oauth/Token/AccessTest.php';
@@ -42,6 +43,7 @@ class Zend_Oauth_AllTests
         $suite->addTestSuite('Zend_Oauth_Http_RequestTokenTest');
         $suite->addTestSuite('Zend_Oauth_Http_UserAuthorisationTest');
         $suite->addTestSuite('Zend_Oauth_Http_AccessTokenTest');
+        $suite->addTestSuite('Zend_Oauth_Http_UtilityTest');
         $suite->addTestSuite('Zend_Oauth_Token_RequestTest');
         $suite->addTestSuite('Zend_Oauth_Token_AuthorisedRequestTest');
         $suite->addTestSuite('Zend_Oauth_Token_AccessTest');
