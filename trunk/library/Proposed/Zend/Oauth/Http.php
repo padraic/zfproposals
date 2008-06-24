@@ -2,12 +2,6 @@
 
 require_once 'Zend/Oauth/Http/Utility.php';
 
-require_once 'Zend/Oauth/Signature/Hmac.php';
-
-require_once 'Zend/Oauth/Signature/Rsa.php';
-
-require_once 'Zend/Oauth/Signature/Plaintext.php';
-
 class Zend_Oauth_Http
 {
 

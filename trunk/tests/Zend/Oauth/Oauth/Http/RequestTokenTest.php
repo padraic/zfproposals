@@ -34,7 +34,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testAssembleParametersCorrectlyAggregatesOauthParameters()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -50,7 +50,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
         $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(
             'custom_param1'=>'foo',
             'custom_param2'=>'bar'
-        ), $this->stubHttpUtility);
+        ));
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -147,9 +147,9 @@ class Test_Consumer_32874 extends Zend_Oauth_Consumer
 class Test_Http_Utility_32874 extends Zend_Oauth_Http_Utility
 {
     public function __construct(){}
-    public static function generateNonce(){return md5('1234567890');}
-    public static function generateTimestamp(){return '12345678901';}
-    public static function sign(array $params, $signatureMethod, $consumerSecret,
+    public function generateNonce(){return md5('1234567890');}
+    public function generateTimestamp(){return '12345678901';}
+    public function sign(array $params, $signatureMethod, $consumerSecret,
         $accessTokenSecret = null, $method = null, $url = null)
     {
         return md5('0987654321');

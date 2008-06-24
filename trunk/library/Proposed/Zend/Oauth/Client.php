@@ -35,8 +35,8 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     public function __construct(array $oauthOptions, $uri = null, $config = null) 
     {
-        $this->setOptions($oauthOptions);
         parent::__construct($uri, $config);
+        $this->setOptions($oauthOptions);
     }
 
     public function setMethod($method = self::GET)
@@ -56,7 +56,19 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     public function request($method = null)
     {
+        if (! $this->uri instanceof Zend_Uri_Http) {
+            /** @see Zend_Http_Client_Exception */
+            require_once 'Zend/Http/Client/Exception.php';
+            throw new Zend_Http_Client_Exception('No valid URI has been passed to the client');
+        }
+
         if ($method) $this->setMethod($method);
+        $this->redirectCounter = 0;
+        $response = null;
+
+        // Make sure the adapter is loaded
+        if ($this->adapter == null) $this->setAdapter($this->config['adapter']);
+
         do {
             $uri = clone $this->uri;
             if (!empty($this->paramsGet)) {
@@ -214,9 +226,9 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                 case self::ENC_URLENCODED:
                     // Encode body as application/x-www-form-urlencoded
                     $this->setHeaders('Content-type', self::ENC_URLENCODED);
-                    if ($this->getRequestSchemeMethod() == Zend_Oauth::REQUEST_SCHEME_POSTBODY) {
+                    if ($this->getRequestScheme() == Zend_Oauth::REQUEST_SCHEME_POSTBODY) {
                         $body = $this->getToken()->toQueryString(
-                            $this->getUrl(), $this, $this->paramsPost
+                            $this->getUri(true), $this, $this->paramsPost
                         );
                     } else {
                         $body = http_build_query($this->paramsPost, '', '&');
@@ -324,9 +336,9 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
     {
         $scheme = strtolower($scheme);
         if (!in_array($scheme, array(
-                self::REQUEST_SCHEME_HEADER,
-                self::REQUEST_SCHEME_POSTBODY,
-                self::REQUEST_SCHEME_QUERYSTRING
+                Zend_Oauth::REQUEST_SCHEME_HEADER,
+                Zend_Oauth::REQUEST_SCHEME_POSTBODY,
+                Zend_Oauth::REQUEST_SCHEME_QUERYSTRING
             ))) {
             require_once 'Zend/Oauth/Exception.php';
             throw new Zend_Oauth_Exception(

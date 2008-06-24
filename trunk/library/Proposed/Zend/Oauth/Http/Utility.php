@@ -4,6 +4,12 @@ require_once 'Zend/Oauth.php';
 
 require_once 'Zend/Oauth/Http.php';
 
+require_once 'Zend/Oauth/Signature/Hmac.php';
+
+require_once 'Zend/Oauth/Signature/Rsa.php';
+
+require_once 'Zend/Oauth/Signature/Plaintext.php';
+
 class Zend_Oauth_Http_Utility
 {
 
@@ -11,19 +17,19 @@ class Zend_Oauth_Http_Utility
     {
         $params = array();
         $params['oauth_consumer_key'] = $config->getConsumerKey();
-        $params['oauth_nonce'] = Zend_Oauth::generateNonce();
+        $params['oauth_nonce'] = $this->generateNonce();
         $params['oauth_signature_method'] = $config->getSignatureMethod();
-        $params['oauth_timestamp'] = Zend_Oauth::generateTimestamp();
-        $params['oauth_token'] = $this->getToken();
+        $params['oauth_timestamp'] = $this->generateTimestamp();
+        $params['oauth_token'] = $config->getToken()->getToken();
         $params['oauth_version'] = $config->getVersion();
         if (!is_null($serviceProviderParams)) {
             $params = array_merge($params, $serviceProviderParams);
         }
-        $params['oauth_signature'] = self::sign(
+        $params['oauth_signature'] = $this->sign(
             $params,
             $config->getSignatureMethod(),
             $config->getConsumerSecret(),
-            $this->getTokenSecret(),
+            $config->getToken()->getTokenSecret(),
             $config->getRequestMethod(),
             $url
         );
@@ -52,7 +58,7 @@ class Zend_Oauth_Http_Utility
         return implode(",", $headerValue);
     }
 
-    public static function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
+    public function sign(array $params, $signatureMethod, $consumerSecret, $tokenSecret = null, $method = null, $url = null)
     {
         $className = '';
         $hashAlgo = null;
@@ -67,12 +73,12 @@ class Zend_Oauth_Http_Utility
         return $signatureObject->sign($params, $method, $url);
     }
 
-    public static function generateNonce()
+    public function generateNonce()
     {
         return md5(uniqid(rand(), true));
     }
 
-    public static function generateTimestamp()
+    public function generateTimestamp()
     {
         return time();
     }
