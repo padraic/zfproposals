@@ -39,3 +39,10 @@ $client->setParameterPost('group','oauth');
 $response = $client->request();
 header('Content-Type: ' . $response->getHeader('Content-Type'));
 echo $response->getBody();
+
+// Retrieved XML will be similar to:
+
+//      <?xml version="1.0" encoding="utf-8" ?>
+//      <response status="ok" version="">
+//      	<count>138</count>
+//      </response>
