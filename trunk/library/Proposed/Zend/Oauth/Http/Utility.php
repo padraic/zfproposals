@@ -44,10 +44,8 @@ class Zend_Oauth_Http_Utility
         $headerValue[] = 'OAuth realm="' . $realm . '"';
         foreach ($params as $key => $value) {
             $headerValue[] =
-                Zend_Oauth::urlEncode($key)
-                . '="'
-                . Zend_Oauth::urlEncode($value)
-                . '"';
+                Zend_Oauth::urlEncode($key) . '="'
+                . Zend_Oauth::urlEncode($value) . '"';
         }
         return implode(",", $headerValue);
     }
