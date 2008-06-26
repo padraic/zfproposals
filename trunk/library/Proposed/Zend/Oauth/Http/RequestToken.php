@@ -19,6 +19,15 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     public function assembleParams()
     {
         $params = array();
+        // add to all other schemes too!
+        //$requestTokenUrl = Zend_Uri_Http::fromString($this->_consumer->getRequestTokenUrl());
+        //$queryString = $requestTokenUrl->getQuery();
+        //if (!empty($queryString)) {
+        //    $queryPairs = $this->_httpUtility->parseQueryString($queryString);
+        //    $params = array_merge($params, $queryPairs);
+        //    $requestTokenUrl->setQuery('');
+        //    $this->_consumer->setRequestTokenUrl($requestTokenUrl->getUri(true));
+        //}
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
         $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
@@ -73,6 +82,8 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
                     $this->_consumer->getRequestTokenUrl());
                 break;
         }
+        //var_dump($httpClient);
+        //var_dump($httpClient->request()); exit; //TEST//
         return $httpClient->request();
     }
 

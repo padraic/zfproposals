@@ -37,7 +37,7 @@ abstract class Zend_Oauth_Signature_Abstract
         elseif ($uri->getScheme() == 'https' && $uri->getPort() == '443'):
             $uri->setPort('');
         endif;
-        $uri->setQuery('');
+        $uri->setQuery(''); // Google done right? Probably not...
         $uri->setFragment('');
         $uri->setHost(strtolower($uri->getHost()));
         return $uri->getUri(true);

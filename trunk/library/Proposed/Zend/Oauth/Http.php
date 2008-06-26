@@ -2,6 +2,8 @@
 
 require_once 'Zend/Oauth/Http/Utility.php';
 
+require_once 'Zend/Uri/Http.php';
+
 class Zend_Oauth_Http
 {
 
@@ -65,7 +67,7 @@ class Zend_Oauth_Http
             || $status == 401 // Unauthorized
             || empty($body)   // Missing request token
             ) {
-            $this->_assessRequestAttempt();
+            $this->_assessRequestAttempt($response);
             $response = $this->startRequestCycle($params);
         }
         return $response;
@@ -75,14 +77,17 @@ class Zend_Oauth_Http
     {
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($url);
+        $params = array_merge(
+            $this->_httpUtility->parseQueryString($client->getUri()->getQuery()), $params
+        );
         $client->getUri()->setQuery(
-            $this->_httpUtility->toEncodedQueryString($params)    
+            $this->_httpUtility->toEncodedQueryString($params)
         );
         $client->setMethod(Zend_Http_Client::POST);
         return $client;
     }
 
-    protected function _assessRequestAttempt()
+    protected function _assessRequestAttempt(Zend_Http_Response $response = null)
     {
         switch ($this->_preferredRequestScheme) {
             case Zend_Oauth::REQUEST_SCHEME_HEADER:
@@ -94,7 +99,8 @@ class Zend_Oauth_Http
             default:
                 require_once 'Zend/Oauth/Exception.php';
                 throw new Zend_Oauth_Exception(
-                    'Could not retrieve a valid Token response from Token URL'
+                    'Could not retrieve a valid Token response from Token URL:'
+                    . (!is_null($response) ? PHP_EOL . $response->getBody() : '')
                 );
         }
     }

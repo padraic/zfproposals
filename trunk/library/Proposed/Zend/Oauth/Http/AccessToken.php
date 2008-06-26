@@ -54,7 +54,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $client->setUri($this->_consumer->getAccessTokenUrl());
         $client->setMethod(Zend_Http_Client::POST);
         $client->setRawData(
-            $this->_httpUtility->toEncodedQueryString($params)  
+            $this->_httpUtility->toEncodedQueryString($params)
         );
         return $client;
     }
@@ -84,7 +84,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
             || $status == 401 // Unauthorized
             || empty($body)   // Missing request token
             ) {
-            $this->_assessRequestAttempt();
+            $this->_assessRequestAttempt($response);
             $response = $this->startRequestCycle($params);
         }
         return $response;

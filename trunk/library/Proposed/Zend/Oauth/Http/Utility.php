@@ -36,7 +36,7 @@ class Zend_Oauth_Http_Utility
         return $params;
     }
 
-    public function toEncodedQueryString(array $params) 
+    public function toEncodedQueryString(array $params)
     {
         $encodedParams = array();
         foreach ($params as $key => $value) {
@@ -73,6 +73,20 @@ class Zend_Oauth_Http_Utility
         return $signatureObject->sign($params, $method, $url);
     }
 
+    public function parseQueryString($query)
+    {
+        $params = array();
+        if (empty($query)) {
+            return array();
+        }
+        $parts = explode('&', $query);
+        foreach ($parts as $pair) {
+            $kv = explode('=', $pair);
+            $params[rawurldecode($kv[0])] = rawurldecode($kv[1]);
+        }
+        return $params;
+    }
+
     public function generateNonce()
     {
         return md5(uniqid(rand(), true));
@@ -83,7 +97,7 @@ class Zend_Oauth_Http_Utility
         return time();
     }
 
-    public static function urlEncode($value) 
+    public static function urlEncode($value)
     {
         $encoded = rawurlencode($value);
         return str_replace('%7E','~',$encoded);
