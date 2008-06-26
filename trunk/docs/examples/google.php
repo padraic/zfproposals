@@ -8,12 +8,14 @@ $options = array(
     'requestScheme' => Zend_Oauth::REQUEST_SCHEME_HEADER,
     'version' => '1.0',
     'signatureMethod' => 'RSA-SHA1',
-    'localUrl' => 'http://localhost/test_gdata.php',
-    'requestTokenUrl' => '',
-    'userAuthorisationUrl' => '',
-    'accessTokenUrl' => '',
+    'localUrl' => 'path/to/this/file.php',
+    'requestTokenUrl' => 'https://www.google.com/accounts/OAuthGetRequestToken?scope=http://www.google.com/m8/feeds',
+    'userAuthorisationUrl' => 'https://www.google.com/accounts/OAuthAuthorizeToken',
+    'accessTokenUrl' => 'https://www.google.com/accounts/OAuthGetAccessToken',
     'consumerKey' => 'dev.phpspec.org',
-    'consumerSecret' => new Zend_Crypt_Rsa_Key_Private()
+    'consumerSecret' => new Zend_Crypt_Rsa_Key_Private(
+        file_get_contents(realpath('./myrsakey.pem'));
+    )
 );
 
 $consumer = new Zend_Oauth_Consumer($options);
@@ -35,7 +37,7 @@ if (!isset($_SESSION['ACCESS_TOKEN'])) {
 $client = $token->getHttpClient($options);
 $client->setUri('http://');
 $client->setMethod(Zend_Http_Client::POST);
-$client->setParameterPost();
+//$client->setParameterPost();
 
 $response = $client->request();
 header('Content-Type: ' . $response->getHeader('Content-Type'));
