@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Zend/Oauth/Http.php';
+
 require_once 'Zend/Uri/Http.php';
 
 class Zend_Oauth_Http_UserAuthorisation extends Zend_Oauth_Http

@@ -20,12 +20,12 @@ class Zend_Oauth
 
     public static function getHttpClient()
     {
-        if (!isset(self::$httpClient)) {
+        if (!isset(self::$httpClient)):
             self::$httpClient = new Zend_Http_Client;
-        } else {
+        else:
             self::$httpClient->setHeaders('Authorization', null);
             self::$httpClient->resetParameters();
-        }
+        endif;
         return self::$httpClient;
     }
 

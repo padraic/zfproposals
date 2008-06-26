@@ -37,6 +37,8 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
 
     protected $_consumerSecret = null;
 
+    protected $_rsaPrivateKey = null;
+
     protected $_requestToken = null;
 
     protected $_accessToken = null;
@@ -76,6 +78,9 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
                     break;
                 case 'userAuthorisationUrl':
                     $this->setUserAuthorisationUrl($value);
+                    break;
+                case 'rsaPrivateKey':
+                    $this->setRsaPrivateKey($value);
                     break;
             }
         }
@@ -288,6 +293,16 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
     public function getUserAuthorisationUrl()
     {
         return $this->_userAuthorisationUrl;
+    }
+
+    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key) 
+    {
+        $this->_rsaPrivateKey = $key;
+    }
+
+    public function getRsaPrivateKey() 
+    {
+        return $this->_rsaPrivateKey;
     }
 
 }

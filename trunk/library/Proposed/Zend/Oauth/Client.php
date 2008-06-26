@@ -33,6 +33,8 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_consumerSecret = null;
 
+    protected $_rsaPrivateKey = null;
+
     public function __construct(array $oauthOptions, $uri = null, $config = null)
     {
         parent::__construct($uri, $config);
@@ -437,6 +439,16 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
     public function getUserAuthorisationUrl()
     {
         return $this->_userAuthorisationUrl;
+    }
+
+    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key) 
+    {
+        $this->_rsaPrivateKey = $key;
+    }
+
+    public function getRsaPrivateKey() 
+    {
+        return $this->_rsaPrivateKey;
     }
 
 }
