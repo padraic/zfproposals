@@ -174,6 +174,9 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
 
     public function getConsumerSecret()
     {
+        if (!is_null($this->_rsaPrivateKey)) {
+            return $this->_rsaPrivateKey;
+        }
         return $this->_consumerSecret;
     }
 
