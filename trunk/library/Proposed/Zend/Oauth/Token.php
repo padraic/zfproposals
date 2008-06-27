@@ -36,8 +36,7 @@ abstract class Zend_Oauth_Token
     {
         if (isset($this->_params[self::TOKEN_PARAM_KEY])
             && !empty($this->_params[self::TOKEN_PARAM_KEY])
-            && isset($this->_params[self::TOKEN_SECRET_PARAM_KEY])
-            && !empty($this->_params[self::TOKEN_SECRET_PARAM_KEY])) {
+            && isset($this->_params[self::TOKEN_SECRET_PARAM_KEY])) {
             return true;
         }
         return false;
@@ -60,7 +59,7 @@ abstract class Zend_Oauth_Token
 
     public function setParam($key, $value)
     {
-        $this->_params[$key] = $value;
+        $this->_params[$key] = trim($value, "\n");
     }
 
     public function setParams(array $params)

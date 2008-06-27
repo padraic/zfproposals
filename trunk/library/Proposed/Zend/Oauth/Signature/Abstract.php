@@ -37,7 +37,7 @@ abstract class Zend_Oauth_Signature_Abstract
         elseif ($uri->getScheme() == 'https' && $uri->getPort() == '443'):
             $uri->setPort('');
         endif;
-        $uri->setQuery(''); // Google done right? Probably not...
+        $uri->setQuery('');
         $uri->setFragment('');
         $uri->setHost(strtolower($uri->getHost()));
         return $uri->getUri(true);
@@ -57,6 +57,11 @@ abstract class Zend_Oauth_Signature_Abstract
 
     protected function _getBaseSignatureString(array $params, $method = null, $url = null)
     {
+        $encodedParams = array();
+        foreach ($params as $key => $value) {
+            $encodedParams[Zend_Oauth_Http_Utility::urlEncode($key)]
+                = Zend_Oauth_Http_Utility::urlEncode($value);
+        }
         $baseStrings = array();
         if (isset($method)) {
             $baseStrings[] = strtoupper($method);
@@ -67,11 +72,11 @@ abstract class Zend_Oauth_Signature_Abstract
                 $this->normaliseBaseSignatureUrl($url)
             );
         }
-        if (isset($params['oauth_signature'])) {
-            unset($params['oauth_signature']);
+        if (isset($encodedParams['oauth_signature'])) {
+            unset($encodedParams['oauth_signature']);
         }
         $baseStrings[] = Zend_Oauth_Http_Utility::urlEncode(
-            $this->_toByteValueOrderedQueryString($params)
+            $this->_toByteValueOrderedQueryString($encodedParams)
         );
         return implode('&', $baseStrings);
     }

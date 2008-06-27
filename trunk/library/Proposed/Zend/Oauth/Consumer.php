@@ -89,12 +89,12 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         }
     }
 
-    public function getRequestToken(array $customServiceParameters = null, Zend_Oauth_Http_RequestToken $request = null)
+    public function getRequestToken(array $customServiceParameters = null, $excludeCustomParamsFromHeader = true, Zend_Oauth_Http_RequestToken $request = null)
     {
         if (is_null($request)) {
-            $request = new Zend_Oauth_Http_RequestToken($this, $customServiceParameters);
+            $request = new Zend_Oauth_Http_RequestToken($this, $customServiceParameters, $excludeCustomParamsFromHeader);
         } elseif(!is_null($customServiceParameters)) {
-            $request->setParameters($customServiceParameters);
+            $request->setParameters($customServiceParameters, $excludeCustomParamsFromHeader);
         }
         $this->_requestToken = $request->execute();
         return $this->_requestToken;

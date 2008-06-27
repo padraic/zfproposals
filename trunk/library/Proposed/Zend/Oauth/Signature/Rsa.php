@@ -21,7 +21,6 @@ class Zend_Oauth_Signature_Rsa extends Zend_Oauth_Signature_Abstract
 
     protected function _assembleKey()
     {
-        // no key construction - just the RSA Key object
         return $this->_consumerSecret;
     }
 

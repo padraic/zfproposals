@@ -36,8 +36,15 @@ class Zend_Oauth_Http_Utility
         return $params;
     }
 
-    public function toEncodedQueryString(array $params)
+    public function toEncodedQueryString(array $params, $customParamsOnly = false)
     {
+        if ($customParamsOnly) {
+            foreach ($params as $key=>$value) {
+                if (preg_match("/^oauth_/", $key)) {
+                    unset($params[$key]);
+                }
+            }
+        }
         $encodedParams = array();
         foreach ($params as $key => $value) {
             $encodedParams[] =
@@ -46,11 +53,16 @@ class Zend_Oauth_Http_Utility
         return implode('&', $encodedParams);
     }
 
-    public function toAuthorizationHeader(array $params, $realm = null)
+    public function toAuthorizationHeader(array $params, $realm = null, $excludeCustomParams = true)
     {
         $headerValue = array();
         $headerValue[] = 'OAuth realm="' . $realm . '"';
         foreach ($params as $key => $value) {
+            if ($excludeCustomParams) {
+                if (!preg_match("/^oauth_/", $key)) {
+                    continue;
+                }
+            }
             $headerValue[] =
                 self::urlEncode($key) . '="'
                 . self::urlEncode($value) . '"';

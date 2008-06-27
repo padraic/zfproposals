@@ -19,15 +19,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     public function assembleParams()
     {
         $params = array();
-        // add to all other schemes too!
-        //$requestTokenUrl = Zend_Uri_Http::fromString($this->_consumer->getRequestTokenUrl());
-        //$queryString = $requestTokenUrl->getQuery();
-        //if (!empty($queryString)) {
-        //    $queryPairs = $this->_httpUtility->parseQueryString($queryString);
-        //    $params = array_merge($params, $queryPairs);
-        //    $requestTokenUrl->setQuery('');
-        //    $this->_consumer->setRequestTokenUrl($requestTokenUrl->getUri(true));
-        //}
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
         $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
@@ -49,10 +40,16 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
 
     public function getRequestSchemeHeaderClient(array $params)
     {
-        $headerValue = $this->_toAuthorizationHeader($params);
+        $headerValue = $this->_httpUtility->toAuthorizationHeader(
+            $params, null, $this->_excludeParamsFromHeader
+        );
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
+        if ($this->_excludeParamsFromHeader) {
+            $rawdata = $this->_httpUtility->toEncodedQueryString($params, true);
+            if (!empty($rawdata)) $client->setRawData($rawdata);
+        }
         $client->setMethod(Zend_Http_Client::POST);
         return $client;
     }
@@ -82,8 +79,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
                     $this->_consumer->getRequestTokenUrl());
                 break;
         }
-        //var_dump($httpClient);
-        //var_dump($httpClient->request()); exit; //TEST//
         return $httpClient->request();
     }
 
