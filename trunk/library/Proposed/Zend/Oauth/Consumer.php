@@ -100,7 +100,8 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         return $this->_requestToken;
     }
 
-    public function getRedirectUrl(array $customServiceParameters = null, Zend_Oauth_Token_Request $token = null,
+    public function getRedirectUrl(array $customServiceParameters = null,
+        Zend_Oauth_Token_Request $token = null,
         Zend_Oauth_Http_UserAuthorisation $redirect = null)
     {
         if (is_null($redirect)) {
@@ -140,7 +141,7 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
                     'Authorised token from Service Provider does not match supplied Request Token details');
             }
         } else {
-            // retrieve token from storage solution
+            // retrieve token from storage solution !!TBI!!
         }
         $this->_requestToken = $token;
         $this->_accessToken = $request->execute();

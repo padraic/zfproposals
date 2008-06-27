@@ -71,6 +71,9 @@ class Zend_Oauth_Http
             || $status == 401 // Unauthorized
             || empty($body)   // Missing request token
             ) {
+                // This is not a great idea
+                // - cycling should be left to the implementing application
+                //   which should be aware of how an SP reports/handles errors
             $this->_assessRequestAttempt($response);
             $response = $this->startRequestCycle($params);
         }

@@ -19,6 +19,11 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
     public function assembleParams()
     {
         $params = array();
+        // Google fix (don't ask)
+        if (preg_match("%https\:\/\/www\.google\.com\/accounts\/OAuthGet%", $this->_consumer->getAccessTokenUrl())
+            && $this->_consumer->getRequestMethod() == 'POST') {
+            $params[''] = '';  // we can haz empty params not in spec
+        }
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
         $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
