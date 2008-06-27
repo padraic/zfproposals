@@ -89,9 +89,6 @@ class Zend_Oauth_Http
     {
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($url);
-        $params = array_merge(
-            $this->_httpUtility->parseQueryString($client->getUri()->getQuery()), $params
-        );
         $client->getUri()->setQuery(
             $this->_httpUtility->toEncodedQueryString($params)
         );
