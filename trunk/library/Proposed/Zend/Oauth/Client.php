@@ -15,7 +15,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_signatureMethod = 'HMAC-SHA1';
 
-    protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_POSTBODY;
+    protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
 
     protected $_requestMethod = 'POST';
 
@@ -44,11 +44,14 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
     public function setMethod($method = self::GET)
     {
         $return = parent::setMethod($method);
+        // this is all wrong - but GET support is not introduced yet...
         if ($method == self::GET) {
-            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
             $this->_requestMethod = 'GET';
+            if ($this->_requestScheme !== Zend_Oauth::REQUEST_SCHEME_HEADER) {
+                $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
+            }
         } elseif($method == self::POST) {
-            $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_POSTBODY);
+            //$this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_POSTBODY);
             $this->_requestMethod = 'POST';
         }
         return $return;
@@ -253,6 +256,82 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         }
 
         return $body;
+    }
+
+    protected function prepareHeaders()
+    {
+        $headers = array();
+
+        // Set the host header
+        if (! isset($this->headers['host'])) {
+            $host = $this->uri->getHost();
+
+            // If the port is not default, add it
+            if (! (($this->uri->getScheme() == 'http' && $this->uri->getPort() == 80) ||
+                  ($this->uri->getScheme() == 'https' && $this->uri->getPort() == 443))) {
+                $host .= ':' . $this->uri->getPort();
+            }
+
+            $headers[] = "Host: {$host}";
+        }
+
+        // Set the connection header
+        if (! isset($this->headers['connection'])) {
+            if (! $this->config['keepalive']) $headers[] = "Connection: close";
+        }
+
+        // Set the Accept-encoding header if not set - depending on whether
+        // zlib is available or not.
+        if (! isset($this->headers['accept-encoding'])) {
+        	if (function_exists('gzinflate')) {
+        		$headers[] = 'Accept-encoding: gzip, deflate';
+        	} else {
+        		$headers[] = 'Accept-encoding: identity';
+        	}
+        }
+        
+        // Set the content-type header
+        if ($this->method == self::POST &&
+           (! isset($this->headers['content-type']) && isset($this->enctype))) {
+
+            $headers[] = "Content-type: {$this->enctype}";
+        }
+        
+        // Set the user agent header
+        if (! isset($this->headers['user-agent']) && isset($this->config['useragent'])) {
+            $headers[] = "User-agent: {$this->config['useragent']}";
+        }
+
+        // Set HTTP authentication if needed
+        if (is_array($this->auth)) {
+            $auth = self::encodeAuthHeader($this->auth['user'], $this->auth['password'], $this->auth['type']);
+            $headers[] = "Authorization: {$auth}";
+        }
+        if ($this->getRequestScheme() == Zend_Oauth::REQUEST_SCHEME_HEADER) {
+            $oauth = $this->getToken()->toHeader(
+                $this->getUri(true), $this
+            );
+            $headers[] = "Authorization: {$oauth}";
+        }
+
+        // Load cookies from cookie jar
+        if (isset($this->cookiejar)) {
+            $cookstr = $this->cookiejar->getMatchingCookies($this->uri,
+                true, Zend_Http_CookieJar::COOKIE_STRING_CONCAT);
+
+            if ($cookstr) $headers[] = "Cookie: {$cookstr}";
+        }
+
+        // Add all other user defined headers
+        foreach ($this->headers as $header) {
+        	list($name, $value) = $header;
+            if (is_array($value))
+                $value = implode(', ', $value);
+
+            $headers[] = "$name: $value";
+        }
+
+        return $headers;
     }
 
     public function setOptions(array $options)
