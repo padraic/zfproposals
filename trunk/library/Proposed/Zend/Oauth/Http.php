@@ -15,7 +15,7 @@ class Zend_Oauth_Http
 
     protected $_preferredRequestScheme = null;
 
-    protected $_preferredRequestMethod = null;
+    protected $_preferredRequestMethod = Zend_Oauth::POST;
 
     protected $_httpUtility = null;
 
@@ -23,7 +23,6 @@ class Zend_Oauth_Http
     {
         $this->_consumer = $consumer;
         $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
-        $this->_preferredRequestMethod = $this->_consumer->getRequestMethod();
         if (!is_null($parameters)) {
             $this->setParameters($parameters);
         }
@@ -33,6 +32,15 @@ class Zend_Oauth_Http
         } else {
             $this->_httpUtility = new Zend_Oauth_Http_Utility;
         }
+    }
+
+    public function setMethod($method)
+    {
+        if (!in_array($method, array(Zend_Oauth::POST, Zend_Oauth::GET))) {
+            require_once 'Zend/Oauth/Exception.php';
+            throw new Zend_Oauth_Exception('invalid HTTP method: '.$method);
+        }
+        $this->_preferredRequestMethod = $method;
     }
 
     public function setParameters(array $customServiceParameters,
@@ -71,9 +79,6 @@ class Zend_Oauth_Http
             || $status == 401 // Unauthorized
             || empty($body)   // Missing request token
             ) {
-                // This is not a great idea
-                // - cycling should be left to the implementing application
-                //   which should be aware of how an SP reports/handles errors
             $this->_assessRequestAttempt($response);
             $response = $this->startRequestCycle($params);
         }
@@ -90,7 +95,7 @@ class Zend_Oauth_Http
         $client->getUri()->setQuery(
             $this->_httpUtility->toEncodedQueryString($params)
         );
-        $client->setMethod(Zend_Http_Client::POST);
+        $client->setMethod($this->_preferredRequestMethod);
         return $client;
     }
 

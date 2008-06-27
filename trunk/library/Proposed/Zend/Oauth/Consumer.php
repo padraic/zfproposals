@@ -19,8 +19,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
 
     protected $_signatureMethod = 'HMAC-SHA1';
 
-    protected $_requestMethod = 'POST';
-
     protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
 
     protected $_version = '1.0';
@@ -89,12 +87,16 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         }
     }
 
-    public function getRequestToken(array $customServiceParameters = null, $excludeCustomParamsFromHeader = true, Zend_Oauth_Http_RequestToken $request = null)
+    public function getRequestToken(array $customServiceParameters = null, $httpMethod = null,
+        $excludeCustomParamsFromHeader = true, Zend_Oauth_Http_RequestToken $request = null)
     {
         if (is_null($request)) {
             $request = new Zend_Oauth_Http_RequestToken($this, $customServiceParameters, $excludeCustomParamsFromHeader);
         } elseif(!is_null($customServiceParameters)) {
             $request->setParameters($customServiceParameters, $excludeCustomParamsFromHeader);
+        }
+        if (!is_null($httpMethod)) {
+            $request->setMethod($httpMethod);
         }
         $this->_requestToken = $request->execute();
         return $this->_requestToken;
@@ -123,7 +125,7 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
     }
 
     public function getAccessToken($queryData, Zend_Oauth_Token_Request $token = null,
-        Zend_Oauth_Http_AccessToken $request = null)
+        $httpMethod = null, Zend_Oauth_Http_AccessToken $request = null)
     {
         $authorisedToken = new Zend_Oauth_Token_AuthorisedRequest($queryData);
         if (!$authorisedToken->isValid()) {
@@ -133,6 +135,9 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         }
         if (is_null($request)) {
             $request = new Zend_Oauth_Http_AccessToken($this);
+        }
+        if (!is_null($httpMethod)) {
+            $request->setMethod($httpMethod);
         }
         if (isset($token)) {
             if ($authorisedToken->getToken() !== $token->getToken()) {
@@ -197,11 +202,6 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
     public function getSignatureMethod()
     {
         return $this->_signatureMethod;
-    }
-
-    public function getRequestMethod()
-    {
-        return $this->_requestMethod;
     }
 
     public function setRequestScheme($scheme)
@@ -299,12 +299,12 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         return $this->_userAuthorisationUrl;
     }
 
-    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key) 
+    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key)
     {
         $this->_rsaPrivateKey = $key;
     }
 
-    public function getRsaPrivateKey() 
+    public function getRsaPrivateKey()
     {
         return $this->_rsaPrivateKey;
     }

@@ -17,8 +17,6 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
 
-    protected $_requestMethod = 'POST';
-
     protected $_version = '1.0';
 
     protected $_localUrl = null;
@@ -289,14 +287,14 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         		$headers[] = 'Accept-encoding: identity';
         	}
         }
-        
+
         // Set the content-type header
         if ($this->method == self::POST &&
            (! isset($this->headers['content-type']) && isset($this->enctype))) {
 
             $headers[] = "Content-type: {$this->enctype}";
         }
-        
+
         // Set the user agent header
         if (! isset($this->headers['user-agent']) && isset($this->config['useragent'])) {
             $headers[] = "User-agent: {$this->config['useragent']}";
@@ -520,12 +518,12 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         return $this->_userAuthorisationUrl;
     }
 
-    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key) 
+    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key)
     {
         $this->_rsaPrivateKey = $key;
     }
 
-    public function getRsaPrivateKey() 
+    public function getRsaPrivateKey()
     {
         return $this->_rsaPrivateKey;
     }

@@ -19,11 +19,6 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     public function assembleParams()
     {
         $params = array();
-        // Google fix (don't ask)
-        //if (preg_match("%https\:\/\/www\.google\.com\/accounts\/OAuthGet%", //$this->_consumer->getRequestTokenUrl())
-        //    && $this->_consumer->getRequestMethod() == 'POST') {
-        //    $params[''] = ''; // we can haz empty params not in spec
-        //}
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
         $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
@@ -55,7 +50,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
             $rawdata = $this->_httpUtility->toEncodedQueryString($params, true);
             if (!empty($rawdata)) $client->setRawData($rawdata);
         }
-        $client->setMethod(Zend_Http_Client::POST);
+        $client->setMethod($this->_preferredRequestMethod);
         return $client;
     }
 
@@ -63,7 +58,7 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     {
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
-        $client->setMethod(Zend_Http_Client::POST);
+        $client->setMethod($this->_preferredRequestMethod);
         $client->setRawData(
             $this->_httpUtility->toEncodedQueryString($params)
         );

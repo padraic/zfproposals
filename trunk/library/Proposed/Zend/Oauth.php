@@ -11,6 +11,10 @@ class Zend_Oauth
 
     const REQUEST_SCHEME_QUERYSTRING = 'querystring';
 
+    const GET = 'GET';
+
+    const POST = 'POST';
+
     protected static $httpClient = null;
 
     public static function setHttpClient(Zend_Http_Client $httpClient)

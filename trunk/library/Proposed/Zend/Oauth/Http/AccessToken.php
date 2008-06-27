@@ -19,11 +19,6 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
     public function assembleParams()
     {
         $params = array();
-        // Google fix (don't ask)
-        if (preg_match("%https\:\/\/www\.google\.com\/accounts\/OAuthGet%", $this->_consumer->getAccessTokenUrl())
-            && $this->_consumer->getRequestMethod() == 'POST') {
-            $params[''] = '';  // we can haz empty params not in spec
-        }
         $params['oauth_consumer_key'] = $this->_consumer->getConsumerKey();
         $params['oauth_nonce'] = $this->_httpUtility->generateNonce();
         $params['oauth_signature_method'] = $this->_consumer->getSignatureMethod();
@@ -35,7 +30,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
             $this->_consumer->getSignatureMethod(),
             $this->_consumer->getConsumerSecret(),
             $this->_consumer->getLastRequestToken()->getTokenSecret(),
-            $this->_consumer->getRequestMethod(),
+            $this->_preferredRequestMethod,
             $this->_consumer->getAccessTokenUrl()
         );
         return $params;
@@ -48,7 +43,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
-        $client->setMethod(Zend_Http_Client::POST);
+        $client->setMethod($this->_preferredRequestMethod);
         return $client;
     }
 
@@ -57,7 +52,7 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
         $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getAccessTokenUrl());
-        $client->setMethod(Zend_Http_Client::POST);
+        $client->setMethod($this->_preferredRequestMethod);
         $client->setRawData(
             $this->_httpUtility->toEncodedQueryString($params)
         );
@@ -68,31 +63,6 @@ class Zend_Oauth_Http_AccessToken extends Zend_Oauth_Http
     {
         $params = $this->_cleanParamsOfIllegalCustomParameters($params);
         return parent::getRequestSchemeQueryStringClient($params, $url);
-    }
-
-    public function startRequestCycle(array $params)
-    {
-        $response = null;
-        $body = null;
-        $status = null;
-        try {
-            $response = $this->_attemptRequest($params);
-        } catch (Zend_Http_Client_Exception $e) {
-        }
-        if (!is_null($response)) {
-            $body = $response->getBody();
-            $status = $response->getStatus();
-        }
-        if (is_null($response)// Request failure/exception
-            || $status == 500 // Internal Server Error
-            || $status == 400 // Bad Request
-            || $status == 401 // Unauthorized
-            || empty($body)   // Missing request token
-            ) {
-            $this->_assessRequestAttempt($response);
-            $response = $this->startRequestCycle($params);
-        }
-        return $response;
     }
 
     protected function _attemptRequest(array $params)

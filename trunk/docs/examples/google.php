@@ -26,7 +26,7 @@ $consumer = new Zend_Oauth_Consumer($options);
 
 if (!isset($_SESSION['ACCESS_TOKEN_GOOGLE'])) {
     if (!empty($_GET)) {
-        $token = $consumer->getAccessToken($_GET, unserialize($_SESSION['REQUEST_TOKEN_GOOGLE']));
+        $token = $consumer->getAccessToken($_GET, unserialize($_SESSION['REQUEST_TOKEN_GOOGLE']), Zend_Oauth::GET);
         $_SESSION['ACCESS_TOKEN_GOOGLE'] = serialize($token);
     } else {
         $token = $consumer->getRequestToken(array('scope'=>'http://www.google.com/m8/feeds'));

@@ -21,8 +21,6 @@ interface Zend_Oauth_Config_Interface
 
     public function getRequestScheme();
 
-    public function getRequestMethod();
-
     public function setVersion($version);
 
     public function getVersion();
