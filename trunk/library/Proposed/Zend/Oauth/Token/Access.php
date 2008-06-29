@@ -35,9 +35,9 @@ class Zend_Oauth_Token_Access extends Zend_Oauth_Token
         return $this->_httpUtility->toEncodedQueryString($params);
     }
 
-    public function getHttpClient(array $oauthOptions, $uri = null, $config = null) 
+    public function getHttpClient(array $oauthOptions, $uri = null, $config = null, $excludeCustomParamsFromHeader = true)
     {
-        $client = new Zend_Oauth_Client($oauthOptions, $uri, $config);
+        $client = new Zend_Oauth_Client($oauthOptions, $uri, $config, $excludeCustomParamsFromHeader);
         $client->setToken($this);
         return $client;
     }
