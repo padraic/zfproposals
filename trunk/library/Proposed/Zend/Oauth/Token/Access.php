@@ -11,7 +11,7 @@ require_once 'Zend/Oauth/Client.php';
 class Zend_Oauth_Token_Access extends Zend_Oauth_Token
 {
 
-    public function toHeader($url, Zend_Oauth_Config_Interface $config, $realm = null)
+    public function toHeader($url, Zend_Oauth_Config_Interface $config, array $customParams = null, $realm = null)
     {
         if (!Zend_Uri::check($url)) {
             require_once 'Zend/Oauth/Exception.php';
@@ -19,7 +19,7 @@ class Zend_Oauth_Token_Access extends Zend_Oauth_Token
                 '\'' . $url . '\' is not a valid URI'
             );
         }
-        $params = $this->_httpUtility->assembleParams($url, $config);
+        $params = $this->_httpUtility->assembleParams($url, $config, $customParams);
         return $this->_httpUtility->toAuthorizationHeader($params, $realm);
     }
 

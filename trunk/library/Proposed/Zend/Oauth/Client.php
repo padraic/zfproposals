@@ -44,18 +44,12 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     public function setMethod($method = self::GET)
     {
-        $return = parent::setMethod($method);
-        // this is all wrong - but GET support is not introduced yet...
         if ($method == self::GET) {
             $this->_requestMethod = 'GET';
-            if ($this->_requestScheme !== Zend_Oauth::REQUEST_SCHEME_HEADER) {
-                $this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_QUERYSTRING);
-            }
         } elseif($method == self::POST) {
-            //$this->setRequestScheme(Zend_Oauth::REQUEST_SCHEME_POSTBODY);
             $this->_requestMethod = 'POST';
         }
-        return $return;
+        return parent::setMethod($method);
     }
 
     public function request($method = null)
@@ -66,36 +60,46 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         if ($this->_requestScheme == Zend_Oauth::REQUEST_SCHEME_HEADER) {
             $params = array();
             if (!empty($this->paramsGet)) {
-
+                $params = array_merge($params, $this->paramsGet);
+                $query = $this->getToken()->toQueryString(
+                    $this->getUri(true), $this, $params
+                );
+                $this->paramsGet = array();
+            }
+            if (!empty($this->paramsPost)) {
+                $params = array_merge($params, $this->paramsPost);
+                $query = $this->getToken()->toQueryString(
+                    $this->getUri(true), $this, $params
+                );
+                $this->paramsPost = array();
             }
             $oauthHeaderValue = $this->getToken()->toHeader(
-                $this->getUri(true), $this
+                $this->getUri(true), $this, $params
             );
             $this->setHeaders('Authorization', $oauthHeaderValue);
+            // handle non-OAuth protocol parameter passage
+            if ($this->_requestMethod == self::GET) {
+                $this->getUri()->setQuery($query);
+            } elseif($this->_requestMethod == self::POST) {
+                $this->setRawData($query);
+            }
         } elseif ($this->_requestScheme == Zend_Oauth::REQUEST_SCHEME_POSTBODY) {
+            if ($this->_requestMethod == self::GET) {
+                require_once 'Zend/Oauth/Exception.php';
+                throw new Zend_Oauth_Exception('The client is configured to pass OAuth parameters through a POST body but request method is set to GET');
+            }
             $raw = $this->getToken()->toQueryString(
                 $this->getUri(true), $this, $this->paramsPost
             );
-            $this->paramsPost = array();
             $this->setRawData($raw);
+            $this->paramsPost = array();
         } elseif ($this->_requestScheme == Zend_Oauth::REQUEST_SCHEME_QUERYSTRING) {
-            $query = $uri->getUri()->getQuery();
-            if (!empty($query)) {
-                $params = array();
-                $parts = explode('&', $query); // yes, yes, test ;)
-                foreach ($parts as $part) {
-                    $pair = explode('=', $part);
-                    $params[$pair[0]] = $pair[1];
-                }
-                $params = array_merge($params, $this->paramsGet);
-            }
-            // reset query to the signed OAuth parameter style
-            $this->paramsGet = array();
             $this->getUri()->setQuery('');
             $query = $this->getToken()->toQueryString(
-                $this->getUri(true), $this, $params
+                $this->getUri(true), $this, $this->paramsGet
             );
             $this->getUri()->setQuery($query);
+            $this->paramsGet = array();
         }
         return parent::request();
     }

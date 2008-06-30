@@ -29,7 +29,7 @@ if (!isset($_SESSION['ACCESS_TOKEN_GOOGLE'])) {
         $token = $consumer->getAccessToken($_GET, unserialize($_SESSION['REQUEST_TOKEN_GOOGLE']), Zend_Oauth::GET);
         $_SESSION['ACCESS_TOKEN_GOOGLE'] = serialize($token);
     } else {
-        $token = $consumer->getRequestToken(array('scope'=>'http://www.google.com/m8/feeds'));
+        $token = $consumer->getRequestToken(array('scope'=>'http://www.google.com/m8/feeds'), Zend_Oauth::GET);
         $_SESSION['REQUEST_TOKEN_GOOGLE'] = serialize($token);
         $consumer->redirect();
         exit;
@@ -39,7 +39,7 @@ if (!isset($_SESSION['ACCESS_TOKEN_GOOGLE'])) {
     $_SESSION['ACCESS_TOKEN_GOOGLE'] = null;
 }
 
-// OAuth Access Token Retreived; Proceed to query Data API
+// OAuth Access Token Retreived; Proceed to query Data API for current user's contacts
 $client = $token->getHttpClient($options);
 $client->setUri('http://www.google.com/m8/feeds/groups/default/full');
 $client->setMethod(Zend_Http_Client::GET);
