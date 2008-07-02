@@ -22,7 +22,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorSetsConsumerInstance()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer,null,$this->stubHttpUtility);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer,null,null,$this->stubHttpUtility);
         $this->assertType('Test_Consumer_32874', $request->getConsumer());
     }
 
@@ -34,14 +34,14 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testAssembleParametersCorrectlyAggregatesOauthParameters()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, null, $this->stubHttpUtility);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
             'oauth_signature_method' => 'HMAC-SHA1',
             'oauth_timestamp' => '12345678901',
             'oauth_version' => '1.0',
-            'oauth_signature' => 'iRXhXHV3N4uJMqXtlAKO/S+a5Ow='
+            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c'
         );
         $this->assertEquals($expectedParams, $request->assembleParams());
     }
@@ -50,14 +50,14 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
         $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, array(
             'custom_param1'=>'foo',
             'custom_param2'=>'bar'
-        ));
+        ), null, $this->stubHttpUtility);
         $expectedParams = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
             'oauth_signature_method' => 'HMAC-SHA1',
             'oauth_timestamp' => '12345678901',
             'oauth_version' => '1.0',
-            'oauth_signature' => 'gop5+27V7XxJxPDuOkkgOzFvTqA=',
+            'oauth_signature' => '6fb42da0e32e07b61c9f0251fe627a9c',
             'custom_param1' => 'foo',
             'custom_param2' => 'bar'
         );
@@ -66,7 +66,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeHeaderClientSetsCorrectlyEncodedAuthorizationHeader()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -82,14 +82,14 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
         'OAuth realm="",oauth_consumer_key="1234567890",oauth_nonce="e807f1fcf82d132f9b'
         .'b018ca6738a19f",oauth_signature_method="HMAC-SHA1",oauth_timestamp="'
         .'12345678901",oauth_version="1.0",oauth_signature="6fb42da0e32e07b61c'
-        .'9f0251fe627a9c~",custom_param1="foo",custom_param2="bar"',
+        .'9f0251fe627a9c~"',
             $client->getHeader('Authorization')
         );
     }
 
     public function testGetRequestSchemePostBodyClientSetsCorrectlyEncodedRawData()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
@@ -112,7 +112,7 @@ class Zend_Oauth_Http_RequestTokenTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestSchemeQueryStringClientSetsCorrectlyEncodedQueryString()
     {
-        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, $this->stubHttpUtility);
+        $request = new Zend_Oauth_Http_RequestToken($this->stubConsumer, null, null, $this->stubHttpUtility);
         $params = array (
             'oauth_consumer_key' => '1234567890',
             'oauth_nonce' => 'e807f1fcf82d132f9bb018ca6738a19f',
