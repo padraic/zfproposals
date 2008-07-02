@@ -91,6 +91,8 @@ class Zend_Oauth_Http_Utility
         if (empty($query)) {
             return array();
         }
+        // not remotely perfect but beats parse_str() which converts
+        // periods and uses urldecode, not rawurldecode.
         $parts = explode('&', $query);
         foreach ($parts as $pair) {
             $kv = explode('=', $pair);
