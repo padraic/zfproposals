@@ -30,7 +30,6 @@ require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/Oauth/AllTests.php';
-require_once 'Zend/Crypt/AllTests.php';
 
 
 class Zend_AllTests
@@ -44,7 +43,6 @@ class Zend_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend');
         $suite->addTest(Zend_Oauth_AllTests::suite());
-        $suite->addTest(Zend_Crypt_AllTests::suite());
         return $suite;
     }
 }
