@@ -13,13 +13,15 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorSetsConsumerKey()
     {
-        $consumer = new Zend_Oauth_Consumer('1234567890', '0987654321');
+        $config = array('consumerKey'=>'1234567890','consumerSecret'=>'0987654321');
+        $consumer = new Zend_Oauth_Consumer($config);
         $this->assertEquals('1234567890', $consumer->getConsumerKey());
     }
 
     public function testConstructorSetsConsumerSecret()
     {
-        $consumer = new Zend_Oauth_Consumer('1234567890', '0987654321');
+        $config = array('consumerKey'=>'1234567890','consumerSecret'=>'0987654321');
+        $consumer = new Zend_Oauth_Consumer($config);
         $this->assertEquals('0987654321', $consumer->getConsumerSecret());
     }
 
@@ -28,7 +30,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'signatureMethod' => 'rsa-sha1'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('RSA-SHA1', $consumer->getSignatureMethod());
     }
 
@@ -46,7 +48,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'requestScheme' => Zend_Oauth::REQUEST_SCHEME_POSTBODY
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals(Zend_Oauth::REQUEST_SCHEME_POSTBODY, $consumer->getRequestScheme());
     }
 
@@ -55,7 +57,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'version' => '1.1'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('1.1', $consumer->getVersion());
     }
 
@@ -64,7 +66,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'localUrl' => 'http://www.example.com/local'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('http://www.example.com/local', $consumer->getLocalUrl());
     }
 
@@ -73,7 +75,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'requestTokenUrl' => 'http://www.example.com/request'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('http://www.example.com/request', $consumer->getRequestTokenUrl());
     }
 
@@ -82,7 +84,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'userAuthorisationUrl' => 'http://www.example.com/authorise'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('http://www.example.com/authorise', $consumer->getUserAuthorisationUrl());
     }
 
@@ -91,13 +93,14 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $options = array(
             'accessTokenUrl' => 'http://www.example.com/access'
         );
-        $consumer = new Zend_Oauth_Consumer('bleh', 'bleh', $options);
+        $consumer = new Zend_Oauth_Consumer($options);
         $this->assertEquals('http://www.example.com/access', $consumer->getAccessTokenUrl());
     }
 
     public function testSetSignatureMethodThrowsExceptionForInvalidMethod()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setSignatureMethod('buckyball');
             $this->fail('Invalid signature method accepted by setSignatureMethod');
@@ -117,7 +120,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testSetRequestSchemeThrowsExceptionForInvalidMethod()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setRequestScheme('buckyball');
             $this->fail('Invalid request scheme accepted by setRequestScheme');
@@ -127,7 +131,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testSetLocalUrlThrowsExceptionForInvalidUrl()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setLocalUrl('buckyball');
             $this->fail('Invalid url accepted by setLocalUrl');
@@ -137,7 +142,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testSetRequestTokenUrlThrowsExceptionForInvalidUrl()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setRequestTokenUrl('buckyball');
             $this->fail('Invalid url accepted by setRequestUrl');
@@ -147,7 +153,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testSetUserAuthorisationUrlThrowsExceptionForInvalidUrl()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setUserAuthorisationUrl('buckyball');
             $this->fail('Invalid url accepted by setUserAuthorisationUrl');
@@ -157,7 +164,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testSetAccessTokenUrlThrowsExceptionForInvalidUrl()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setAccessTokenUrl('buckyball');
             $this->fail('Invalid url accepted by setAccessTokenUrl');
@@ -167,16 +175,17 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequestTokenReturnsInstanceOfOauthTokenRequest()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
-        $token = $consumer->getRequestToken(null, new Test_Http_RequestToken_48231);
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
+        $token = $consumer->getRequestToken(null, null, new Test_Http_RequestToken_48231);
         $this->assertType('Zend_Oauth_Token_Request', $token);
     }
 
     public function testGetRedirectUrlReturnsUserAuthorisationUrlWithParameters()
     {
-        $consumer = new Test_Consumer_48231('12345', '54321', array(
-            'userAuthorisationUrl'=>'http://www.example.com/authorise'
-        ));
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321',
+            'userAuthorisationUrl'=>'http://www.example.com/authorise');
+        $consumer = new Test_Consumer_48231($config);
         $params = array('foo'=>'bar');
         $uauth = new Zend_Oauth_Http_UserAuthorisation($consumer, $params);
         $token = new Zend_Oauth_Token_Request;
@@ -190,7 +199,8 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testGetAccessTokenReturnsInstanceOfOauthTokenAccess()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         $rtoken = new Zend_Oauth_Token_Request;
         $rtoken->setToken('token');
         $token = $consumer->getAccessToken(array('oauth_token'=>'token'), $rtoken, new Test_Http_AccessToken_48231);
@@ -199,13 +209,15 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testGetLastRequestTokenReturnsInstanceWhenExists()
     {
-        $consumer = new Test_Consumer_48231('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Test_Consumer_48231($config);
         $this->assertType('Zend_Oauth_Token_Request', $consumer->getLastRequestToken());
     }
 
     public function testGetLastAccessTokenReturnsInstanceWhenExists()
     {
-        $consumer = new Test_Consumer_48231('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Test_Consumer_48231($config);
         $this->assertType('Zend_Oauth_Token_Access', $consumer->getLastAccessToken());
     }
 
@@ -231,10 +243,10 @@ class Test_Http_AccessToken_48231 extends Zend_Oauth_Http_AccessToken
 
 class Test_Consumer_48231 extends Zend_Oauth_Consumer
 {
-    public function __construct($consumerKey, $consumerSecret, array $options = array()){
+    public function __construct(array $options = array()){
         $this->_requestToken = new Zend_Oauth_Token_Request;
         $this->_accessToken = new Zend_Oauth_Token_Access;
-        parent::__construct($consumerKey, $consumerSecret, $options);}
+        parent::__construct($options);}
     public function getLocalUrl(){
         return 'http://www.example.com/local';}
 }

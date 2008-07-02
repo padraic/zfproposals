@@ -10,28 +10,28 @@ class Zend_Oauth_Signature_AbstractTest extends PHPUnit_Framework_TestCase
     {
         $sign = new Zend_Oauth_Signature_Plaintext('foo');
         $url = 'HTTP://WWW.EXAMPLE.COM:80/REQUEST';
-        $this->assertEquals('http://www.example.com/request', $sign->normaliseBaseSignatureUrl($url));
+        $this->assertEquals('http://www.example.com/REQUEST', $sign->normaliseBaseSignatureUrl($url));
     }
 
     public function testNormaliseHttpsBaseSignatureUrl() 
     {
         $sign = new Zend_Oauth_Signature_Plaintext('foo');
         $url = 'HTTPS://WWW.EXAMPLE.COM:443/REQUEST';
-        $this->assertEquals('https://www.example.com/request', $sign->normaliseBaseSignatureUrl($url));
+        $this->assertEquals('https://www.example.com/REQUEST', $sign->normaliseBaseSignatureUrl($url));
     }
 
     public function testNormaliseHttpPortBaseSignatureUrl() 
     {
         $sign = new Zend_Oauth_Signature_Plaintext('foo');
         $url = 'HTTP://WWW.EXAMPLE.COM:443/REQUEST';
-        $this->assertEquals('http://www.example.com:443/request', $sign->normaliseBaseSignatureUrl($url));
+        $this->assertEquals('http://www.example.com:443/REQUEST', $sign->normaliseBaseSignatureUrl($url));
     }
 
     public function testNormaliseHttpsPortBaseSignatureUrl() 
     {
         $sign = new Zend_Oauth_Signature_Plaintext('foo');
         $url = 'HTTPS://WWW.EXAMPLE.COM:80/REQUEST';
-        $this->assertEquals('https://www.example.com:80/request', $sign->normaliseBaseSignatureUrl($url));
+        $this->assertEquals('https://www.example.com:80/REQUEST', $sign->normaliseBaseSignatureUrl($url));
     }
 
     public function testNormaliseHttpsRemovesFragmentFromBaseSignatureUrl() 
