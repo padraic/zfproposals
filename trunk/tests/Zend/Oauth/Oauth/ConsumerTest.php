@@ -13,14 +13,14 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorSetsConsumerKey()
     {
-        $config = array('consumerKey'=>'1234567890','consumerSecret'=>'0987654321');
+        $config = array('consumerKey'=>'1234567890');
         $consumer = new Zend_Oauth_Consumer($config);
         $this->assertEquals('1234567890', $consumer->getConsumerKey());
     }
 
     public function testConstructorSetsConsumerSecret()
     {
-        $config = array('consumerKey'=>'1234567890','consumerSecret'=>'0987654321');
+        $config = array('consumerSecret'=>'0987654321');
         $consumer = new Zend_Oauth_Consumer($config);
         $this->assertEquals('0987654321', $consumer->getConsumerSecret());
     }
@@ -34,7 +34,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('RSA-SHA1', $consumer->getSignatureMethod());
     }
 
-    /*public function testSetsRequestMethodFromOptionsArray()
+    /*public function testSetsRequestMethodFromOptionsArray() // add back
     {
         $options = array(
             'requestMethod' => 'get'

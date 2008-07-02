@@ -9,8 +9,6 @@ class Zend_Oauth_Http
 
     protected $_parameters = array();
 
-    protected $_excludeParamsFromHeader = true;
-
     protected $_consumer = null;
 
     protected $_preferredRequestScheme = null;
@@ -19,14 +17,14 @@ class Zend_Oauth_Http
 
     protected $_httpUtility = null;
 
-    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null, $excludeCustomParamsFromHeader = true, Zend_Oauth_Http_Utility $utility = null)
+    public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null,
+        Zend_Oauth_Http_Utility $utility = null)
     {
         $this->_consumer = $consumer;
         $this->_preferredRequestScheme = $this->_consumer->getRequestScheme();
         if (!is_null($parameters)) {
             $this->setParameters($parameters);
         }
-        $this->_excludeParamsFromHeaders = $excludeCustomParamsFromHeader;
         if (!is_null($utility)) {
             $this->_httpUtility = $utility;
         } else {
@@ -43,11 +41,14 @@ class Zend_Oauth_Http
         $this->_preferredRequestMethod = $method;
     }
 
-    public function setParameters(array $customServiceParameters,
-        $excludeCustomParamsFromHeader = true)
+    public function getMethod()
+    {
+        return $this->_preferredRequestMethod;
+    }
+
+    public function setParameters(array $customServiceParameters)
     {
         $this->_parameters = $customServiceParameters;
-        $this->_excludeParamsFromHeader = $excludeCustomParamsFromHeader;
     }
 
     public function getParameters()
@@ -119,10 +120,8 @@ class Zend_Oauth_Http
         $headerValue = array();
         $headerValue[] = 'OAuth realm="' . $realm . '"';
         foreach ($params as $key => $value) {
-            if ($this->_excludeParamsFromHeader) {
-                if (!preg_match("/^oauth_/", $key)) {
-                    continue; // e.g. Google; cannot include scope in Header
-                }
+            if (!preg_match("/^oauth_/", $key)) {
+                continue;
             }
             $headerValue[] =
                 Zend_Oauth_Http_Utility::urlEncode($key)

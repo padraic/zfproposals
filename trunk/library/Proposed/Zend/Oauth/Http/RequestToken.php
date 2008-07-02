@@ -41,15 +41,13 @@ class Zend_Oauth_Http_RequestToken extends Zend_Oauth_Http
     public function getRequestSchemeHeaderClient(array $params)
     {
         $headerValue = $this->_httpUtility->toAuthorizationHeader(
-            $params, null, $this->_excludeParamsFromHeader
+            $params
         );
         $client = Zend_Oauth::getHttpClient();
         $client->setUri($this->_consumer->getRequestTokenUrl());
         $client->setHeaders('Authorization', $headerValue);
-        if ($this->_excludeParamsFromHeader) {
-            $rawdata = $this->_httpUtility->toEncodedQueryString($params, true);
-            if (!empty($rawdata)) $client->setRawData($rawdata);
-        }
+        $rawdata = $this->_httpUtility->toEncodedQueryString($params, true);
+        if (!empty($rawdata)) $client->setRawData($rawdata);
         $client->setMethod($this->_preferredRequestMethod);
         return $client;
     }
