@@ -203,7 +203,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $consumer = new Zend_Oauth_Consumer($config);
         $rtoken = new Zend_Oauth_Token_Request;
         $rtoken->setToken('token');
-        $token = $consumer->getAccessToken(array('oauth_token'=>'token'), $rtoken, new Test_Http_AccessToken_48231);
+        $token = $consumer->getAccessToken(array('oauth_token'=>'token'), $rtoken, null, new Test_Http_AccessToken_48231);
         $this->assertType('Zend_Oauth_Token_Access', $token);
     }
 
