@@ -19,7 +19,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_version = '1.0';
 
-    protected $_localUrl = null;
+    protected $_callbackUrl = null;
 
     protected $_requestTokenUrl = null;
 
@@ -33,12 +33,17 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
 
     protected $_rsaPrivateKey = null;
 
-    protected $_excludeCustomParamsFromHeader = true;
+    protected $_requestMethod = self::POST;
 
     public function __construct(array $oauthOptions, $uri = null, $config = null, $excludeCustomParamsFromHeader = true)
     {
         parent::__construct($uri, $config);
-        $this->setOptions($oauthOptions);
+        if (!is_null($oauthOptions)) {
+            if ($oauthOptions instanceof Zend_Config) {
+                $oauthOptions = $oauthOptions->toArray();
+            }
+            $this->setOptions($options);
+        }
         $this->_excludeCustomParamsFromHeader = (bool) $excludeCustomParamsFromHeader;
     }
 
@@ -124,10 +129,16 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                     $this->setVersion($value);
                     break;
                 case 'localUrl':
-                    $this->setLocalUrl($value);
+                    $this->setCallbackUrl($value);
+                    break;
+                case 'callbackUrl':
+                    $this->setCallbackUrl($value);
                     break;
                 case 'requestTokenUrl':
                     $this->setRequestTokenUrl($value);
+                    break;
+                case 'requestMethod':
+                    $this->setRequestMethod($value);
                     break;
                 case 'accessTokenUrl':
                     $this->setAccessTokenUrl($value);
@@ -203,6 +214,13 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                 '\'' . $scheme . '\' is an unsupported request scheme'
             );
         }
+        if ($scheme == self::REQUEST_SCHEME_POSTBODY
+            && $this->getRequestMethod() == self::GET) {
+            require_once 'Zend/Oauth/Exception.php';
+            throw new Zend_Oauth_Exception(
+                'Cannot set POSTBODY request method if HTTP method set to GET'
+            );
+        }
         $this->_requestScheme = $scheme;
     }
 
@@ -226,7 +244,7 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
         return $this->_version;
     }
 
-    public function setLocalUrl($url)
+    public function setCallbackUrl($url)
     {
         if (!Zend_Uri::check($url)) {
             require_once 'Zend/Oauth/Exception.php';
@@ -234,12 +252,22 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
                 '\'' . $url . '\' is not a valid URI'
             );
         }
-        $this->_localUrl = $url;
+        $this->_callbackUrl = $url;
+    }
+
+    public function getCallbackUrl()
+    {
+        return $this->_callbackUrl;
+    }
+
+    public function setLocalUrl($url)
+    {
+        $this->setCallbackUrl($url);
     }
 
     public function getLocalUrl()
     {
-        return $this->_localUrl;
+        return $this->getCallbackUrl();
     }
 
     public function setRequestTokenUrl($url)
@@ -288,6 +316,20 @@ class Zend_Oauth_Client extends Zend_Http_Client implements Zend_Oauth_Config_In
     public function getUserAuthorisationUrl()
     {
         return $this->_userAuthorisationUrl;
+    }
+
+    public function setRequestMethod($method) 
+    {
+        if (!in_array($method, array(Zend_Oauth::GET, Zend_Oauth::POST))) {
+            require_once 'Zend/Oauth/Exception.php';
+            throw new Zend_Oauth_Exception('Invalid method: '.$method);
+        }
+        $this->_requestMethod = $method;
+    }
+
+    public function getRequestMethod() 
+    {
+        return $this->_requestMethod;
     }
 
     public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key)

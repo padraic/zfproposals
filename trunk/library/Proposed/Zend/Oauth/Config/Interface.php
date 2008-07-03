@@ -5,6 +5,8 @@ interface Zend_Oauth_Config_Interface
 
     public function setOptions(array $options);
 
+    public function getToken();
+
     public function setConsumerKey($key);
 
     public function getConsumerKey();
@@ -25,13 +27,17 @@ interface Zend_Oauth_Config_Interface
 
     public function getVersion();
 
-    public function setLocalUrl($url);
+    public function setCallbackUrl($url);
 
-    public function getLocalUrl();
+    public function getCallbackUrl();
 
     public function setRequestTokenUrl($url);
 
     public function getRequestTokenUrl();
+
+    public function setRequestMethod($method);
+
+    public function getRequestMethod();
 
     public function setAccessTokenUrl($url);
 
