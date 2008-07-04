@@ -4,7 +4,7 @@ require_once 'Zend/Oauth.php';
 
 require_once 'Zend/Uri.php';
 
-require_once 'Zend/Oauth/Config/Interface.php';
+require_once 'Zend/Oauth/Config.php';
 
 class Zend_Oauth_Server extends Zend_Oauth implements Zend_Oauth_Config_Interface
 {
@@ -20,6 +20,34 @@ class Zend_Oauth_Server extends Zend_Oauth implements Zend_Oauth_Config_Interfac
             }
             $this->_config->setOptions($options);
         }
+    }
+
+    public function createRequestToken()
+    {
+        if (strtoupper($_SERVER['REQUEST_METHOD']) == Zend_Oauth::POST) {
+            
+        } elseif (strtoupper($_SERVER['REQUEST_METHOD']) == Zend_Oauth::GET) {
+
+        }
+        require_once 'Zend/Oauth/Exception.php';
+        throw new Zend_Oauth_Exception('Unsupported method: '
+        . strtoupper($_SERVER['REQUEST_METHOD']));
+    }
+
+    public function createAccessToken() 
+    {
+    }
+
+    public function getRedirectUrl() 
+    {
+    }
+
+    public function redirect() 
+    {
+    }
+
+    public function isAuthorised() 
+    {
     }
 
     public function __call($method, $args) 
