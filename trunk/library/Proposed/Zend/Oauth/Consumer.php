@@ -12,92 +12,30 @@ require_once 'Zend/Oauth/Http/AccessToken.php';
 
 require_once 'Zend/Oauth/Token/AuthorisedRequest.php';
 
-require_once 'Zend/Oauth/Config/Interface.php';
+require_once 'Zend/Oauth/Config.php';
 
-class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interface
+class Zend_Oauth_Consumer extends Zend_Oauth
 {
-
-    protected $_signatureMethod = 'HMAC-SHA1';
-
-    protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
-
-    protected $_version = '1.0';
-
-    protected $_callbackUrl = null;
-
-    protected $_requestTokenUrl = null;
-
-    protected $_accessTokenUrl = null;
-
-    protected $_userAuthorisationUrl = null;
-
-    protected $_consumerKey = null;
-
-    protected $_consumerSecret = null;
-
-    protected $_rsaPrivateKey = null;
 
     protected $_requestToken = null;
 
     protected $_accessToken = null;
 
-    protected $_requestMethod = Zend_Oauth::POST;
+    protected $_config = null;
 
     public function __construct($options = null)
     {
+        $this->_config = new Zend_Oauth_Config;
         if (!is_null($options)) {
             if ($options instanceof Zend_Config) {
                 $options = $options->toArray();
             }
-            $this->setOptions($options);
+            $this->_config->setOptions($options);
         }
     }
 
-    public function setOptions(array $options)
-    {
-        foreach ($options as $key=>$value) {
-            switch ($key) {
-                case 'consumerKey':
-                    $this->setConsumerKey($value);
-                    break;
-                case 'consumerSecret':
-                    $this->setConsumerSecret($value);
-                    break;
-                case 'signatureMethod':
-                    $this->setSignatureMethod($value);
-                    break;
-                case 'version':
-                    $this->setVersion($value);
-                    break;
-                case 'localUrl':
-                    $this->setCallbackUrl($value);
-                    break;
-                case 'callbackUrl':
-                    $this->setCallbackUrl($value);
-                    break;
-                case 'requestTokenUrl':
-                    $this->setRequestTokenUrl($value);
-                    break;
-                case 'accessTokenUrl':
-                    $this->setAccessTokenUrl($value);
-                    break;
-                case 'userAuthorisationUrl':
-                    $this->setUserAuthorisationUrl($value);
-                    break;
-                case 'requestMethod':
-                    $this->setRequestMethod($value);
-                    break;
-                case 'rsaPrivateKey':
-                    $this->setRsaPrivateKey($value);
-                    break;
-            }
-        }
-        if (isset($options['requestScheme'])) {
-            $this->setRequestScheme($options['requestScheme']);
-        }
-    }
-
-    public function getRequestToken(array $customServiceParameters = null, $httpMethod = null,
+    public function getRequestToken(array $customServiceParameters = null,
+        $httpMethod = null,
         Zend_Oauth_Http_RequestToken $request = null)
     {
         if (is_null($request)) {
@@ -157,10 +95,11 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
             if ($authorisedToken->getToken() !== $token->getToken()) {
                 require_once 'Zend/Oauth/Exception.php';
                 throw new Zend_Oauth_Exception(
-                    'Authorised token from Service Provider does not match supplied Request Token details');
+                    'Authorised token from Service Provider does not match
+                    supplied Request Token details'
+                );
             }
         } else {
-            // retrieve token from storage solution !!TBI!!
             require_once 'Zend/Oauth/Exception.php';
             throw new Zend_Oauth_Exception('Request token must be passed to method');
         }
@@ -184,173 +123,13 @@ class Zend_Oauth_Consumer extends Zend_Oauth implements Zend_Oauth_Config_Interf
         return $this->_accessToken;
     }
 
-    public function setConsumerKey($key)
+    public function __call($method, array $args) 
     {
-        $this->_consumerKey = $key;
-    }
-
-    public function getConsumerKey()
-    {
-        return $this->_consumerKey;
-    }
-
-    public function setConsumerSecret($secret)
-    {
-        $this->_consumerSecret = $secret;
-    }
-
-    public function getConsumerSecret()
-    {
-        if (!is_null($this->_rsaPrivateKey)) {
-            return $this->_rsaPrivateKey;
+        if (method_exists($this->_config, $method)) {
+            return call_user_func_array(array($this->_config,$method), $args);
         }
-        return $this->_consumerSecret;
-    }
-
-    public function setSignatureMethod($method)
-    {
-        $this->_signatureMethod = strtoupper($method);
-    }
-
-    public function getSignatureMethod()
-    {
-        return $this->_signatureMethod;
-    }
-
-    public function setRequestScheme($scheme)
-    {
-        $scheme = strtolower($scheme);
-        if (!in_array($scheme, array(
-                self::REQUEST_SCHEME_HEADER,
-                self::REQUEST_SCHEME_POSTBODY,
-                self::REQUEST_SCHEME_QUERYSTRING
-            ))) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                '\'' . $scheme . '\' is an unsupported request scheme'
-            );
-        }
-        if ($scheme == self::REQUEST_SCHEME_POSTBODY
-            && $this->getRequestMethod() == Zend_Oauth::GET) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                'Cannot set POSTBODY request method if HTTP method set to GET'
-            );
-        }
-        $this->_requestScheme = $scheme;
-    }
-
-    public function getRequestScheme()
-    {
-        return $this->_requestScheme;
-    }
-
-    public function setVersion($version)
-    {
-        $this->_version = $version;
-    }
-
-    public function getVersion()
-    {
-        return $this->_version;
-    }
-
-    public function setCallbackUrl($url)
-    {
-        if (!Zend_Uri::check($url)) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                '\'' . $url . '\' is not a valid URI'
-            );
-        }
-        $this->_callbackUrl = $url;
-    }
-
-    public function getCallbackUrl()
-    {
-        return $this->_callbackUrl;
-    }
-
-    public function setLocalUrl($url)
-    {
-        $this->setCallbackUrl($url);
-    }
-
-    public function getLocalUrl()
-    {
-        return $this->getCallbackUrl();
-    }
-
-    public function setRequestTokenUrl($url)
-    {
-        if (!Zend_Uri::check($url)) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                '\'' . $url . '\' is not a valid URI'
-            );
-        }
-        $this->_requestTokenUrl = $url;
-    }
-
-    public function getRequestTokenUrl()
-    {
-        return $this->_requestTokenUrl;
-    }
-
-    public function setAccessTokenUrl($url)
-    {
-        if (!Zend_Uri::check($url)) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                '\'' . $url . '\' is not a valid URI'
-            );
-        }
-        $this->_accessTokenUrl = $url;
-    }
-
-    public function getAccessTokenUrl()
-    {
-        return $this->_accessTokenUrl;
-    }
-
-    public function setUserAuthorisationUrl($url)
-    {
-        if (!Zend_Uri::check($url)) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception(
-                '\'' . $url . '\' is not a valid URI'
-            );
-        }
-        $this->_userAuthorisationUrl = $url;
-    }
-
-    public function getUserAuthorisationUrl()
-    {
-        return $this->_userAuthorisationUrl;
-    }
-
-    public function setRequestMethod($method) 
-    {
-        if (!in_array($method, array(Zend_Oauth::GET, Zend_Oauth::POST))) {
-            require_once 'Zend/Oauth/Exception.php';
-            throw new Zend_Oauth_Exception('Invalid method: '.$method);
-        }
-        $this->_requestMethod = $method;
-    }
-
-    public function getRequestMethod() 
-    {
-        return $this->_requestMethod;
-    }
-
-    public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key)
-    {
-        $this->_rsaPrivateKey = $key;
-    }
-
-    public function getRsaPrivateKey()
-    {
-        return $this->_rsaPrivateKey;
+        require_once 'Zend/Oauth/Exception.php';
+        throw new Zend_Oauth_Exception('Method does not exist: '.$method);
     }
 
 }

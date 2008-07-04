@@ -48,7 +48,6 @@ class Zend_Oauth_Http_UserAuthorisationTest extends PHPUnit_Framework_TestCase
 
 class Test_Consumer_34879 extends Zend_Oauth_Consumer
 {
-    public function __construct(){}
     public function getUserAuthorisationUrl(){return 'http://www.example.com/authorise';}
     public function getLocalUrl(){return 'http://www.example.com/local';}
     public function getLastRequestToken(){$r=new Test_Token_34879;return $r;}

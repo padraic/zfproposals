@@ -2,7 +2,7 @@
 
 require_once 'PHPUnit/Framework/TestCase.php';
 require_once 'Zend/Oauth/Token/Access.php';
-require_once 'Zend/Oauth/Config/Interface.php';
+require_once 'Zend/Oauth/Config.php';
 
 class Zend_Oauth_Token_AccessTest extends PHPUnit_Framework_TestCase
 {
@@ -96,34 +96,15 @@ class Test_Http_Utility_90244 extends Zend_Oauth_Http_Utility
     }
 }
 
-class Test_Config_90244 implements Zend_Oauth_Config_Interface
+class Test_Config_90244 extends Zend_Oauth_Config
 {
     public function getConsumerKey(){return '1234567890';}
     public function getSignatureMethod(){return 'HMAC-SHA1';}
     public function getVersion(){return '1.0';}
     public function getRequestTokenUrl(){return 'http://www.example.com/request';}
-    public function getToken(){
-        $token = new Zend_Oauth_Token_Access;
+    public function getToken(){$token = new Zend_Oauth_Token_Access;
         $token->setToken('abcde');
-        return $token;
-    }
+        return $token;}
     public function getRequestMethod() 
-    {
-        return 'POST';
-    }
-    public function setOptions(array $options){}
-    public function setConsumerKey($key){}
-    public function setConsumerSecret($secret){}
-    public function getConsumerSecret(){}
-    public function setSignatureMethod($method){}
-    public function setRequestScheme($scheme){}
-    public function getRequestScheme(){}
-    public function setVersion($version){}
-    public function setLocalUrl($url){}
-    public function getLocalUrl(){}
-    public function setRequestTokenUrl($url){}
-    public function setAccessTokenUrl($url){}
-    public function getAccessTokenUrl(){}
-    public function setUserAuthorisationUrl($url){}
-    public function getUserAuthorisationUrl(){}
+    {return 'POST';}
 }

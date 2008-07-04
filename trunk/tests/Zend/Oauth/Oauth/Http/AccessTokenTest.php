@@ -140,7 +140,6 @@ class Zend_Oauth_Http_AccessTokenTest extends PHPUnit_Framework_TestCase
 
 class Test_Consumer_39745 extends Zend_Oauth_Consumer
 {
-    public function __construct(){}
     public function getConsumerKey(){return '1234567890';}
     public function getSignatureMethod(){return 'HMAC-SHA1';}
     public function getVersion(){return '1.0';}

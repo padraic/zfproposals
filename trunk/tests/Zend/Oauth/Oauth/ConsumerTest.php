@@ -97,7 +97,7 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://www.example.com/access', $consumer->getAccessTokenUrl());
     }
 
-    public function testSetSignatureMethodThrowsExceptionForInvalidMethod()
+    /*public function testSetSignatureMethodThrowsExceptionForInvalidMethod()
     {
         $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
         $consumer = new Zend_Oauth_Consumer($config);
@@ -106,17 +106,18 @@ class Zend_Oauth_ConsumerTest extends PHPUnit_Framework_TestCase
             $this->fail('Invalid signature method accepted by setSignatureMethod');
         } catch (Zend_Oauth_Exception $e) {
         }
-    }
+    }*/
 
-    /*public function testSetRequestMethodThrowsExceptionForInvalidMethod()
+    public function testSetRequestMethodThrowsExceptionForInvalidMethod()
     {
-        $consumer = new Zend_Oauth_Consumer('12345', '54321');
+        $config = array('consumerKey'=>'12345','consumerSecret'=>'54321');
+        $consumer = new Zend_Oauth_Consumer($config);
         try {
             $consumer->setRequestMethod('buckyball');
             $this->fail('Invalid request method accepted by setRequestMethod');
         } catch (Zend_Oauth_Exception $e) {
         }
-    }*/
+    }
 
     public function testSetRequestSchemeThrowsExceptionForInvalidMethod()
     {
