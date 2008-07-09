@@ -49,8 +49,6 @@ class AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework');
 
-        // $suite->addTestSuite('ZendTest');
-
         $suite->addTest(Zend_AllTests::suite());
 
         return $suite;
