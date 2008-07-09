@@ -271,6 +271,11 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         return $this->_rsaPrivateKey;
     }
 
+    public function setToken(Zend_Oauth_Token $token) 
+    {
+        $this->_token = $token;
+    }
+
     public function getToken() 
     {
         return $this->_token;
