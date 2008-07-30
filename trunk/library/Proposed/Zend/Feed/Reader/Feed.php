@@ -6,6 +6,7 @@ require_once 'Zend/Feed/Reader.php';
  * Interpretive class for Zend_Feed which interprets incoming
  * Zend_Feed_Abstract objects and presents a common unified API for all RSS
  * and Atom versions.
+ * Or will...when it's been completed ;).
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
@@ -57,7 +58,7 @@ class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
     public static function detectType(Zend_Feed_Abstract $feed)
     {
         $xpath = new DOMXPath($feed->getDOM()->ownerDocument);
-        if ($xpath->query('/rss')->length > 0) {
+        if ($xpath->query('/rss')->length) {
             $type = self::TYPE_RSS_ANY;
             $version = $xpath->evaluate('string(/rss/@version)');
             if (strlen($version) > 0) {
@@ -82,29 +83,29 @@ class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
             return $type;
         }
         $xpath->registerNamespace('rdf', self::NAMESPACE_RDF);
-        if ($xpath->query('/rdf:RDF')->length > 0) {
+        if ($xpath->query('/rdf:RDF')->length) {
             $xpath->registerNamespace('rss', self::NAMESPACE_RSS_10);
-            if ($xpath->query('/rdf:RDF/rss:channel')->length > 0
-                || $xpath->query('/rdf:RDF/rss:image')->length > 0
-                || $xpath->query('/rdf:RDF/rss:item')->length > 0
-                || $xpath->query('/rdf:RDF/rss:textinput')->length > 0) {
+            if ($xpath->query('/rdf:RDF/rss:channel')->length
+                || $xpath->query('/rdf:RDF/rss:image')->length
+                || $xpath->query('/rdf:RDF/rss:item')->length
+                || $xpath->query('/rdf:RDF/rss:textinput')->length) {
                 return self::TYPE_RSS_10;
             }
             $xpath->registerNamespace('rss', self::NAMESPACE_RSS_090);
-            if ($xpath->query('/rdf:RDF/rss:channel')->length > 0
-                || $xpath->query('/rdf:RDF/rss:image')->length > 0
-                || $xpath->query('/rdf:RDF/rss:item')->length > 0
-                || $xpath->query('/rdf:RDF/rss:textinput')->length > 0) {
+            if ($xpath->query('/rdf:RDF/rss:channel')->length
+                || $xpath->query('/rdf:RDF/rss:image')->length
+                || $xpath->query('/rdf:RDF/rss:item')->length
+                || $xpath->query('/rdf:RDF/rss:textinput')->length) {
                 return self::TYPE_RSS_090;
             }
         }
         $type = self::TYPE_ATOM_ANY;
         $xpath->registerNamespace('atom', self::NAMESPACE_ATOM_10);
-        if ($xpath->query('//atom:feed')->length > 0) {
+        if ($xpath->query('//atom:feed')->length) {
             return self::TYPE_ATOM_10;
         }
         $xpath->registerNamespace('atom', self::NAMESPACE_ATOM_03);
-        if ($xpath->query('//atom:feed')->length > 0) {
+        if ($xpath->query('//atom:feed')->length) {
             return self::TYPE_ATOM_03;
         }
         return self::TYPE_ANY;
@@ -123,7 +124,7 @@ class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
     public function current() 
     {
         $item = $this->_feed->current();
-        // get entry reader
+        // get entry reader when ready
         return $entry;
     }
 
