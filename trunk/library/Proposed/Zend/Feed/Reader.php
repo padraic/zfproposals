@@ -38,22 +38,22 @@ class Zend_Feed_Reader
     const NAMESPACE_ATOM_03 = 'http://purl.org/atom/ns#';
     const NAMESPACE_ATOM_10 = 'http://www.w3.org/2005/Atom';
 
-    public static function import($url) 
+    public static function import($url)
     {
         $feed = Zend_Feed::import($url);
         return self::importFeed($feed);
     }
 
-    public static function importString($string) 
+    public static function importString($string)
     {
         $feed = Zend_Feed::importString($string);
         return self::importFeed($feed);
     }
 
-    public static function importFeed(Zend_Feed_Abstract $feed) 
+    public static function importFeed(Zend_Feed_Abstract $feed)
     {
         $type = self::detectType($feed);
-        if (substr($feed, 3) == 'rss') {
+        if (substr($type, 0, 3) == 'rss') {
             require_once 'Zend/Feed/Reader/Feed/Rss.php';
             $reader = new Zend_Feed_Reader_Feed_Rss($feed, $type);
         } else {

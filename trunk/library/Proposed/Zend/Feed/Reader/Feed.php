@@ -19,51 +19,55 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
 
     protected $_domDocument = null;
 
-    public function __construct(Zend_Feed_Abstract $feed, $type = null) 
+    protected $_xpath = null;
+
+    public function __construct(Zend_Feed_Abstract $feed, $type = null)
     {
         $this->_feed = $feed;
         $this->_domDocument = $feed->getDOM()->ownerDocument;
+        $this->_xpath = new DOMXPath($this->_domDocument);
         if (!is_null($type)) {
             $this->_data['type'] = $type;
         } else {
             $this->_data['type'] = self::detectType($feed);
         }
+        $this->_registerDefaultNamespaces();
     }
 
-    public function getType() 
+    public function getType()
     {
-        if (isset($this->_data['type'])) {
-            return $this->_data['type'];
-        }
+        return $this->_data['type'];
     }
 
-    public function count() 
+    public function count()
     {
         return $this->_feed->count();
     }
 
-    public function rewind() 
+    public function rewind()
     {
         $this->_feed->rewind();
     }
 
-    public function current() 
+    public function current()
     {
         $item = $this->_feed->current();
         // get entry reader when ready
         return $entry;
     }
 
-    public function key() 
+    public function key()
     {
         return $this->_feed->key();
     }
 
-    public function next() 
+    public function next()
     {
         $this->_feed->next();
     }
 
-    abstract function getContent();
+    abstract public function getContent();
+
+    abstract protected function _registerDefaultNamespaces();
 
 }
