@@ -10,7 +10,7 @@ require_once 'Zend/Feed/Reader.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
+abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
 {
 
     protected $_feed = null;
@@ -63,5 +63,7 @@ class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
     {
         $this->_feed->next();
     }
+
+    abstract function getContent();
 
 }
