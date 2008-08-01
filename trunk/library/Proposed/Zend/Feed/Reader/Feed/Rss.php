@@ -12,7 +12,7 @@ require_once 'Zend/Feed/Reader/Feed.php';
 class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
 {
 
-    public function getAuthors() 
+    public function getAuthors()
     {
         if (isset($this->_data['authors'])) {
             return $this->_data['authors'];
@@ -39,13 +39,13 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         return $this->_data['authors'];
     }
 
-    public function getAuthor() 
+    public function getAuthor()
     {
         $authors = $this->getAuthors();
         return $authors[0];
     }
 
-    public function getCopyright() 
+    public function getCopyright()
     {
         if (isset($this->_data['copyright'])) {
             return $this->_data['copyright'];
@@ -70,6 +70,36 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         }
         $this->_data['copyright'] = $copyright;
         return $this->_data['copyright'];
+    }
+
+    public function getDescription()
+    {
+        if (isset($this->_data['description'])) {
+            return $this->_data['description'];
+        }
+        $description = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $description = $this->_xpath->evaluate('string(/rss/channel/description)');
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string(/rss/channel/dc11:description)');
+            }
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string(/rss/channel/dc10:description)');
+            }
+        } else {
+            $description = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/rss:description)');
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc11:description)');
+            }
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc10:description)');
+            }
+        }
+        if (!$description) {
+            $description = null;
+        }
+        $this->_data['description'] = $description;
+        return $this->_data['description'];
     }
 
     public function getTitle()

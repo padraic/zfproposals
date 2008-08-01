@@ -945,4 +945,242 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $feed->getCopyright());
     }
 
+
+
+
+
+
+    /**
+     * Get Description (Unencoded Text)
+     */
+    public function testGetsDescriptionFromRss20()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss20.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss094()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss094.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss093()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss093.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss092()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss092.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss091()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss091.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss10.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss090()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/rss090.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    // DC 1.0
+
+    public function testGetsDescriptionFromRss20_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss20.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss094_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss094.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss093_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss093.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss092_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss092.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss091_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss091.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss10_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss10.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss090_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc10/rss090.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    // DC 1.1
+
+    public function testGetsDescriptionFromRss20_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss20.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss094_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss094.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss093_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss093.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss092_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss092.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss091_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss091.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss10_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss10.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss090_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/dc11/rss090.xml')
+        );
+        $this->assertEquals('My Description', $feed->getDescription());
+    }
+
+    // Missing Description
+
+    public function testGetsDescriptionFromRss20_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss20.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss094_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss094.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss093_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss093.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss092_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss092.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss091_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss091.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss10_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
+    public function testGetsDescriptionFromRss090_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/description/plain/none/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getDescription());
+    }
+
 }
