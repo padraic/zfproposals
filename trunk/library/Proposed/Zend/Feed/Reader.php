@@ -38,6 +38,9 @@ class Zend_Feed_Reader
     const NAMESPACE_ATOM_03 = 'http://purl.org/atom/ns#';
     const NAMESPACE_ATOM_10 = 'http://www.w3.org/2005/Atom';
 
+    const NAMESPACE_DC_10 = 'http://purl.org/dc/elements/1.0/';
+    const NAMESPACE_DC_11 = 'http://purl.org/dc/elements/1.1/';
+
     public static function import($url)
     {
         $feed = Zend_Feed::import($url);
