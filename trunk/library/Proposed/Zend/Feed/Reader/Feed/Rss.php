@@ -102,6 +102,38 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         return $this->_data['description'];
     }
 
+    public function getLanguage()
+    {
+        if (isset($this->_data['language'])) {
+            return $this->_data['language'];
+        }
+        $language = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $language = $this->_xpath->evaluate('string(/rss/channel/language)');
+            if (!$language) {
+                $language = $this->_xpath->evaluate('string(/rss/channel/dc11:language)');
+            }
+            if (!$language) {
+                $language = $this->_xpath->evaluate('string(/rss/channel/dc10:language)');
+            }
+        } else {
+            if (!$language) {
+                $language = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc11:language)');
+            }
+            if (!$language) {
+                $language = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc10:language)');
+            }
+            if (!$language) {
+                $language = $this->_xpath->evaluate('string(//@xml:lang[1])');
+            }
+        }
+        if (!$language) {
+            $language = null;
+        }
+        $this->_data['language'] = $language;
+        return $this->_data['language'];
+    }
+
     public function getTitle()
     {
         if (isset($this->_data['title'])) {

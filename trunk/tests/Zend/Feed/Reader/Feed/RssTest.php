@@ -945,11 +945,6 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $feed->getCopyright());
     }
 
-
-
-
-
-
     /**
      * Get Description (Unencoded Text)
      */
@@ -1181,6 +1176,260 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
             file_get_contents($this->_feedSamplePath.'/description/plain/none/rss090.xml')
         );
         $this->assertEquals(null, $feed->getDescription());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Get Language (Unencoded Text)
+     */
+    public function testGetsLanguageFromRss20()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss20.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss094()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss094.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss093()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss093.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss092()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss092.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss091()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss091.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss090()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    // DC 1.0
+
+    public function testGetsLanguageFromRss20_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss20.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss094_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss094.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss093_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss093.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss092_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss092.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss091_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss091.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss10_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss10.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss090_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc10/rss090.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    // DC 1.1
+
+    public function testGetsLanguageFromRss20_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss20.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss094_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss094.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss093_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss093.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss092_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss092.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss091_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss091.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss10_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss10.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss090_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/dc11/rss090.xml')
+        );
+        $this->assertEquals('en-GB', $feed->getLanguage());
+    }
+
+    // Other
+
+    public function testGetsLanguageFromRss10_XmlLang()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/rdf/rss10.xml')
+        );
+        $this->assertEquals('en', $feed->getLanguage());
+    }
+
+    // Missing Language
+
+    public function testGetsLanguageFromRss20_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss20.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss094_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss094.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss093_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss093.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss092_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss092.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss091_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss091.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss10_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
+    }
+
+    public function testGetsLanguageFromRss090_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/language/plain/none/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getLanguage());
     }
 
 }
