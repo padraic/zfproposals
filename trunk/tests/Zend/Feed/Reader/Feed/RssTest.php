@@ -480,7 +480,7 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Get Title (Unencoded Text)
+     * Get Single Author (Unencoded Text)
      */
     public function testGetsSingleAuthorFromRss20()
     {
@@ -710,6 +710,239 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
             file_get_contents($this->_feedSamplePath.'/author/plain/none/rss090.xml')
         );
         $this->assertEquals(null, $feed->getAuthor());
+    }
+
+    /**
+     * Get Copyright (Unencoded Text)
+     */
+    public function testGetsCopyrightFromRss20()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss20.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss094()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss094.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss093()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss093.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss092()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss092.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss091()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss091.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss090()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    // DC 1.0
+
+    public function testGetsCopyrightFromRss20_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss20.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss094_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss094.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss093_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss093.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss092_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss092.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss091_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss091.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss10_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss10.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss090_Dc10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc10/rss090.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    // DC 1.1
+
+    public function testGetsCopyrightFromRss20_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss20.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss094_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss094.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss093_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss093.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss092_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss092.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss091_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss091.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss10_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss10.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss090_Dc11()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/dc11/rss090.xml')
+        );
+        $this->assertEquals('Copyright 2008', $feed->getCopyright());
+    }
+
+    // Missing Copyright
+
+    public function testGetsCopyrightFromRss20_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss20.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss094_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss094.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss093_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss093.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss092_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss092.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss091_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss091.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss10_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
+    }
+
+    public function testGetsCopyrightFromRss090_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/copyright/plain/none/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getCopyright());
     }
 
 }
