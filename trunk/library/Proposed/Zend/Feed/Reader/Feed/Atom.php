@@ -12,11 +12,11 @@ require_once 'Zend/Feed/Reader/Feed.php';
 class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
 {
 
-    public function getContent()
+    public function getTitle()
     {
     }
 
-    public function getTitle()
+    protected function _registerDefaultNamespaces()
     {
     }
 

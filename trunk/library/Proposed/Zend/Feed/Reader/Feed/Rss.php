@@ -12,10 +12,6 @@ require_once 'Zend/Feed/Reader/Feed.php';
 class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
 {
 
-    public function getContent()
-    {
-    }
-
     public function getTitle()
     {
         if (isset($this->_data['title'])) {
@@ -43,6 +39,39 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         }
         $this->_data['title'] = $title;
         return $this->_data['title'];
+    }
+
+    public function getAuthors() 
+    {
+        if (isset($this->_data['authors'])) {
+            return $this->_data['authors'];
+        }
+        $authors = array();
+        $list = $this->_xpath->query('//dc11:creator');
+        if (!$list->length) {
+            $list = $this->_xpath->query('//dc10:creator');
+        }
+        if (!$list->length) {
+            if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+                $list = $this->_xpath->query('//author');
+            } else {
+                $list = $this->_xpath->query('//rss:author');
+            }
+        }
+        foreach ($list as $authorObj) {
+            $authors[] = $authorObj->nodeValue;
+        }
+        if (empty($authors)) {
+            $authors = null;
+        }
+        $this->_data['authors'] = $authors;
+        return $this->_data['authors'];
+    }
+
+    public function getAuthor() 
+    {
+        $authors = $this->getAuthors();
+        return $authors[0];
     }
 
     protected function _registerDefaultNamespaces()

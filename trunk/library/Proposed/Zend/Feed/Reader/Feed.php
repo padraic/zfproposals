@@ -66,7 +66,7 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
         $this->_feed->next();
     }
 
-    abstract public function getContent();
+    abstract public function getTitle();
 
     abstract protected function _registerDefaultNamespaces();
 
