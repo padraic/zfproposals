@@ -1178,17 +1178,6 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $feed->getDescription());
     }
 
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Get Language (Unencoded Text)
      */
@@ -1431,5 +1420,133 @@ class Zend_Feed_Reader_Feed_RssTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(null, $feed->getLanguage());
     }
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Get Link (Unencoded Text)
+     */
+    public function testGetsLinkFromRss20()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss20.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss094()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss094.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss093()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss093.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss092()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss092.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss091()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss091.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss10.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss090()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss090.xml')
+        );
+        $this->assertEquals('http://www.example.com', $feed->getLink());
+    }
+
+    // Missing Link
+
+    public function testGetsLinkFromRss20_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss20.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss094_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss094.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss093_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss093.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss092_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss092.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss091_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss091.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss10_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss10.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
+    public function testGetsLinkFromRss090_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss090.xml')
+        );
+        $this->assertEquals(null, $feed->getLink());
+    }
+
 
 }

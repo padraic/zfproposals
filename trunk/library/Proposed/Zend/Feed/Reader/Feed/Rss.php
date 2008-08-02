@@ -134,11 +134,30 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         return $this->_data['language'];
     }
 
+    public function getLink()
+    {
+        if (isset($this->_data['link'])) {
+            return $this->_data['link'];
+        }
+        $link = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $link = $this->_xpath->evaluate('string(/rss/channel/link)');
+        } else {
+            $link = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/rss:link)');
+        }
+        if (!$link) {
+            $link = null;
+        }
+        $this->_data['link'] = $link;
+        return $this->_data['link'];
+    }
+
     public function getTitle()
     {
         if (isset($this->_data['title'])) {
             return $this->_data['title'];
         }
+        $title = null;
         if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
             $title = $this->_xpath->evaluate('string(/rss/channel/title)');
             if (!$title) {
