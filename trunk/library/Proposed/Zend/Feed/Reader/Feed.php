@@ -58,11 +58,12 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
     {
         if (substr($this->getType(), 0, 3) == 'rss') {
             require_once 'Zend/Feed/Reader/Entry/Rss.php';
-            $reader = new Zend_Feed_Reader_Entry_Rss($this->_feed->current(), $this->feed->key());
+            $reader = new Zend_Feed_Reader_Entry_Rss($this->_feed->current(), $this->_feed->key(), $this->getType());
         } else {
             require_once 'Zend/Feed/Reader/Entry/Atom.php';
-            $reader = new Zend_Feed_Reader_Entry_Atom($this->_feed->current(), $this->feed->key());
+            $reader = new Zend_Feed_Reader_Entry_Atom($this->_feed->current(), $this->_feed->key(), $this->getType());
         }
+        $reader->setXpath($this->_xpath);
         return $reader;
     }
 

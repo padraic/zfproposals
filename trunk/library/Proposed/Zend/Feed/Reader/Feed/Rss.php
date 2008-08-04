@@ -209,7 +209,6 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         foreach($entries as $index=>$entry) {
             $this->_entries[$index] = $entry;
         }
-        var_dump($this->_entries);
     }
 
 }
