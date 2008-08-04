@@ -21,6 +21,10 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
 
     protected $_xpath = null;
 
+    protected $_entries = array();
+
+    protected $_entriesKey = 0;
+
     public function __construct(Zend_Feed_Abstract $feed, $type = null)
     {
         $this->_feed = $feed;
@@ -32,6 +36,7 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
             $this->_data['type'] = self::detectType($feed);
         }
         $this->_registerDefaultNamespaces();
+        $this->_indexEntries();
     }
 
     public function getType()
@@ -51,9 +56,14 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
 
     public function current()
     {
-        $item = $this->_feed->current();
-        // get entry reader when ready
-        return $entry;
+        if (substr($this->getType(), 0, 3) == 'rss') {
+            require_once 'Zend/Feed/Reader/Entry/Rss.php';
+            $reader = new Zend_Feed_Reader_Entry_Rss($this->_feed->current(), $this->feed->key());
+        } else {
+            require_once 'Zend/Feed/Reader/Entry/Atom.php';
+            $reader = new Zend_Feed_Reader_Entry_Atom($this->_feed->current(), $this->feed->key());
+        }
+        return $reader;
     }
 
     public function key()
@@ -66,7 +76,12 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
         $this->_feed->next();
     }
 
-    abstract public function getTitle();
+    public function toArray() // untested
+    {
+        return $this->_data;
+    }
+
+    abstract public function getTitle(); // add the rest once known so there's a clearly defined interface
 
     abstract protected function _registerDefaultNamespaces();
 

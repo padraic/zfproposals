@@ -40,6 +40,9 @@ class Zend_Feed_Reader
 
     const NAMESPACE_DC_10 = 'http://purl.org/dc/elements/1.0/';
     const NAMESPACE_DC_11 = 'http://purl.org/dc/elements/1.1/';
+    const NAMESPACE_GEO_POSITIONING = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+    const NAMESPACE_YAHOO_WEATHER = 'http://xml.weather.yahoo.com/ns/rss/1.0';
+    const NAMESPACE_APPLE_ITUNES = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
 
     public static function import($url)
     {

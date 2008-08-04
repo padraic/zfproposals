@@ -35,7 +35,7 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         if (empty($authors)) {
             $authors = null;
         }
-        $this->_data['authors'] = $authors;
+        $this->_data['authors'] = array_unique($authors);
         return $this->_data['authors'];
     }
 
@@ -196,6 +196,20 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         }
         $this->_xpath->registerNamespace('dc10', Zend_Feed_Reader::NAMESPACE_DC_10);
         $this->_xpath->registerNamespace('dc11', Zend_Feed_Reader::NAMESPACE_DC_11);
+    }
+
+    protected function _indexEntries()
+    {
+        $entries = array();
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $entries = $this->_xpath->evaluate('//item');
+        } else {
+            $entries = $this->_xpath->evaluate('//rss:item');
+        }
+        foreach($entries as $index=>$entry) {
+            $this->_entries[$index] = $entry;
+        }
+        var_dump($this->_entries);
     }
 
 }
