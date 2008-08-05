@@ -33,16 +33,18 @@ class Zend_Feed_Reader
 
     const NAMESPACE_RSS_090 = 'http://my.netscape.com/rdf/simple/0.9/';
     const NAMESPACE_RSS_10 = 'http://purl.org/rss/1.0/';
-    const NAMESPACE_RSS_20 = ''; // RSS 2.0 has no default namespace
     const NAMESPACE_RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
     const NAMESPACE_ATOM_03 = 'http://purl.org/atom/ns#';
     const NAMESPACE_ATOM_10 = 'http://www.w3.org/2005/Atom';
 
     const NAMESPACE_DC_10 = 'http://purl.org/dc/elements/1.0/';
     const NAMESPACE_DC_11 = 'http://purl.org/dc/elements/1.1/';
-    const NAMESPACE_GEO_POSITIONING = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
-    const NAMESPACE_YAHOO_WEATHER = 'http://xml.weather.yahoo.com/ns/rss/1.0';
-    const NAMESPACE_APPLE_ITUNES = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
+    const NAMESPACE_CONTENT_10 = 'http://purl.org/rss/1.0/modules/content/';
+    const NAMESPACE_SLASH_10 = 'http://purl.org/rss/1.0/modules/slash/';
+    const NAMESPACE_WFWCOMMENTAPI = 'http://wellformedweb.org/CommentAPI/';
+    const NAMESPACE_GEO = 'http://www.w3.org/2003/01/geo/wgs84_pos#';
+    const NAMESPACE_YAHOOWEATHER_10 = 'http://xml.weather.yahoo.com/ns/rss/1.0';
+    const NAMESPACE_ITUNES_10 = 'http://www.itunes.com/dtds/podcast-1.0.dtd';
 
     public static function import($url)
     {

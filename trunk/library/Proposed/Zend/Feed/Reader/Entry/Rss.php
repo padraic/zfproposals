@@ -86,6 +86,54 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         return null;
     }
 
+    public function getContent() 
+    {
+        if (isset($this->_data['content'])) {
+            return $this->_data['content'];
+        }
+        $content = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $content = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/content:encoded)');
+        } else {
+            $content = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/content:encoded)');
+        }
+        if (!$content) {
+            $content = $this->getDescription();
+        }
+        $this->_data['content'] = $content;
+        return $this->_data['content'];
+    }
+
+    public function getDescription() 
+    {
+        if (isset($this->_data['description'])) {
+            return $this->_data['description'];
+        }
+        $description = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/description)');
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/dc11:description)');
+            }
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/dc10:description)');
+            }
+        } else {
+            $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/rss:description)');
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/dc11:description)');
+            }
+            if (!$description) {
+                $description = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/dc10:description)');
+            }
+        }
+        if (!$description) {
+            $description = null;
+        }
+        $this->_data['description'] = $description;
+        return $this->_data['description'];
+    }
+
     public function getId()
     {
         if (isset($this->_data['id'])) {
