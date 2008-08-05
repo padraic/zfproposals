@@ -155,7 +155,13 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
             }
         }
         if (!$id) {
-            $id = null;
+            //if ($this->getPermaLink()) {
+            //    $id = $this->getPermaLink();
+            if ($this->getTitle()) {
+                $id = $this->getTitle();
+            } else {
+                $id = null;
+            }
         }
         $this->_data['id'] = $id;
         return $this->_data['id'];

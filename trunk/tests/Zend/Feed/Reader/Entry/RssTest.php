@@ -209,7 +209,72 @@ class Zend_Feed_Reader_Entry_RssTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://www.example.com/1', $entry->getId());
     }
 
-    // Missing Id
+    // Missing Id (but alternates to Title)
+
+        public function testGetsIdFromRss20_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss20.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss094_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss094.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss093_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss093.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss092_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss092.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss091_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss091.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss10_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss10.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    public function testGetsIdFromRss090_Title()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/title/rss090.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Entry Title', $entry->getId());
+    }
+
+    // Missing Any Id
 
     public function testGetsIdFromRss20_None()
     {
