@@ -11,6 +11,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'ReaderTest.php';
 require_once 'Reader/Feed/RssTest.php';
+require_once 'Reader/Entry/RssTest.php';
 
 class Zend_Feed_AllTests
 {
@@ -27,6 +28,8 @@ class Zend_Feed_AllTests
 
         // RSS - Feed Level
         $suite->addTestSuite('Zend_Feed_Reader_Feed_RssTest');
+        // RSS - Item Level
+        $suite->addTestSuite('Zend_Feed_Reader_Entry_RssTest');
 
         return $suite;
     }

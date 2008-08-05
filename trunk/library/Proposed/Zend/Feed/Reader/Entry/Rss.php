@@ -23,8 +23,9 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
     {
         $this->_entry = $entry;
         $this->_entryKey = $entryKey;
-        $this->_xpathQueryRss = '//item[' . $this->_entryKey+1 . ']';
-        $this->_xpathQueryRdf = '//rss:item[' . $this->_entryKey+1 . ']';
+        // Everyone by now should now XPath indices start from 1 not 0
+        $this->_xpathQueryRss = '//item[' . ($this->_entryKey+1) . ']';
+        $this->_xpathQueryRdf = '//rss:item[' . ($this->_entryKey+1) . ']';
         $this->_domDocument = $this->_entry->getDOM()->ownerDocument;
         if (!is_null($type)) {
             $this->_data['type'] = $type;
@@ -68,6 +69,16 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
     public function getType()
     {
         return $this->_data['type'];
+    }
+
+    public function toArray() 
+    {
+        return $this->_data;
+    }
+
+    public function getDomDocument() 
+    {
+        return $this->_domDocument;
     }
 
 }
