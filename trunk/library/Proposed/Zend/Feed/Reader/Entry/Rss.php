@@ -45,6 +45,7 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
             return $this->_data['authors'];
         }
         $authors = array();
+        // @todo: create a list from all potential sources rather than from alternatives
         if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
             $list = $this->_xpath->evaluate($this->_xpathQueryRss.'//author');
             if (!$list->length) {
@@ -66,6 +67,8 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
             foreach ($list as $author) {
                 if ($this->getType() == Zend_Feed_Reader::TYPE_RSS_20
                     && preg_match("/\(([^\)]+)\)/", $author->nodeValue, $matches, PREG_OFFSET_CAPTURE)) {
+                    // source name from RSS 2.0 <author>
+                    // format "joe@example.com (Joe Bloggs)"
                     $authors[] = $matches[1][0];
                 } else {
                     $authors[] = $author->nodeValue;
@@ -155,8 +158,8 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
             }
         }
         if (!$id) {
-            //if ($this->getPermaLink()) {
-            //    $id = $this->getPermaLink();
+            //if ($this->getPermalink()) {
+            //    $id = $this->getPermalink();
             if ($this->getTitle()) {
                 $id = $this->getTitle();
             } else {
@@ -165,6 +168,24 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         }
         $this->_data['id'] = $id;
         return $this->_data['id'];
+    }
+
+    public function getLink()
+    {
+        if (isset($this->_data['link'])) {
+            return $this->_data['link'];
+        }
+        $link = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $link = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/link)');
+        } else {
+            $link = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/rss:link)');
+        }
+        if (!$link) {
+            $link = null;
+        }
+        $this->_data['link'] = $link;
+        return $this->_data['link'];
     }
 
     public function getTitle()

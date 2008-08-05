@@ -211,7 +211,7 @@ class Zend_Feed_Reader_Entry_RssTest extends PHPUnit_Framework_TestCase
 
     // Missing Id (but alternates to Title)
 
-        public function testGetsIdFromRss20_Title()
+    public function testGetsIdFromRss20_Title()
     {
         $feed = Zend_Feed_Reader::importString(
             file_get_contents($this->_feedSamplePath.'/id/plain/title/rss20.xml')
@@ -1578,6 +1578,137 @@ class Zend_Feed_Reader_Entry_RssTest extends PHPUnit_Framework_TestCase
         );
         $entry = $feed->current();
         $this->assertEquals(null, $entry->getContent());
+    }
+
+    /**
+     * Get Link (Unencoded Text)
+     */
+    public function testGetsLinkFromRss20()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss20.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss094()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss094.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss093()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss093.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss092()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss092.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss091()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss091.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss10.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss090()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/rss090.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('http://www.example.com/entry', $entry->getLink());
+    }
+
+    // Missing Link
+
+    public function testGetsLinkFromRss20_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss20.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss094_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss094.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss093_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss093.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss092_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss092.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss091_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss091.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss10_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss10.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
+    }
+
+    public function testGetsLinkFromRss090_None()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/link/plain/none/rss090.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals(null, $entry->getLink());
     }
 
 }
