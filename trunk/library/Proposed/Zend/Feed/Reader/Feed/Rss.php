@@ -44,7 +44,10 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
     public function getAuthor()
     {
         $authors = $this->getAuthors();
-        return $authors[0];
+        if (isset($authors[0])) {
+            return $authors[0];
+        }
+        return null;
     }
 
     public function getCopyright()
