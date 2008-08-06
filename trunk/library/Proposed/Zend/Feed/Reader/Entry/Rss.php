@@ -89,7 +89,7 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         return null;
     }
 
-    public function getContent() 
+    public function getContent()
     {
         if (isset($this->_data['content'])) {
             return $this->_data['content'];
@@ -107,7 +107,7 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         return $this->_data['content'];
     }
 
-    public function getDescription() 
+    public function getDescription()
     {
         if (isset($this->_data['description'])) {
             return $this->_data['description'];
@@ -170,12 +170,13 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         return $this->_data['id'];
     }
 
-    public function getLink()
+    public function getLink($index = 0)
     {
         if (isset($this->_data['link'])) {
             return $this->_data['link'];
         }
         $link = null;
+        // there may be >1 links - need to return an index, or accept an index integer to fix
         if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
             $link = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/link)');
         } else {
@@ -186,6 +187,11 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         }
         $this->_data['link'] = $link;
         return $this->_data['link'];
+    }
+
+    public function getPermlink()
+    {
+        return $this->getLink(0);
     }
 
     public function getTitle()
@@ -223,12 +229,12 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
         return $this->_data['type'];
     }
 
-    public function toArray() 
+    public function toArray()
     {
         return $this->_data;
     }
 
-    public function getDomDocument() 
+    public function getDomDocument()
     {
         return $this->_domDocument;
     }
