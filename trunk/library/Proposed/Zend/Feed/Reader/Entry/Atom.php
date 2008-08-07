@@ -43,7 +43,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         }
         /**
          * TODO: The author elements contains or can contain a name, uri and email address.
-         * Test if this is the right approach
+         * These attributes should either be split up, or be ignored.
          */
         $authors = $this->_xpath->evaluate($this->_xpathQuery . '//author');
         $contributors = $this->_xpath->evaluate($this->_xpathQuery . '//contributor');
