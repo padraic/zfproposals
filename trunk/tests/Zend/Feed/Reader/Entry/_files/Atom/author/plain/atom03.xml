@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed version="0.3" xmlns="http://purl.org/atom/ns#">
+    <entry>
+        <author>
+            <name></name>
+            <uri></uri>
+            <email></email>
+        </author>
+    </entry>
+</feed>

@@ -97,7 +97,18 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
 
     public function getDescription()
     {
-        // TODO: Look for an Atom equivalent of description
+        if (isset($this->_data['description'])) {
+            return $this->_data['description'];
+        }
+
+        $description = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/summary)');
+
+        if (!$description) {
+            $description = null;
+        }
+
+        $this->_data['description'] = $description;
+        return $this->_data['description'];
     }
 
     public function getId()

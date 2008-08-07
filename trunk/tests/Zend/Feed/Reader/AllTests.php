@@ -23,6 +23,8 @@ class Zend_Feed_Reader_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Feed_Reader');
 
         $suite->addTestSuite('Zend_Feed_Reader_FeedTest');
+        $suite->addTestSuite('Zend_Feed_Reader_Feed_AtomTest');
+        $suite->addTestSuite('Zend_Feed_Reader_Feed_RssTest');
 
         return $suite;
     }
