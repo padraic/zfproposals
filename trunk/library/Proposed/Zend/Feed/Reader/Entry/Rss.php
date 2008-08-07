@@ -158,9 +158,9 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
             }
         }
         if (!$id) {
-            //if ($this->getPermalink()) {
-            //    $id = $this->getPermalink();
-            if ($this->getTitle()) {
+            if ($this->getPermalink()) {
+                $id = $this->getPermalink();
+            } elseif ($this->getTitle()) {
                 $id = $this->getTitle();
             } else {
                 $id = null;
@@ -172,24 +172,34 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
 
     public function getLink($index = 0)
     {
-        if (isset($this->_data['link'])) {
-            return $this->_data['link'];
+        if (!isset($this->_data['links'])) {
+            $this->getLinks();
         }
-        $link = null;
-        // there may be >1 links - need to return an index, or accept an index integer to fix
-        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
-            $link = $this->_xpath->evaluate('string('.$this->_xpathQueryRss.'/link)');
-        } else {
-            $link = $this->_xpath->evaluate('string('.$this->_xpathQueryRdf.'/rss:link)');
+        if (isset($this->_data['links'][$index])) {
+            return $this->_data['links'][$index];
         }
-        if (!$link) {
-            $link = null;
-        }
-        $this->_data['link'] = $link;
-        return $this->_data['link'];
+        return null;
     }
 
-    public function getPermlink()
+    public function getLinks() 
+    {
+        if (isset($this->_data['links'])) {
+            return $this->_data['links'];
+        }
+        $links = array();
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $list = $this->_xpath->query($this->_xpathQueryRss.'//link');
+        } else {
+            $list = $this->_xpath->query($this->_xpathQueryRdf.'//rss:link');
+        }
+        foreach ($list as $link) {
+            $links[] = $link->nodeValue;
+        }
+        $this->_data['links'] = $links;
+        return $this->_data['links'];
+    }
+
+    public function getPermalink()
     {
         return $this->getLink(0);
     }
