@@ -41,18 +41,32 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         if (isset($this->_data['authors'])) {
             return $this->_data['authors'];
         }
+        /**
+         * TODO: The author elements contains or can contain a name, uri and email address.
+         * Test if this is the right approach
+         */
+        $authors = $this->_xpath->evaluate($this->_xpathQuery . '//author');
+        $contributors = $this->_xpath->evaluate($this->_xpathQuery . '//contributor');
         
-        // @todo: create a list from all potential sources rather than from alternatives
-        // There are contributors as well...
-        $authors = array($this->_xpath->evaluate($this->_xpathQuery . '//author'));
+        $people = array();
         
-        if ($list->length) {
-            foreach ($list as $author) {
-                $authors[] = $author->nodeValue;
+        if ($authors->length) {
+            foreach ($authors as $author) {
+                $people[] = $author->nodeValue;
             }
-            $authors = array_unique($authors);
         }
-        $this->_data['authors'] = $authors;
+        
+        if ($contributors->length) {
+            foreach ($contributors as $contributor) {
+                $people[] = $contributor->nodeValue;
+            }
+        }
+        
+        if (!empty($people)) {
+            $people = array_unique($people);
+        }
+        
+        $this->_data['authors'] = $people;
         return $this->_data['authors'];
     }
 
@@ -71,7 +85,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
             return $this->_data['content'];
         }
 
-        $content = $this->_xpath->evaluate('string('.$this->_xpathQuery.'/content)');
+        $content = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/content)');
 
         if (!$content) {
             $content = $this->getDescription();
@@ -114,7 +128,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         }
         
         // there may be >1 links - need to return an index, or accept an index integer to fix
-        $link = $this->_xpath->evaluate('string('.$this->_xpathQuery . '/link)');
+        $link = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/link)');
         
         if (!$link) {
             $link = null;
@@ -134,7 +148,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
             return $this->_data['title'];
         }
         
-        $title = $this->_xpath->evaluate('string('.$this->_xpathQuery.'/title)');
+        $title = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/title)');
         
         if (!$title) {
             $title = null;

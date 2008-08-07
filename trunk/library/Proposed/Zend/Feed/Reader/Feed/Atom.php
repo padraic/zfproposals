@@ -13,16 +13,45 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
 {
     public function getAuthors()
     {
+        if (isset($this->_data['authors'])) {
+            return $this->_data['authors'];
+        }
         /**
-         * TODO: Add authors support.
-         * Atom seems to store author info both in the "common" section and in
-         * the entries.
+         * TODO: The author elements contains or can contain a name, uri and email address.
+         * Test if this is the right approach
          */
+        $authors = $this->_xpath->evaluate('string(/feed/author)');
+        $contributors = $this->_xpath->evaluate('string(/feed/contributor)');
+        
+        $people = array();
+        
+        if ($authors->length) {
+            foreach ($authors as $author) {
+                $people[] = $author->nodeValue;
+            }
+        }
+        
+        if ($contributors->length) {
+            foreach ($contributors as $contributor) {
+                $people[] = $contributor->nodeValue;
+            }
+        }
+        
+        if (!empty($people)) {
+            $people = array_unique($people);
+        }
+        
+        $this->_data['authors'] = $people;
+        return $this->_data['authors'];
     }
     
-    public function getAuthor()
+    public function getAuthor($index = 0)
     {
-        
+        $authors = $this->getAuthors();
+        if (isset($authors[$index])) {
+            return $authors[$index];
+        }
+        return null;
     }
     
     public function getCopyright()
