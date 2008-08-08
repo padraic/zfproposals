@@ -26,8 +26,7 @@ date_default_timezone_set('Europe/London');
 
 // Determine the root, library, and tests directories of the framework distribution
 $zfRoot    = dirname(dirname(__FILE__));
-$zfLibrary = $zfRoot . DIRECTORY_SEPARATOR . 'library/Current';
-$zfProposed = $zfRoot . DIRECTORY_SEPARATOR . 'library/Proposed';
+$zfProposed = $zfRoot . DIRECTORY_SEPARATOR . 'library';
 $zfTests   = $zfRoot . DIRECTORY_SEPARATOR . 'tests';
 
 /*
@@ -35,7 +34,6 @@ Prepend the Zend Framework library/ and tests/ directories to the include_path. 
 the box and helps prevent loading other copies of the framework code and tests that would supersede this copy.
 */
 set_include_path($zfProposed . PATH_SEPARATOR
-               . $zfLibrary . PATH_SEPARATOR
                . $zfTests   . PATH_SEPARATOR
                . get_include_path());
 
