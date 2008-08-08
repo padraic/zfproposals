@@ -201,6 +201,7 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         }
         $this->_xpath->registerNamespace('dc10', Zend_Feed_Reader::NAMESPACE_DC_10);
         $this->_xpath->registerNamespace('dc11', Zend_Feed_Reader::NAMESPACE_DC_11);
+        $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_03);
         $this->_xpath->registerNamespace('atom', Zend_Feed_Reader::NAMESPACE_ATOM_10);
         $this->_xpath->registerNamespace('content', Zend_Feed_Reader::NAMESPACE_CONTENT_10);
     }
