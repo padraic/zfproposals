@@ -22,7 +22,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         $this->_entry = $entry;
         $this->_entryKey = $entryKey;
         // Everyone by now should now XPath indices start from 1 not 0
-        $this->_xpathQuery = '//entry[' . ($this->_entryKey+1) . ']';
+        $this->_xpathQuery = '//entry[' . ($this->_entryKey + 1) . ']';
         $this->_domDocument = $this->_entry->getDOM()->ownerDocument;
         if (!is_null($type)) {
             $this->_data['type'] = $type;

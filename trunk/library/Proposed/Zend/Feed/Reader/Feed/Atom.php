@@ -120,7 +120,7 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
             return $this->_data['link'];
         }
         
-        $link = $this->_xpath->evaluate('string(/feed/link)');
+        $link = $this->_xpath->evaluate('string(/feed/link[@href])');
         
         if (!$link) {
             $link = null;

@@ -61,6 +61,7 @@ class Zend_Feed_Reader
     public static function importFeed(Zend_Feed_Abstract $feed)
     {
         $type = self::detectType($feed);
+        
         if (substr($type, 0, 3) == 'rss') {
             require_once 'Zend/Feed/Reader/Feed/Rss.php';
             $reader = new Zend_Feed_Reader_Feed_Rss($feed, $type);
