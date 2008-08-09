@@ -10,7 +10,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
     protected $_entryKey = 0;
 
     protected $_xpathQuery = '';
-    
+
     protected $_data = array();
 
     protected $_xpath = null;
@@ -22,7 +22,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         $this->_entry = $entry;
         $this->_entryKey = $entryKey;
         // Everyone by now should now XPath indices start from 1 not 0
-        $this->_xpathQuery = '//entry[' . ($this->_entryKey + 1) . ']';
+        $this->_xpathQuery = '//atom:entry[' . ($this->_entryKey + 1) . ']';
         $this->_domDocument = $this->_entry->getDOM()->ownerDocument;
         if (!is_null($type)) {
             $this->_data['type'] = $type;
@@ -45,27 +45,27 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
          * TODO: The author elements contains or can contain a name, uri and email address.
          * These attributes should either be split up, or be ignored.
          */
-        $authors = $this->_xpath->evaluate($this->_xpathQuery . '//author');
-        $contributors = $this->_xpath->evaluate($this->_xpathQuery . '//contributor');
-        
+        $authors = $this->_xpath->evaluate($this->_xpathQuery . '//atom:author');
+        $contributors = $this->_xpath->evaluate($this->_xpathQuery . '//atom:contributor');
+
         $people = array();
-        
+
         if ($authors->length) {
             foreach ($authors as $author) {
                 $people[] = $author->nodeValue;
             }
         }
-        
+
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
                 $people[] = $contributor->nodeValue;
             }
         }
-        
+
         if (!empty($people)) {
             $people = array_unique($people);
         }
-        
+
         $this->_data['authors'] = $people;
         return $this->_data['authors'];
     }
@@ -85,7 +85,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
             return $this->_data['content'];
         }
 
-        $content = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/content)');
+        $content = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:content)');
 
         if (!$content) {
             $content = $this->getDescription();
@@ -101,7 +101,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
             return $this->_data['description'];
         }
 
-        $description = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/summary)');
+        $description = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:summary)');
 
         if (!$description) {
             $description = null;
@@ -116,8 +116,8 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         if (isset($this->_data['id'])) {
             return $this->_data['id'];
         }
-        
-        $id = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/id)');
+
+        $id = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:id)');
 
         if (!$id) {
             //if ($this->getPermalink()) {
@@ -137,10 +137,10 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         if (isset($this->_data['link'])) {
             return $this->_data['link'];
         }
-        
+
         // there may be >1 links - need to return an index, or accept an index integer to fix
-        $link = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/link)');
-        
+        $link = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:link)');
+
         if (!$link) {
             $link = null;
         }
@@ -158,13 +158,13 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         if (isset($this->_data['title'])) {
             return $this->_data['title'];
         }
-        
-        $title = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/title)');
-        
+
+        $title = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:title)');
+
         if (!$title) {
             $title = null;
         }
-        
+
         $this->_data['title'] = $title;
         return $this->_data['title'];
     }
