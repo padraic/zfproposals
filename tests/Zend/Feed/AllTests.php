@@ -12,6 +12,8 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'ReaderTest.php';
 require_once 'Reader/Feed/RssTest.php';
 require_once 'Reader/Entry/RssTest.php';
+require_once 'Reader/Feed/AtomTest.php';
+require_once 'Reader/Entry/AtomTest.php';
 
 class Zend_Feed_AllTests
 {
@@ -24,12 +26,16 @@ class Zend_Feed_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Feed');
 
+        // Base parent class
         $suite->addTestSuite('Zend_Feed_ReaderTest');
-
         // RSS - Feed Level
         $suite->addTestSuite('Zend_Feed_Reader_Feed_RssTest');
         // RSS - Item Level
         $suite->addTestSuite('Zend_Feed_Reader_Entry_RssTest');
+        // ATOM - Feed Level
+        $suite->addTestSuite('Zend_Feed_Reader_Feed_AtomTest');
+        // ATOM - Item Level
+        $suite->addTestSuite('Zend_Feed_Reader_Entry_AtomTest');
 
         return $suite;
     }
