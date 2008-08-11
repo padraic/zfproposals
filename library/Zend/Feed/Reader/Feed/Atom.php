@@ -21,8 +21,8 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed implements Zend_F
             return $this->_data['authors'];
         }
         
-        $authors = $this->_xpath->query('string(/atom:feed/atom:author)');
-        $contributors = $this->_xpath->query('string(/atom:feed/atom:contributor)');
+        $authors = $this->_xpath->query('/atom:feed/atom:author');
+        $contributors = $this->_xpath->query('/atom:feed/atom:contributor');
         
         $people = array();
         
