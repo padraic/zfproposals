@@ -46,62 +46,20 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         $contributors = $this->_xpath->query($this->_xpathQuery . '//atom:contributor');
 
         $people = array();
-        /**
-         * FIXME: This all looks like a dirty hack... clean it up
-         */
+        
         if ($authors->length) {
             foreach ($authors as $author) {
-            	$childNodes = $author->childNodes;
-            	
-            	$info = array();
-            	
-                for ($i = 0; $i < $childNodes->length; $i++) {
-                    $infoNode  = $childNodes->item($i);
-                    $nodeName  = $infoNode->nodeName;
-                    $nodevalue = $infoNode->nodeValue;
-                    
-                    switch ($nodeName) {
-                        case 'name':
-                        case 'uri':
-                        case 'email':
-                            $info[$nodeName] = $nodevalue;
-                            break;
-                            
-                        default:
-                            // Fallthrough
-                            break;
-                    }
-                }
-                
-                $people[] = new Zend_Feed_Reader_Author($info);
+                $people[] = new Zend_Feed_Reader_Author($author->getElementsByTagName('name')->item(0)->nodeValue,
+                                                        $author->getElementsByTagName('email')->item(0)->nodeValue,
+                                                        $author->getElementsByTagName('uri')->item(0)->nodeValue);
             }
         }
         
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
-                $childNodes = $contributor->childNodes;
-                
-                $info = array();
-                
-                for ($i = 0; $i < $childNodes->length; $i++) {
-                    $infoNode  = $childNodes->item($i);
-                    $nodeName  = $infoNode->nodeName;
-                    $nodevalue = $infoNode->nodeValue;
-                    
-                    switch ($nodeName) {
-                        case 'name':
-                        case 'uri':
-                        case 'email':
-                            $info[$nodeName] = $nodevalue;
-                            break;
-                            
-                        default:
-                            // Fallthrough
-                            break;
-                    }
-                }
-                
-                $people[] = new Zend_Feed_Reader_Author($info);
+                $people[] = new Zend_Feed_Reader_Author($contributor->getElementsByTagName('name')->item(0)->nodeValue,
+                                                        $contributor->getElementsByTagName('email')->item(0)->nodeValue,
+                                                        $contributor->getElementsByTagName('uri')->item(0)->nodeValue);
             }
         }
 

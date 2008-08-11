@@ -65,12 +65,8 @@ class Zend_Feed_Reader_Entry_AtomTest extends PHPUnit_Framework_TestCase
         );
         
         $authors = array(
-            new Zend_Feed_Reader_Author(array('name'  => 'Joe Bloggs',
-                                              'email' => 'joe@example.com',
-                                              'uri'   => 'http://www.example.com')),
-            new Zend_Feed_Reader_Author(array('name'  => 'Jane Bloggs',
-                                              'email' => 'jane@example.com',
-                                              'uri'   => 'http://www.example.com'))
+            new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com'),
+            new Zend_Feed_Reader_Author('Jane Bloggs', 'jane@example.com', 'http://www.example.com')
         );
         
         $entry = $feed->current();
@@ -84,12 +80,8 @@ class Zend_Feed_Reader_Entry_AtomTest extends PHPUnit_Framework_TestCase
         );
         
         $authors = array(
-            new Zend_Feed_Reader_Author(array('name'  => 'Joe Bloggs',
-                                              'email' => 'joe@example.com',
-                                              'uri'   => 'http://www.example.com')),
-            new Zend_Feed_Reader_Author(array('name'  => 'Jane Bloggs',
-                                              'email' => 'jane@example.com',
-                                              'uri'   => 'http://www.example.com'))
+            new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com'),
+            new Zend_Feed_Reader_Author('Jane Bloggs', 'jane@example.com', 'http://www.example.com')
         );
         
         $entry = $feed->current();
@@ -104,9 +96,7 @@ class Zend_Feed_Reader_Entry_AtomTest extends PHPUnit_Framework_TestCase
         $feed = Zend_Feed_Reader::importString(
             file_get_contents($this->_feedSamplePath . '/author/plain/atom03.xml')
         );
-        $author = new Zend_Feed_Reader_Author(array('name'  => 'Joe Bloggs',
-                                                    'email' => 'joe@example.com',
-                                                    'uri'   => 'http://www.example.com'));
+        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
         $entry = $feed->current();
         $this->assertEquals($author, $entry->getAuthor());
     }
@@ -116,9 +106,7 @@ class Zend_Feed_Reader_Entry_AtomTest extends PHPUnit_Framework_TestCase
         $feed = Zend_Feed_Reader::importString(
             file_get_contents($this->_feedSamplePath . '/author/plain/atom10.xml')
         );
-        $author = new Zend_Feed_Reader_Author(array('name'  => 'Joe Bloggs',
-                                                    'email' => 'joe@example.com',
-                                                    'uri'   => 'http://www.example.com'));
+        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
         $entry = $feed->current();
         $this->assertEquals($author, $entry->getAuthor());
     }
