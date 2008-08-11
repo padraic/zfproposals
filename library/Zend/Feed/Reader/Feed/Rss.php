@@ -2,6 +2,8 @@
 
 require_once 'Zend/Feed/Reader/Feed.php';
 
+require_once 'Zend/Feed/Reader/Feed/Interface.php';
+
 /**
  * Interpretive class for Zend_Feed which interprets incoming
  * Zend_Feed_Abstract objects and presents a common unified API for all RSS
@@ -9,7 +11,7 @@ require_once 'Zend/Feed/Reader/Feed.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
+class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed implements Zend_Feed_Reader_Feed_Interface
 {
 
     public function getAuthors()
@@ -41,11 +43,11 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         return $this->_data['authors'];
     }
 
-    public function getAuthor()
+    public function getAuthor($index = 0)
     {
         $authors = $this->getAuthors();
-        if (isset($authors[0])) {
-            return $authors[0];
+        if (isset($authors[$index])) {
+            return $authors[$index];
         }
         return null;
     }
@@ -185,6 +187,11 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed
         }
         $this->_data['title'] = $title;
         return $this->_data['title'];
+    }
+    
+    public function getUpdated()
+    {
+        // TODO: Implement this method
     }
 
     protected function _registerDefaultNamespaces()

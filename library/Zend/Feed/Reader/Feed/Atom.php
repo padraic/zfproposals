@@ -4,6 +4,8 @@ require_once 'Zend/Feed/Reader/Feed.php';
 
 require_once 'Zend/Feed/Reader/Author.php';
 
+require_once 'Zend/Feed/Reader/Feed/Interface.php';
+
 /**
  * Interpretive class for Zend_Feed which interprets incoming
  * Zend_Feed_Abstract objects and presents a common unified API for all RSS
@@ -11,7 +13,7 @@ require_once 'Zend/Feed/Reader/Author.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
+class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed implements Zend_Feed_Reader_Feed_Interface 
 {
     public function getAuthors()
     {

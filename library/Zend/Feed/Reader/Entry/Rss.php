@@ -1,8 +1,13 @@
 <?php
 
+require_once 'Zend/Feed/Reader.php';
+
+require_once 'Zend/Feed/Reader/Entry/Interface.php';
+
+require_once 'Zend/Feed/Reader/Author.php';
 //
 
-class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader
+class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader implements Zend_Feed_Reader_Entry_Interface
 {
 
     protected $_entry = null;

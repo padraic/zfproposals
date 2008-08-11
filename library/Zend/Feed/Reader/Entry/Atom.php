@@ -1,8 +1,13 @@
 <?php
 
+require_once 'Zend/Feed/Reader.php';
+
+require_once 'Zend/Feed/Reader/Entry/Interface.php';
+
+require_once 'Zend/Feed/Reader/Author.php';
 //
 
-class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
+class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader implements Zend_Feed_Reader_Entry_Interface
 {
 
     protected $_entry = null;
@@ -156,7 +161,7 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         return $this->_data['links'];
     }
     
-    public function getPermlink()
+    public function getPermalink()
     {
         return $this->getLink(0);
     }

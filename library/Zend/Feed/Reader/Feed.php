@@ -82,7 +82,7 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
         return $this->_data;
     }
 
-    abstract public function getTitle(); // add the rest once known so there's a clearly defined interface
+    // abstract public function getTitle(); // Already defined in the interface // add the rest once known so there's a clearly defined interface
 
     abstract protected function _registerDefaultNamespaces();
 
