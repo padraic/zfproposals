@@ -2,6 +2,8 @@
 
 require_once 'Zend/Feed/Reader/Feed.php';
 
+require_once 'Zend/Feed/Reader/Author.php';
+
 /**
  * Interpretive class for Zend_Feed which interprets incoming
  * Zend_Feed_Abstract objects and presents a common unified API for all RSS
@@ -22,23 +24,65 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
          */
         $authors = $this->_xpath->evaluate('string(/atom:feed/atom:author)');
         $contributors = $this->_xpath->evaluate('string(/atom:feed/atom:contributor)');
-
+        
         $people = array();
-
+        /**
+         * FIXME: This all looks like a dirty hack... clean it up
+         */
         if ($authors->length) {
             foreach ($authors as $author) {
-                $people[] = $author->nodeValue;
+                $childNodes = $author->childNodes;
+                
+                $info = array();
+                
+                for ($i = 0; $i < $childNodes->length; $i++) {
+                    $infoNode  = $childNodes->item($i);
+                    $nodeName  = $infoNode->nodeName;
+                    $nodevalue = $infoNode->nodeValue;
+                    
+                    switch ($nodeName) {
+                        case 'name':
+                        case 'uri':
+                        case 'email':
+                            $info[$nodeName] = $nodevalue;
+                            break;
+                            
+                        default:
+                            // Fallthrough
+                            break;
+                    }
+                }
             }
+            
+            $people[] = new Zend_Feed_Reader_Author($info);
         }
-
+        
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
-                $people[] = $contributor->nodeValue;
+                $childNodes = $contributor->childNodes;
+                
+                $info = array();
+                
+                for ($i = 0; $i < $childNodes->length; $i++) {
+                    $infoNode  = $childNodes->item($i);
+                    $nodeName  = $infoNode->nodeName;
+                    $nodevalue = $infoNode->nodeValue;
+                    
+                    switch ($nodeName) {
+                        case 'name':
+                        case 'uri':
+                        case 'email':
+                            $info[$nodeName] = $nodevalue;
+                            break;
+                            
+                        default:
+                            // Fallthrough
+                            break;
+                    }
+                }
             }
-        }
-
-        if (!empty($people)) {
-            $people = array_unique($people);
+            
+            $people[] = new Zend_Feed_Reader_Author($info);
         }
 
         $this->_data['authors'] = $people;

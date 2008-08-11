@@ -41,29 +41,68 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
         if (isset($this->_data['authors'])) {
             return $this->_data['authors'];
         }
-        /**
-         * TODO: The author elements contains or can contain a name, uri and email address.
-         * These attributes should either be split up, or be ignored.
-         */
-        $authors = $this->_xpath->evaluate($this->_xpathQuery . '//atom:author');
-        $contributors = $this->_xpath->evaluate($this->_xpathQuery . '//atom:contributor');
+        
+        $authors = $this->_xpath->query($this->_xpathQuery . '//atom:author');
+        $contributors = $this->_xpath->query($this->_xpathQuery . '//atom:contributor');
 
         $people = array();
-
+        /**
+         * FIXME: This all looks like a dirty hack... clean it up
+         */
         if ($authors->length) {
             foreach ($authors as $author) {
-                $people[] = $author->nodeValue;
+            	$childNodes = $author->childNodes;
+            	
+            	$info = array();
+            	
+                for ($i = 0; $i < $childNodes->length; $i++) {
+                    $infoNode  = $childNodes->item($i);
+                    $nodeName  = $infoNode->nodeName;
+                    $nodevalue = $infoNode->nodeValue;
+                    
+                    switch ($nodeName) {
+                        case 'name':
+                        case 'uri':
+                        case 'email':
+                            $info[$nodeName] = $nodevalue;
+                            break;
+                            
+                        default:
+                            // Fallthrough
+                            break;
+                    }
+                }
             }
+            
+            $people[] = new Zend_Feed_Reader_Author($info);
         }
-
+        
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
-                $people[] = $contributor->nodeValue;
+                $childNodes = $contributor->childNodes;
+                
+                $info = array();
+                
+                for ($i = 0; $i < $childNodes->length; $i++) {
+                    $infoNode  = $childNodes->item($i);
+                    $nodeName  = $infoNode->nodeName;
+                    $nodevalue = $infoNode->nodeValue;
+                    
+                    switch ($nodeName) {
+                        case 'name':
+                        case 'uri':
+                        case 'email':
+                            $info[$nodeName] = $nodevalue;
+                            break;
+                            
+                        default:
+                            // Fallthrough
+                            break;
+                    }
+                }
             }
-        }
-
-        if (!empty($people)) {
-            $people = array_unique($people);
+            
+            $people[] = new Zend_Feed_Reader_Author($info);
         }
 
         $this->_data['authors'] = $people;
