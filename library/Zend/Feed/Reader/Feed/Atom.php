@@ -121,7 +121,7 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed implements Zend_F
             return $this->_data['link'];
         }
 
-        $link = $this->_xpath->evaluate('string(/atom:feed/atom:link[@href])');
+        $link = $this->_xpath->evaluate('string(/atom:feed/atom:link/@href)');
 
         if (!$link) {
             $link = null;

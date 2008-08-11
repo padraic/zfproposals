@@ -152,10 +152,12 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader implements Zend_Feed_
         }
         $links = array();
         
-        $list = $this->_xpath->query('string(' . $this->_xpathQuery . '/atom:link)');
+        $list = $this->_xpath->query('string(' . $this->_xpathQuery . '/atom:link/@href)');
         
-        foreach ($list as $link) {
-            $links[] = $link->getAttribute('href');
+        if ($list->length) {
+            foreach ($list as $link) {
+                $links[] = $link->getAttribute('href');
+            }
         }
         $this->_data['links'] = $links;
         return $this->_data['links'];
