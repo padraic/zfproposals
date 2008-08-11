@@ -86,4 +86,5 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
 
     abstract protected function _registerDefaultNamespaces();
 
+    abstract protected function _indexEntries();
 }
