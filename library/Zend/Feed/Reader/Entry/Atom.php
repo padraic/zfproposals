@@ -72,9 +72,9 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
                             break;
                     }
                 }
+                
+                $people[] = new Zend_Feed_Reader_Author($info);
             }
-            
-            $people[] = new Zend_Feed_Reader_Author($info);
         }
         
         if ($contributors->length) {
@@ -100,9 +100,9 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
                             break;
                     }
                 }
+                
+                $people[] = new Zend_Feed_Reader_Author($info);
             }
-            
-            $people[] = new Zend_Feed_Reader_Author($info);
         }
 
         $this->_data['authors'] = $people;

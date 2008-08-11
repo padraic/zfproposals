@@ -18,12 +18,9 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
         if (isset($this->_data['authors'])) {
             return $this->_data['authors'];
         }
-        /**
-         * TODO: The author elements contains or can contain a name, uri and email address.
-         * These attributes should either be split up, or be ignored.
-         */
-        $authors = $this->_xpath->evaluate('string(/atom:feed/atom:author)');
-        $contributors = $this->_xpath->evaluate('string(/atom:feed/atom:contributor)');
+        
+        $authors = $this->_xpath->query('string(/atom:feed/atom:author)');
+        $contributors = $this->_xpath->query('string(/atom:feed/atom:contributor)');
         
         $people = array();
         /**
@@ -52,9 +49,9 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
                             break;
                     }
                 }
+                
+                $people[] = new Zend_Feed_Reader_Author($info);
             }
-            
-            $people[] = new Zend_Feed_Reader_Author($info);
         }
         
         if ($contributors->length) {
@@ -80,9 +77,9 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed
                             break;
                     }
                 }
+                
+                $people[] = new Zend_Feed_Reader_Author($info);
             }
-            
-            $people[] = new Zend_Feed_Reader_Author($info);
         }
 
         $this->_data['authors'] = $people;
