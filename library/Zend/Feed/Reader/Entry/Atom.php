@@ -131,20 +131,31 @@ class Zend_Feed_Reader_Entry_Atom extends Zend_Feed_Reader
 
     public function getLink($index = 0)
     {
-        if (isset($this->_data['link'])) {
-            return $this->_data['link'];
+        if (!isset($this->_data['links'])) {
+            $this->getLinks();
         }
-
-        // there may be >1 links - need to return an index, or accept an index integer to fix
-        $link = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:link)');
-
-        if (!$link) {
-            $link = null;
+        if (isset($this->_data['links'][$index])) {
+            return $this->_data['links'][$index];
         }
-        $this->_data['link'] = $link;
-        return $this->_data['link'];
+        return null;
     }
 
+    public function getLinks() 
+    {
+        if (isset($this->_data['links'])) {
+            return $this->_data['links'];
+        }
+        $links = array();
+        
+        $list = $this->_xpath->query('string(' . $this->_xpathQuery . '/atom:link)');
+        
+        foreach ($list as $link) {
+            $links[] = $link->getAttribute('href');
+        }
+        $this->_data['links'] = $links;
+        return $this->_data['links'];
+    }
+    
     public function getPermlink()
     {
         return $this->getLink(0);
