@@ -10,7 +10,7 @@ require_once 'Zend/Feed/Reader.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
+abstract class Zend_Feed_Reader_Feed_Abstract
 {
 
     protected $_feed = null;
@@ -33,7 +33,7 @@ abstract class Zend_Feed_Reader_Feed extends Zend_Feed_Reader
         if (!is_null($type)) {
             $this->_data['type'] = $type;
         } else {
-            $this->_data['type'] = self::detectType($feed);
+            $this->_data['type'] = Zend_Feed_Reader::detectType($feed);
         }
         $this->_registerDefaultNamespaces();
         $this->_indexEntries();

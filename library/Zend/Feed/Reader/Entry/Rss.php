@@ -7,7 +7,7 @@ require_once 'Zend/Feed/Reader/Entry/Interface.php';
 require_once 'Zend/Feed/Reader/Author.php';
 //
 
-class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader implements Zend_Feed_Reader_Entry_Interface
+class Zend_Feed_Reader_Entry_Rss implements Zend_Feed_Reader_Entry_Interface
 {
 
     protected $_entry = null;
@@ -35,7 +35,7 @@ class Zend_Feed_Reader_Entry_Rss extends Zend_Feed_Reader implements Zend_Feed_R
         if (!is_null($type)) {
             $this->_data['type'] = $type;
         } else {
-            $this->_data['type'] = self::detectType($feed);
+            $this->_data['type'] = Zend_Feed_Reader::detectType($feed);
         }
     }
 
