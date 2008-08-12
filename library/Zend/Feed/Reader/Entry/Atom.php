@@ -99,6 +99,46 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         $this->_data['content'] = $content;
         return $this->_data['content'];
     }
+    
+    public function getDateCreated()
+    {
+        if (isset($this->_data['datecreated'])) {
+            return $this->_data['datecreated'];
+        }
+        
+        if ($this->getType() === Zend_Feed_Reader::TYPE_ATOM_03) {
+            $dateCreated = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:created)');
+        } else {
+            $dateCreated = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:published)');
+        }
+        // TODO: Make the date a Zend_Date object?
+        if (!$dateCreated) {
+            $dateCreated = null;
+        }
+
+        $this->_data['datecreated'] = $dateCreated;
+        return $this->_data['datecreated'];
+    }
+    
+    public function getDateModified()
+    {
+        if (isset($this->_data['datemodified'])) {
+            return $this->_data['datemodified'];
+        }
+
+        if ($this->getType() === Zend_Feed_Reader::TYPE_ATOM_03) {
+            $dateModified = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:modified)');
+        } else {
+            $dateModified = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:updated)');
+        }
+        // TODO: Make the date a Zend_Date object?
+        if (!$dateModified) {
+            $dateModified = null;
+        }
+
+        $this->_data['datemodified'] = $dateModified;
+        return $this->_data['datemodified'];
+    }
 
     public function getDescription()
     {

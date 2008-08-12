@@ -10,6 +10,10 @@ interface Zend_Feed_Reader_Feed_Interface
 
     public function getCopyright();
 
+    public function getDateCreated();
+    
+    public function getDateModified();
+    
     public function getDescription();
 
     public function getLanguage();
@@ -17,6 +21,4 @@ interface Zend_Feed_Reader_Feed_Interface
     public function getLink();
 
     public function getTitle();
-
-    public function getUpdated();
 }

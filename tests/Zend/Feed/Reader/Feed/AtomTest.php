@@ -64,6 +64,48 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Get creation date (Unencoded Text)
+     */
+    public function testGetsDateCreatedFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datecreated/plain/atom03.xml')
+        );
+        
+        $this->assertEquals('Today', $feed->getDateCreated());
+    }
+
+    public function testGetsDateCreatedFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datecreated/plain/atom10.xml')
+        );
+        
+        $this->assertEquals('Today', $feed->getDateCreated());
+    }
+    
+    /**
+     * Get modification date (Unencoded Text)
+     */
+    public function testGetsDateModifiedFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datemodified/plain/atom03.xml')
+        );
+        
+        $this->assertEquals('Today', $feed->getDateModified());
+    }
+
+    public function testGetsDateModifiedFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datemodified/plain/atom10.xml')
+        );
+        
+        $this->assertEquals('Today', $feed->getDateModified());
+    }
+    
+    /**
      * Get Single Author (Unencoded Text)
      */
     public function testGetsSingleAuthorFromAtom03()

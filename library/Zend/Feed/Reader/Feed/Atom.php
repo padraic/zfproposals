@@ -76,6 +76,49 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         $this->_data['copyright'] = $copyright;
         return $this->_data['copyright'];
     }
+    
+    public function getDateCreated()
+    {
+        if (isset($this->_data['datecreated'])) {
+            return $this->_data['datecreated'];
+        }
+
+        if ($this->getType() === Zend_Feed_Reader::TYPE_ATOM_03) {
+            $dateCreated = $this->_xpath->evaluate('string(/atom:feed/atom:created)');
+        } else {
+            $dateCreated = $this->_xpath->evaluate('string(/atom:feed/atom:published)');
+        }
+        
+        if (!$dateCreated) {
+            $dateCreated = null;
+        }
+        // TODO: Make the date a Zend_Date object?
+        $this->_data['datecreated'] = $dateCreated;
+        return $this->_data['datecreated'];
+    }
+    
+    public function getDateModified()
+    {
+        if (isset($this->_data['datemodified'])) {
+            return $this->_data['datemodified'];
+        }
+
+        $dateModified = null;
+
+        if ($this->getType() === Zend_Feed_Reader::TYPE_ATOM_03) {
+            $dateModified = $this->_xpath->evaluate('string(/atom:feed/atom:modified)');
+        } else {
+            $dateModified = $this->_xpath->evaluate('string(/atom:feed/atom:updated)');
+        }
+        
+        // TODO: Make the date a Zend_Date object?
+        if (!$dateModified) {
+            $dateModified = null;
+        }
+
+        $this->_data['datemodified'] = $dateModified;
+        return $this->_data['datemodified'];
+    }
 
     public function getDescription()
     {
@@ -146,29 +189,7 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         $this->_data['title'] = $title;
         return $this->_data['title'];
     }
-
-    public function getUpdated()
-    {
-        if (isset($this->_data['updated'])) {
-            return $this->_data['updated'];
-        }
-
-        $updated = null;
-
-        if ($this->getType() === Zend_Feed_Reader::TYPE_ATOM_03) {
-            $updated = $this->_xpath->evaluate('string(/atom:feed/atom:modified)');
-        } else {
-            $updated = $this->_xpath->evaluate('string(/atom:feed/atom:updated)');
-        }
-
-        if (!$updated) {
-            $updated = null;
-        }
-
-        $this->_data['updated'] = $updated;
-        return $this->_data['updated'];
-    }
-
+    
     protected function _registerDefaultNamespaces()
     {
         switch ($this->_data['type']) {

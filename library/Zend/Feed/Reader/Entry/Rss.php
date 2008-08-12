@@ -111,6 +111,16 @@ class Zend_Feed_Reader_Entry_Rss implements Zend_Feed_Reader_Entry_Interface
         $this->_data['content'] = $content;
         return $this->_data['content'];
     }
+    
+    public function getDateCreated()
+    {
+        // TODO: Implement
+    }
+    
+    public function getDateModified()
+    {
+        // TODO: Implement
+    }
 
     public function getDescription()
     {

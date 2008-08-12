@@ -78,6 +78,16 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed_Abstract implement
         $this->_data['copyright'] = $copyright;
         return $this->_data['copyright'];
     }
+    
+    public function getDateModified()
+    {
+        // TODO: Implement this method
+    }
+    
+    public function getDateCreated()
+    {
+        // TODO: Implement this method
+    }
 
     public function getDescription()
     {
@@ -189,11 +199,6 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed_Abstract implement
         return $this->_data['title'];
     }
     
-    public function getUpdated()
-    {
-        // TODO: Implement this method
-    }
-
     protected function _registerDefaultNamespaces()
     {
         switch ($this->_data['type']) {

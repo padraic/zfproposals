@@ -35,6 +35,48 @@ class Zend_Feed_Reader_Entry_AtomTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Get creation date (Unencoded Text)
+     */
+    public function testGetsDateCreatedFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datecreated/plain/atom03.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Today', $entry->getDateCreated());
+    }
+
+    public function testGetsDateCreatedFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datecreated/plain/atom10.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Today', $entry->getDateCreated());
+    }
+    
+    /**
+     * Get modification date (Unencoded Text)
+     */
+    public function testGetsDateModifiedFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datemodified/plain/atom03.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Today', $entry->getDateModified());
+    }
+
+    public function testGetsDateModifiedFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath . '/datemodified/plain/atom10.xml')
+        );
+        $entry = $feed->current();
+        $this->assertEquals('Today', $entry->getDateModified());
+    }
+    
+    /**
      * Get Title (Unencoded Text)
      */
     public function testGetsTitleFromAtom03()
