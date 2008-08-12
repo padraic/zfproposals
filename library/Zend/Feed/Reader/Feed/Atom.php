@@ -1,6 +1,6 @@
 <?php
 
-require_once 'Zend/Feed/Reader/Feed.php';
+require_once 'Zend/Feed/Reader/Feed/Abstract.php';
 
 require_once 'Zend/Feed/Reader/Author.php';
 
@@ -13,7 +13,7 @@ require_once 'Zend/Feed/Reader/Feed/Interface.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed implements Zend_Feed_Reader_Feed_Interface 
+class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implements Zend_Feed_Reader_Feed_Interface 
 {
     public function getAuthors()
     {
