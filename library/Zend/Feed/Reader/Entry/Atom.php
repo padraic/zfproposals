@@ -54,22 +54,25 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         
         if ($authors->length) {
             foreach ($authors as $author) {
-                $people[] = new Zend_Feed_Reader_Author($author->getElementsByTagName('name')->item(0)->nodeValue,
-                                                        $author->getElementsByTagName('email')->item(0)->nodeValue,
-                                                        $author->getElementsByTagName('uri')->item(0)->nodeValue);
+                $people[] = $this->_getAuthor($author);
             }
         }
         
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
-                $people[] = new Zend_Feed_Reader_Author($contributor->getElementsByTagName('name')->item(0)->nodeValue,
-                                                        $contributor->getElementsByTagName('email')->item(0)->nodeValue,
-                                                        $contributor->getElementsByTagName('uri')->item(0)->nodeValue);
+                $people[] = $this->_getAuthor($contributor);
             }
         }
 
         $this->_data['authors'] = $people;
         return $this->_data['authors'];
+    }
+    
+    protected function _getAuthor(DOMElement $element)
+    {
+        return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('email')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('uri')->item(0)->nodeValue);
     }
 
     public function getAuthor($index = 0)
