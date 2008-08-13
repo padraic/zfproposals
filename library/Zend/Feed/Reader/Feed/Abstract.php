@@ -12,19 +12,54 @@ require_once 'Zend/Feed/Reader.php';
  */
 abstract class Zend_Feed_Reader_Feed_Abstract
 {
-
+    /**
+     * Enter description here...
+     *
+     * @var Zend_Feed_Abstract
+     */
     protected $_feed = null;
 
+    /**
+     * Enter description here...
+     *
+     * @var array
+     */
     protected $_data = array();
 
+    /**
+     * Enter description here...
+     *
+     * @var DOMDocument
+     */
     protected $_domDocument = null;
 
+    /**
+     * Enter description here...
+     *
+     * @var DOMXPath
+     */
     protected $_xpath = null;
 
+    /**
+     * Enter description here...
+     *
+     * @var array
+     */
     protected $_entries = array();
 
+    /**
+     * Enter description here...
+     *
+     * @var int
+     */
     protected $_entriesKey = 0;
 
+    /**
+     * Enter description here...
+     *
+     * @param Zend_Feed_Abstract $feed
+     * @param string $type
+     */
     public function __construct(Zend_Feed_Abstract $feed, $type = null)
     {
         $this->_feed = $feed;
@@ -39,21 +74,40 @@ abstract class Zend_Feed_Reader_Feed_Abstract
         $this->_indexEntries();
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getType()
     {
         return $this->_data['type'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return int
+     */
     public function count()
     {
         return $this->_feed->count();
     }
 
+    /**
+     * Enter description here...
+     *
+     */
     public function rewind()
     {
         $this->_feed->rewind();
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return Zend_Feed_Reader_Entry_Interface
+     */
     public function current()
     {
         if (substr($this->getType(), 0, 3) == 'rss') {
@@ -67,24 +121,44 @@ abstract class Zend_Feed_Reader_Feed_Abstract
         return $reader;
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return unknown
+     */
     public function key()
     {
         return $this->_feed->key();
     }
 
+    /**
+     * Enter description here...
+     *
+     */
     public function next()
     {
         $this->_feed->next();
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return array
+     */
     public function toArray() // untested
     {
         return $this->_data;
     }
-
-    // abstract public function getTitle(); // Already defined in the interface // add the rest once known so there's a clearly defined interface
-
+    
+    /**
+     * Enter description here...
+     *
+     */
     abstract protected function _registerDefaultNamespaces();
 
+    /**
+     * Enter description here...
+     *
+     */
     abstract protected function _indexEntries();
 }

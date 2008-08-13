@@ -15,6 +15,11 @@ require_once 'Zend/Feed/Reader/Feed/Interface.php';
  */
 class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implements Zend_Feed_Reader_Feed_Interface 
 {
+    /**
+     * Enter description here...
+     *
+     * @return array
+     */
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {
@@ -28,17 +33,13 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         
         if ($authors->length) {
             foreach ($authors as $author) {
-                $people[] = new Zend_Feed_Reader_Author($author->getElementsByTagName('name')->item(0)->nodeValue,
-                                                        $author->getElementsByTagName('email')->item(0)->nodeValue,
-                                                        $author->getElementsByTagName('uri')->item(0)->nodeValue);
+                $people[] = $this->_getAuthor($author);
             }
         }
         
         if ($contributors->length) {
             foreach ($contributors as $contributor) {
-                $people[] = new Zend_Feed_Reader_Author($contributor->getElementsByTagName('name')->item(0)->nodeValue,
-                                                        $contributor->getElementsByTagName('email')->item(0)->nodeValue,
-                                                        $contributor->getElementsByTagName('uri')->item(0)->nodeValue);
+                $people[] = $this->_getAuthor($contributor);
             }
         }
 
@@ -46,6 +47,12 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['authors'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @param unknown_type $index
+     * @return Zend_Feed_Reader_Author
+     */
     public function getAuthor($index = 0)
     {
         $authors = $this->getAuthors();
@@ -54,7 +61,25 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         }
         return null;
     }
+    
+    /**
+     * Enter description here...
+     *
+     * @param DOMElement $element
+     * @return Zend_Feed_Reader_Author
+     */
+    protected function _getAuthor(DOMElement $element)
+    {
+        return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('email')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('uri')->item(0)->nodeValue);
+    }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getCopyright()
     {
         if (isset($this->_data['copyright'])) {
@@ -77,6 +102,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['copyright'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return unknown
+     */
     public function getDateCreated()
     {
         if (isset($this->_data['datecreated'])) {
@@ -97,6 +127,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['datecreated'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return unknown
+     */
     public function getDateModified()
     {
         if (isset($this->_data['datemodified'])) {
@@ -120,6 +155,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['datemodified'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getDescription()
     {
         if (isset($this->_data['description'])) {
@@ -142,6 +182,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['description'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getGenerator()
     {
         if (isset($this->_data['generator'])) {
@@ -158,6 +203,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['generator'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getLanguage()
     {
         if (isset($this->_data['language'])) {
@@ -174,6 +224,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['language'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getLink()
     {
         if (isset($this->_data['link'])) {
@@ -190,6 +245,11 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['link'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getTitle()
     {
         if (isset($this->_data['title'])) {
@@ -206,6 +266,10 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         return $this->_data['title'];
     }
     
+    /**
+     * Enter description here...
+     *
+     */
     protected function _registerDefaultNamespaces()
     {
         switch ($this->_data['type']) {
@@ -220,6 +284,10 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         $this->_xpath->registerNamespace('dc11', Zend_Feed_Reader::NAMESPACE_DC_11);
     }
 
+    /**
+     * Enter description here...
+     *
+     */
     protected function _indexEntries()
     {
         $entries = array();

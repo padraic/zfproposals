@@ -9,19 +9,55 @@ require_once 'Zend/Feed/Reader/Author.php';
 
 class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
 {
-
+    /**
+     * Enter description here...
+     *
+     * @var Zend_Feed_Entry_Abstract
+     */
     protected $_entry = null;
 
+    /**
+     * Enter description here...
+     *
+     * @var int
+     */
     protected $_entryKey = 0;
 
+    /**
+     * Enter description here...
+     *
+     * @var string
+     */
     protected $_xpathQuery = '';
 
+    /**
+     * Enter description here...
+     *
+     * @var array
+     */
     protected $_data = array();
 
+    /**
+     * Enter description here...
+     *
+     * @var DOMXPath
+     */
     protected $_xpath = null;
 
+    /**
+     * Enter description here...
+     *
+     * @var DOMDocument
+     */
     protected $_domDocument = null;
 
+    /**
+     * Enter description here...
+     *
+     * @param Zend_Feed_Entry_Abstract $entry
+     * @param int $entryKey
+     * @param string $type
+     */
     public function __construct(Zend_Feed_Entry_Abstract $entry, $entryKey, $type = null)
     {
         $this->_entry = $entry;
@@ -36,11 +72,21 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         }
     }
 
+    /**
+     * Enter description here...
+     *
+     * @param DOMXPath $xpath
+     */
     public function setXpath(DOMXPath $xpath)
     {
         $this->_xpath = $xpath;
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return array
+     */
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {
@@ -67,14 +113,13 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         $this->_data['authors'] = $people;
         return $this->_data['authors'];
     }
-    
-    protected function _getAuthor(DOMElement $element)
-    {
-        return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
-                                           $element->getElementsByTagName('email')->item(0)->nodeValue,
-                                           $element->getElementsByTagName('uri')->item(0)->nodeValue);
-    }
 
+    /**
+     * Enter description here...
+     *
+     * @param unknown_type $index
+     * @return Zend_Feed_Reader_Author
+     */
     public function getAuthor($index = 0)
     {
         $authors = $this->getAuthors();
@@ -83,7 +128,25 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         }
         return null;
     }
+    
+    /**
+     * Enter description here...
+     *
+     * @param DOMElement $element
+     * @return Zend_Feed_Reader_Author
+     */
+    protected function _getAuthor(DOMElement $element)
+    {
+        return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('email')->item(0)->nodeValue,
+                                           $element->getElementsByTagName('uri')->item(0)->nodeValue);
+    }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getContent()
     {
         if (isset($this->_data['content'])) {
@@ -100,6 +163,11 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['content'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return unknown
+     */
     public function getDateCreated()
     {
         if (isset($this->_data['datecreated'])) {
@@ -120,6 +188,11 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['datecreated'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return unknown
+     */
     public function getDateModified()
     {
         if (isset($this->_data['datemodified'])) {
@@ -140,6 +213,11 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['datemodified'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getDescription()
     {
         if (isset($this->_data['description'])) {
@@ -156,6 +234,11 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['description'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getId()
     {
         if (isset($this->_data['id'])) {
@@ -165,9 +248,9 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         $id = $this->_xpath->evaluate('string(' . $this->_xpathQuery . '/atom:id)');
 
         if (!$id) {
-            //if ($this->getPermalink()) {
-            //    $id = $this->getPermalink();
-            if ($this->getTitle()) {
+            if ($this->getPermalink()) {
+                $id = $this->getPermalink();
+            } elseif ($this->getTitle()) {
                 $id = $this->getTitle();
             } else {
                 $id = null;
@@ -177,6 +260,12 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['id'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @param int $index
+     * @return string
+     */
     public function getLink($index = 0)
     {
         if (!isset($this->_data['links'])) {
@@ -188,6 +277,11 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return null;
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return array
+     */
     public function getLinks() 
     {
         if (isset($this->_data['links'])) {
@@ -206,11 +300,21 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['links'];
     }
     
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getPermalink()
     {
         return $this->getLink(0);
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getTitle()
     {
         if (isset($this->_data['title'])) {
@@ -227,16 +331,31 @@ class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
         return $this->_data['title'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
     public function getType()
     {
         return $this->_data['type'];
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return array
+     */
     public function toArray()
     {
         return $this->_data;
     }
 
+    /**
+     * Enter description here...
+     *
+     * @return DOMDocument
+     */
     public function getDomDocument()
     {
         return $this->_domDocument;
