@@ -118,6 +118,11 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed_Abstract implement
         $this->_data['description'] = $description;
         return $this->_data['description'];
     }
+    
+    public function getGenerator()
+    {
+        // TODO: Implement
+    }
 
     public function getLanguage()
     {

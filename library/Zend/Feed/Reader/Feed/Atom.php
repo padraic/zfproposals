@@ -141,6 +141,22 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         $this->_data['description'] = $description;
         return $this->_data['description'];
     }
+    
+    public function getGenerator()
+    {
+        if (isset($this->_data['generator'])) {
+            return $this->_data['generator'];
+        }
+        // TODO: Add uri support
+        $generator = $this->_xpath->evaluate('string(/atom:feed/atom:generator)');
+
+        if (!$generator) {
+            $generator = null;
+        }
+
+        $this->_data['generator'] = $generator;
+        return $this->_data['generator'];
+    }
 
     public function getLanguage()
     {

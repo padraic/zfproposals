@@ -106,6 +106,25 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
     }
     
     /**
+     * Get Generator (Unencoded Text)
+     */
+    public function testGetsGeneratorFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/generator/plain/atom03.xml')
+        );
+        $this->assertEquals('Zend_Feed', $feed->getGenerator());
+    }
+
+    public function testGetsGeneratorFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/generator/plain/atom10.xml')
+        );
+        $this->assertEquals('Zend_Feed', $feed->getGenerator());
+    }
+    
+    /**
      * Get Single Author (Unencoded Text)
      */
     public function testGetsSingleAuthorFromAtom03()
