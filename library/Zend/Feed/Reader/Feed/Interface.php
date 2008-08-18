@@ -18,6 +18,8 @@ interface Zend_Feed_Reader_Feed_Interface
 
     public function getGenerator();
     
+    public function getId();
+    
     public function getLanguage();
 
     public function getLink();

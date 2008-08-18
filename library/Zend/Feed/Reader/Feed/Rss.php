@@ -123,6 +123,39 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed_Abstract implement
     {
         // TODO: Implement
     }
+    
+    public function getId()
+    {
+        if (isset($this->_data['id'])) {
+            return $this->_data['id'];
+        }
+        $id = null;
+        if ($this->getType() !== Zend_Feed_Reader::TYPE_RSS_10 && $this->getType() !== Zend_Feed_Reader::TYPE_RSS_090) {
+            $id = $this->_xpath->evaluate('string(/rss/channel/guid)');
+            if (!$id) {
+                $id = $this->_xpath->evaluate('string(/rss/channel/dc11:identifier)');
+            }
+            if (!$id) {
+                $id = $this->_xpath->evaluate('string(/rss/channel/dc10:identifier)');
+            }
+        } else {
+            $id = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc11:identifier)');
+            if (!$id) {
+                $id = $this->_xpath->evaluate('string(/rdf:RDF/rss:channel/dc10:identifier)');
+            }
+        }
+        if (!$id) {
+            if ($this->getLink()) {
+                $id = $this->getLink();
+            } elseif ($this->getTitle()) {
+                $id = $this->getTitle();
+            } else {
+                $id = null;
+            }
+        }
+        $this->_data['id'] = $id;
+        return $this->_data['id'];
+    }
 
     public function getLanguage()
     {

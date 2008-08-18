@@ -223,6 +223,32 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         $this->_data['language'] = $language;
         return $this->_data['language'];
     }
+    
+    /**
+     * Enter description here...
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        if (isset($this->_data['id'])) {
+            return $this->_data['id'];
+        }
+
+        $id = $this->_xpath->evaluate('string(/atom:feed/atom:id)');
+
+        if (!$id) {
+            if ($this->getLink()) {
+                $id = $this->getLink();
+            } elseif ($this->getTitle()) {
+                $id = $this->getTitle();
+            } else {
+                $id = null;
+            }
+        }
+        $this->_data['id'] = $id;
+        return $this->_data['id'];
+    }
 
     /**
      * Enter description here...
