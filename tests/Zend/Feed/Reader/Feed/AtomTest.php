@@ -182,6 +182,25 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals('My Description', $feed->getDescription());
     }
+    
+    /**
+     * Get Id (Unencoded Text)
+     */
+    public function testGetsIdFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/atom03.xml')
+        );
+        $this->assertEquals('123', $feed->getId());
+    }
+
+    public function testGetsIdFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/id/plain/atom10.xml')
+        );
+        $this->assertEquals('123', $feed->getId());
+    }
 
     /**
      * Get Language (Unencoded Text)

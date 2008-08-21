@@ -10,6 +10,7 @@ require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'ReaderTest.php';
+require_once 'Reader/AuthorTest.php';
 require_once 'Reader/Feed/RssTest.php';
 require_once 'Reader/Entry/RssTest.php';
 require_once 'Reader/Feed/AtomTest.php';
@@ -26,6 +27,8 @@ class Zend_Feed_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Feed');
 
+        // Author
+        $suite->addTestSuite('Zend_Feed_Reader_AuthorTest');
         // Base parent class
         $suite->addTestSuite('Zend_Feed_ReaderTest');
         // RSS - Feed Level
