@@ -5,7 +5,7 @@
  * and Atom versions.
  * Or will...when it's been completed ;).
  *
- * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright 2008 Jurriën Stutterheim
  */
 class Zend_Feed_Reader_Author
 {

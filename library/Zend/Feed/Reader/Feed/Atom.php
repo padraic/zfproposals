@@ -11,7 +11,7 @@ require_once 'Zend/Feed/Reader/Feed/Interface.php';
  * Zend_Feed_Abstract objects and presents a common unified API for all RSS
  * and Atom versions.
  *
- * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
+ * @copyright 2008 Jurriën Stutterheim
  */
 class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implements Zend_Feed_Reader_Feed_Interface 
 {
