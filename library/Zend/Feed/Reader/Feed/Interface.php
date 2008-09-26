@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright 2008 JurriÃ«n Stutterheim
+ * @copyright 2008 Jurriën Stutterheim
  */
 
 interface Zend_Feed_Reader_Feed_Interface

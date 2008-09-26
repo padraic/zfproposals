@@ -1,13 +1,14 @@
 <?php
-/**
- * @copyright 2008 JurriÃ«n Stutterheim
- */
- 
+
 require_once 'Zend/Feed/Reader.php';
 
 require_once 'Zend/Feed/Reader/Entry/Interface.php';
 
-require_once 'Zend/Feed/Reader/Author.php'
+require_once 'Zend/Feed/Reader/Author.php';
+
+/**
+ * @copyright 2008 Jurriën Stutterheim
+ */
 
 class Zend_Feed_Reader_Entry_Atom implements Zend_Feed_Reader_Entry_Interface
 {
