@@ -1,0 +1,18 @@
+Zend_Feed_Reader TODO
+=====================
+
+1. Complete refactoring of Dublin Core support to an extracted class.
+2. Implement Dublin Core support for Atom feeds.
+3. Implement Atom support as an extension to RSS/RDF
+4. Feed interpreting behaviour should utilise the following standard priority
+   for RSS feeds (need tests to verify this!):
+        - RSS Elements
+        - DC Elements
+        - Atom Elements
+5. Should be possible to avoid unnecessary querying via XPath by detecting
+   Atom/DC support and avoiding any Atom/DC instance calls if not supported.
+6. Implement value decoding scheme for simple text strings.
+7. Examine feasibility of HTML filtering against using a whitelist approach.
+8. Examine the links between ZFR and ZF. Should ZFR optionally control feed loading?
+9. Implement caching solutions including feed caching, Conditional HTTP GET, and preservation of internal class member caching.
+10. Implement a plugin system to support both standard and custom plugins 
