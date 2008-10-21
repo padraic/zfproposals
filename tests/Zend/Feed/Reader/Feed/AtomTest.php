@@ -42,11 +42,20 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
         );
         
         $authors = array(
+        	'joe@example.com (Joe Bloggs)',
+        	'jane@example.com (Jane Bloggs)'
+        );
+        
+        $this->assertEquals($authors, $feed->getAuthors());
+        
+        /*
+        $authors = array(
             new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com'),
             new Zend_Feed_Reader_Author('Jane Bloggs', 'jane@example.com', 'http://www.example.com')
         );
         
         $this->assertEquals($authors, $feed->getAuthors());
+		*/
     }
 
     public function testGetsAuthorArrayFromAtom10()
@@ -56,11 +65,51 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
         );
         
         $authors = array(
+        	'joe@example.com (Joe Bloggs)',
+        	'jane@example.com (Jane Bloggs)'
+        );
+        
+        $this->assertEquals($authors, $feed->getAuthors());
+        
+        /*
+        $authors = array(
             new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com'),
             new Zend_Feed_Reader_Author('Jane Bloggs', 'jane@example.com', 'http://www.example.com')
         );
         
         $this->assertEquals($authors, $feed->getAuthors());
+		*/
+    }
+    
+	/**
+     * Get Single Author (Unencoded Text)
+     */
+    public function testGetsSingleAuthorFromAtom03()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/author/plain/atom03.xml')
+        );
+        
+        $this->assertEquals('joe@example.com (Joe Bloggs)', $feed->getAuthor());
+        
+        /*
+        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
+        $this->assertEquals($author, $feed->getAuthor());
+		*/
+    }
+
+    public function testGetsSingleAuthorFromAtom10()
+    {
+        $feed = Zend_Feed_Reader::importString(
+            file_get_contents($this->_feedSamplePath.'/author/plain/atom10.xml')
+        );
+        
+        $this->assertEquals('joe@example.com (Joe Bloggs)', $feed->getAuthor());
+        
+        /*
+        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
+        $this->assertEquals($author, $feed->getAuthor());
+		*/
     }
     
     /**
@@ -122,27 +171,6 @@ class Zend_Feed_Reader_Feed_AtomTest extends PHPUnit_Framework_TestCase
             file_get_contents($this->_feedSamplePath.'/generator/plain/atom10.xml')
         );
         $this->assertEquals('Zend_Feed', $feed->getGenerator());
-    }
-    
-    /**
-     * Get Single Author (Unencoded Text)
-     */
-    public function testGetsSingleAuthorFromAtom03()
-    {
-        $feed = Zend_Feed_Reader::importString(
-            file_get_contents($this->_feedSamplePath.'/author/plain/atom03.xml')
-        );
-        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
-        $this->assertEquals($author, $feed->getAuthor());
-    }
-
-    public function testGetsSingleAuthorFromAtom10()
-    {
-        $feed = Zend_Feed_Reader::importString(
-            file_get_contents($this->_feedSamplePath.'/author/plain/atom10.xml')
-        );
-        $author = new Zend_Feed_Reader_Author('Joe Bloggs', 'joe@example.com', 'http://www.example.com');
-        $this->assertEquals($author, $feed->getAuthor());
     }
 
     /**
