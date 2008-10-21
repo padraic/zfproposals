@@ -52,6 +52,7 @@ class Zend_Feed_Reader_Entry_Dc
         $this->_registerNamespaces();
     }
 
+    // TODO: Create Zend_Feed_Reader_Author objects
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {

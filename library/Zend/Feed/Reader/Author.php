@@ -36,4 +36,9 @@ class Zend_Feed_Reader_Author
     {
         return $this->_uri;
     }
+    
+    public function __toString()
+    {
+    	return $this->_email . ' (' . $this->_author . ')';
+    }
 }

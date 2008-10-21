@@ -48,6 +48,7 @@ class Zend_Feed_Reader_Entry_Rss implements Zend_Feed_Reader_Entry_Interface
         $this->_dc->setXpath($this->_xpath);
     }
 
+    // TODO: Create Zend_Feed_Reader_Author objects
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {

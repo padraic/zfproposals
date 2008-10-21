@@ -89,9 +89,13 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
      */
     protected function _getAuthor(DOMElement $element)
     {
-        return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
+        return $element->getElementsByTagName('email')->item(0)->nodeValue . ' (' . $element->getElementsByTagName('name')->item(0)->nodeValue . ')';
+    	/*
+        Don't actually return a Zend_Feed_Reader_Author until it's implemented for RSS as well
+		return new Zend_Feed_Reader_Author($element->getElementsByTagName('name')->item(0)->nodeValue,
                                            $element->getElementsByTagName('email')->item(0)->nodeValue,
                                            $element->getElementsByTagName('uri')->item(0)->nodeValue);
+		*/
     }
 
     /**
@@ -141,7 +145,7 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
         if (!$dateCreated) {
             $dateCreated = null;
         }
-        // TODO: Make the date a Zend_Date object?
+
         $this->_data['datecreated'] = $dateCreated;
         return $this->_data['datecreated'];
     }
@@ -165,7 +169,6 @@ class Zend_Feed_Reader_Feed_Atom extends Zend_Feed_Reader_Feed_Abstract implemen
             $dateModified = $this->_xpath->evaluate('string(' . $this->getXpathPrefix() . '/atom:updated)');
         }
         
-        // TODO: Make the date a Zend_Date object?
         if (!$dateModified) {
             $dateModified = null;
         }

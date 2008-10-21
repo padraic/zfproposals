@@ -36,6 +36,7 @@ class Zend_Feed_Reader_Feed_Rss extends Zend_Feed_Reader_Feed_Abstract implement
         }
     }
 
+    // TODO: Create Zend_Feed_Reader_Author objects
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {

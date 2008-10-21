@@ -24,6 +24,7 @@ class Zend_Feed_Reader_Feed_Dc extends Zend_Feed_Reader_Feed_Abstract
         return $this->_xpathPrefix;
     }
 
+    // TODO: Create Zend_Feed_Reader_Author objects
     public function getAuthors()
     {
         if (isset($this->_data['authors'])) {
