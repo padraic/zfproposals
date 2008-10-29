@@ -140,6 +140,11 @@ abstract class Zend_Feed_Reader_Feed_Abstract implements Iterator
         $this->_feed->next();
     }
 
+    public function valid()
+    {
+        //TODO: Implement
+    }
+
     /**
      * Enter description here...
      *
