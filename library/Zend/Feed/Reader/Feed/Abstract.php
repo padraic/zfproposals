@@ -10,7 +10,7 @@ require_once 'Zend/Feed/Reader.php';
  *
  * @copyright 2007-2008 Pádraic Brady (http://blog.astrumfutura.com)
  */
-abstract class Zend_Feed_Reader_Feed_Abstract
+abstract class Zend_Feed_Reader_Feed_Abstract implements Iterator
 {
     /**
      * Enter description here...
