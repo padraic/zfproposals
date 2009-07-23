@@ -29,6 +29,11 @@ require_once 'Zend/Date.php';
 require_once 'Zend/Uri.php';
 
 /**
+ * @see Zend_Feed_Writer_Entry
+ */
+require_once 'Zend/Feed/Writer/Entry.php';
+
+/**
  * @category   Zend
  * @package    Zend_Feed_Writer
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -241,9 +246,9 @@ class Zend_Feed_Writer
      */
     public function setId($id)
     {
-        if (empty($id) || !is_string($id)) {
+        if (empty($id) || !is_string($id) || !Zend_Uri::check($id)) {
             require_once 'Zend/Feed/Exception.php';
-            throw new Zend_Feed_Exception('Invalid parameter: parameter must be a non-empty string');
+            throw new Zend_Feed_Exception('Invalid parameter: parameter must be a non-empty string and valid URI/IRI');
         }
         $this->_data['id'] = $id;
     }
@@ -500,6 +505,13 @@ class Zend_Feed_Writer
     public function reset()
     {
         $this->_data = array();
+    }
+
+    public function addEntry()
+    {
+        $newEntry = new Zend_Feed_Writer_Entry;
+        $this->_entries[] = $newEntry;
+        return $newEntry;
     }
 
 }

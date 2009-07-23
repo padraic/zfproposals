@@ -152,6 +152,23 @@ class Zend_Feed_Writer_EntryTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    public function testSetsContent()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $entry->setContent('I\'m content.');
+        $this->assertEquals("I'm content.", $entry->getContent());
+    }
+
+    public function testSetContentThrowsExceptionOnInvalidParam()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setContent('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
     public function testSetDateCreatedDefaultsToCurrentTime()
     {
         $entry = new Zend_Feed_Writer_Entry;
@@ -238,6 +255,12 @@ class Zend_Feed_Writer_EntryTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_null($entry->getCopyright()));
     }
 
+    public function testGetContentReturnsNullIfDateNotSet()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $this->assertTrue(is_null($entry->getContent()));
+    }
+
     public function testSetsDescription()
     {
         $entry = new Zend_Feed_Writer_Entry;
@@ -264,8 +287,8 @@ class Zend_Feed_Writer_EntryTest extends PHPUnit_Framework_TestCase
     public function testSetsId()
     {
         $entry = new Zend_Feed_Writer_Entry;
-        $entry->setId('abc');
-        $this->assertEquals('abc', $entry->getId());
+        $entry->setId('http://www.example.com/id');
+        $this->assertEquals('http://www.example.com/id', $entry->getId());
     }
 
     public function testSetIdThrowsExceptionOnInvalidParameter()
@@ -321,10 +344,109 @@ class Zend_Feed_Writer_EntryTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function testGetLinkReturnsNullIfDateNotSet()
+    public function testGetLinkReturnsNullIfNotSet()
     {
         $entry = new Zend_Feed_Writer_Entry;
         $this->assertTrue(is_null($entry->getLink()));
+    }
+
+    public function testSetsPermalink()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $entry->setPermalink('http://www.example.com/id');
+        $this->assertEquals('http://www.example.com/id', $entry->getPermalink());
+    }
+
+    public function testSetPermalinkThrowsExceptionOnEmptyString()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setPermalink('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testSetPermalinkThrowsExceptionOnInvalidUri()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setPermalink('http://');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testGetPermalinkReturnsNullIfNotSet()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $this->assertTrue(is_null($entry->getPermalink()));
+    }
+
+    public function testSetsCommentLink()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $entry->setCommentLink('http://www.example.com/id/comments');
+        $this->assertEquals('http://www.example.com/id/comments', $entry->getCommentLink());
+    }
+
+    public function testSetCommentLinkThrowsExceptionOnEmptyString()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentLink('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testSetCommentLinkThrowsExceptionOnInvalidUri()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentLink('http://');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testGetCommentLinkReturnsNullIfDateNotSet()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $this->assertTrue(is_null($entry->getCommentLink()));
+    }
+
+    public function testSetsCommentFeedLink()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $entry->setCommentFeedLink('http://www.example.com/id/comments');
+        $this->assertEquals('http://www.example.com/id/comments', $entry->getCommentFeedLink());
+    }
+
+    public function testSetCommentFeedLinkThrowsExceptionOnEmptyString()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentFeedLink('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testSetCommentFeedLinkThrowsExceptionOnInvalidUri()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentFeedLink('http://');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testGetCommentFeedLinkReturnsNullIfDateNotSet()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $this->assertTrue(is_null($entry->getCommentFeedLink()));
     }
 
     public function testSetsTitle()
@@ -348,6 +470,39 @@ class Zend_Feed_Writer_EntryTest extends PHPUnit_Framework_TestCase
     {
         $entry = new Zend_Feed_Writer_Entry;
         $this->assertTrue(is_null($entry->getTitle()));
+    }
+
+    public function testSetsCommentCount()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $entry->setCommentCount('10');
+        $this->assertEquals(10, $entry->getCommentCount());
+    }
+
+    public function testSetCommentCountThrowsExceptionOnInvalidEmptyParameter()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentCount('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testSetCommentCountThrowsExceptionOnInvalidNonIntegerParameter()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        try {
+            $entry->setCommentCount('a');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testGetCommentCountReturnsNullIfDateNotSet()
+    {
+        $entry = new Zend_Feed_Writer_Entry;
+        $this->assertTrue(is_null($entry->getCommentCount()));
     }
 
 }

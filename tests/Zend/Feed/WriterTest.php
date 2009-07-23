@@ -264,8 +264,8 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
     public function testSetsId()
     {
         $writer = new Zend_Feed_Writer;
-        $writer->setId('abc');
-        $this->assertEquals('abc', $writer->getId());
+        $writer->setId('http://www.example.com/id');
+        $this->assertEquals('http://www.example.com/id', $writer->getId());
     }
 
     public function testSetIdThrowsExceptionOnInvalidParameter()
@@ -273,6 +273,16 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
         $writer = new Zend_Feed_Writer;
         try {
             $writer->setId('');
+            $this->fail();
+        } catch (Zend_Feed_Exception $e) {
+        }
+    }
+
+    public function testSetIdThrowsExceptionOnInvalidUri()
+    {
+        $writer = new Zend_Feed_Writer;
+        try {
+            $writer->setId('http://');
             $this->fail();
         } catch (Zend_Feed_Exception $e) {
         }

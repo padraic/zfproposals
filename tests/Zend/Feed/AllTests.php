@@ -33,6 +33,7 @@ require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/Feed/WriterTest.php';
+require_once 'Zend/Feed/Writer/EntryTest.php';
 
 
 class Zend_AllTests
@@ -47,6 +48,7 @@ class Zend_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend');
 
         $suite->addTestSuite('Zend_Feed_WriterTest');
+        $suite->addTestSuite('Zend_Feed_Writer_EntryTest');
 
         return $suite;
     }
