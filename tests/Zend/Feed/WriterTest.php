@@ -486,4 +486,22 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_null($writer->getFeedLinks()));
     }
 
+    public function testAddsNewEntryToInternalCollection()
+    {
+        $writer = new Zend_Feed_Writer;
+        $entry = $writer->addEntry();
+        $this->assertTrue($entry instanceof Zend_Feed_Writer_Entry);
+    }
+
+    public function testOrdersEntriesByDateIfRequested()
+    {
+        $writer = new Zend_Feed_Writer;
+        $entry = $writer->addEntry();
+        $entry->setDateCreated(1234567890);
+        $entry2 = $writer->addEntry();
+        $entry2->setDateCreated(1230000000);
+        $writer->orderByDate();
+        $this->assertEquals(1230000000, $writer->getEntry(1)->getDateCreated()->get(Zend_Date::TIMESTAMP));
+    }
+
 }

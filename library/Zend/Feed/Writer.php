@@ -514,4 +514,26 @@ class Zend_Feed_Writer
         return $newEntry;
     }
 
+    public function getEntry($index)
+    {
+        if (isset($this->_entries[$index])) {
+            return $this->_entries[$index];
+        }
+        return null;
+    }
+
+    public function orderByDate()
+    {
+        $timestamp = time();
+        $entries = array();
+        foreach ($this->_entries as $entry) {
+            if ($entry->getDateCreated()) {
+                $timestamp = (int) $entry->getDateCreated()->get(Zend_Date::TIMESTAMP);
+            }
+            $entries[$timestamp] = $entry;
+        }
+        krsort($entries, SORT_NUMERIC);
+        $this->_entries = array_values($entries);
+    }
+
 }
