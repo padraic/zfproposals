@@ -240,13 +240,14 @@ class Zend_Feed_Writer
     }
 
     /**
-     * Set the feed ID
+     * Set the feed ID - URI or URN (via PCRE pattern) supported
      *
      * @return string|null
      */
     public function setId($id)
     {
-        if (empty($id) || !is_string($id) || !Zend_Uri::check($id)) {
+        if ((empty($id) || !is_string($id) || !Zend_Uri::check($id)) &&
+        !preg_match("#^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{1,31}:([a-zA-Z0-9\(\)\+\,\.\:\=\@\;\$\_\!\*\-]|%[0-9a-fA-F]{2})*#", $id)) {
             require_once 'Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('Invalid parameter: parameter must be a non-empty string and valid URI/IRI');
         }
@@ -524,6 +525,7 @@ class Zend_Feed_Writer
 
     public function orderByDate()
     {
+        // maybe not the most efficient way - but it works until something better comes along
         $timestamp = time();
         $entries = array();
         foreach ($this->_entries as $entry) {

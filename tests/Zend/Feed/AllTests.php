@@ -34,6 +34,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/Feed/WriterTest.php';
 require_once 'Zend/Feed/Writer/EntryTest.php';
+require_once 'Zend/Feed/Writer/Feed/AtomTest.php';
 
 
 class Zend_AllTests
@@ -49,6 +50,7 @@ class Zend_AllTests
 
         $suite->addTestSuite('Zend_Feed_WriterTest');
         $suite->addTestSuite('Zend_Feed_Writer_EntryTest');
+        $suite->addTestSuite('Zend_Feed_Writer_Feed_AtomTest');
 
         return $suite;
     }

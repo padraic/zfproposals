@@ -268,6 +268,13 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://www.example.com/id', $writer->getId());
     }
 
+    public function testStesIdAcceptsUrns()
+    {
+        $writer = new Zend_Feed_Writer;
+        $writer->setId('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6');
+        $this->assertEquals('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6', $writer->getId());
+    }
+
     public function testSetIdThrowsExceptionOnInvalidParameter()
     {
         $writer = new Zend_Feed_Writer;
