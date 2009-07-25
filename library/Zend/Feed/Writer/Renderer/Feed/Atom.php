@@ -13,7 +13,7 @@
  * to padraic dot brady at yahoo dot com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Feed_container_Renderer_Feed_Atom
+ * @package    Zend_Feed_Writer_Renderer_Feed_Atom
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -28,11 +28,11 @@ require_once 'Zend/Feed/Writer/Renderer/Entry/Atom.php';
 
 /**
  * @category   Zend
- * @package    Zend_Feed_container_Renderer_Feed_Atom
+ * @package    Zend_Feed_Writer_Renderer_Feed_Atom
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_RendererInterface
+class Zend_Feed_Writer_Renderer_Feed_Atom implements Zend_Feed_Writer_RendererInterface
 {
 
     protected $_container = null;
@@ -41,7 +41,7 @@ class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_Rend
 
     protected $_ignoreExceptions = false;
 
-    public function __construct (Zend_Feed_container $container)
+    public function __construct (Zend_Feed_Writer $container)
     {
         $this->_container = $container;
     }
@@ -53,9 +53,8 @@ class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_Rend
         }
         $this->_dom = new DOMDocument('1.0', $this->_container->getEncoding());
         $this->_dom->formatOutput = true;
-        $ns = Zend_Feed_container::NAMESPACE_ATOM_10;
         // create the root element COMPULSORY
-        $root = $this->_dom->createElementNS($ns, 'feed');
+        $root = $this->_dom->createElementNS(Zend_Feed_Writer::NAMESPACE_ATOM_10, 'feed');
         $this->_dom->appendChild($root);
         // set the language OPTIONAL
         if ($this->_container->getLanguage()) {
@@ -79,7 +78,7 @@ class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_Rend
         $updated->nodeValue = $this->_container->getDateModified()->get(Zend_Date::ISO_8601);
         // set the generator OPTIONAL
         if (!$this->_container->getGenerator()) {
-            $this->_container->setGenerator('Zend_Feed_container', Zend_Version::VERSION, 'http://framework.zend.com');
+            $this->_container->setGenerator('Zend_Feed_Writer', Zend_Version::VERSION, 'http://framework.zend.com');
         }
         $gdata = $this->_container->getGenerator();
         $generator = $this->_dom->createElement('generator');
@@ -149,9 +148,10 @@ class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_Rend
         return $this->_dom;
     }
 
-    public function getElement(
+    public function getElement()
+    {
         return $this->_dom->documentElement;
-    );
+    }
 
     public function getDataContainer()
     {
