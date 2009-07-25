@@ -39,7 +39,7 @@ require_once 'Zend/Feed/Writer/Entry.php';
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Writer
+class Zend_Feed_Writer implements Iterator, Countable
 {
 	/**
 	 * Namespace constants
@@ -74,6 +74,20 @@ class Zend_Feed_Writer
      * @var array
      */
     protected $_data = array();
+
+    /**
+     * Contains all entry objects
+     *
+     * @var array
+     */
+    protected $_entries = array();
+
+    /**
+     * A pointer for the iterator to keep track of the entries array
+     *
+     * @var int
+     */
+    protected $_entriesKey = 0;
 
     /**
      * Set a single author
@@ -508,28 +522,38 @@ class Zend_Feed_Writer
         $this->_data = array();
     }
 
-    public function addEntry()
+    public function createEntry()
     {
-        $newEntry = new Zend_Feed_Writer_Entry;
-        $this->_entries[] = $newEntry;
-        return $newEntry;
+        $entry = new Zend_Feed_Writer_Entry;
+        if ($this->getEncoding()) {
+            $entry->setEncoding($this->getEncoding());
+        }
+        return $entry;
     }
 
-    public function getEntry($index)
+    public function addEntry(Zend_Feed_Writer_Entry $entry)
+    {
+        $this->_entries[] = $entry;
+    }
+
+    public function getEntry($index = 0)
     {
         if (isset($this->_entries[$index])) {
             return $this->_entries[$index];
         }
-        return null;
+        require_once 'Zend/Feed/Exception.php';
+        throw new Zend_Feed_Exception('Undefined index: ' . $index . '. Entry does not exist.');
     }
 
-    public function orderByDate()
+    public function orderByDate() // partially tested - created v modified?
     {
         // maybe not the most efficient way - but it works until something better comes along
         $timestamp = time();
         $entries = array();
         foreach ($this->_entries as $entry) {
-            if ($entry->getDateCreated()) {
+            if ($entry->getDateModified()) {
+                $timestamp = (int) $entry->getDateModified()->get(Zend_Date::TIMESTAMP);
+            } elseif ($entry->getDateCreated()) {
                 $timestamp = (int) $entry->getDateCreated()->get(Zend_Date::TIMESTAMP);
             }
             $entries[$timestamp] = $entry;
@@ -537,5 +561,87 @@ class Zend_Feed_Writer
         krsort($entries, SORT_NUMERIC);
         $this->_entries = array_values($entries);
     }
+
+    /**
+     * Get the number of feed entries.
+     * Required by the Iterator interface.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->_entries);
+    }
+
+	/**
+     * Return the current entry
+     *
+     * @return Zend_Feed_Reader_Entry_Interface
+     */
+    public function current()
+    {
+        return $this->_entries[$this->key()];
+    }
+
+    /**
+     * Return the current feed key
+     *
+     * @return unknown
+     */
+    public function key()
+    {
+        return $this->_entriesKey;
+    }
+
+	/**
+     * Move the feed pointer forward
+     *
+     */
+    public function next()
+    {
+        ++$this->_entriesKey;
+    }
+
+    /**
+     * Reset the pointer in the feed object
+     *
+     */
+    public function rewind()
+    {
+        $this->_entriesKey = 0;
+    }
+
+    /**
+     * Check to see if the iterator is still valid
+     *
+     * @return boolean
+     */
+    public function valid()
+    {
+        return 0 <= $this->_entriesKey && $this->_entriesKey < $this->count();
+    }
+
+    /**
+     * Attempt to build and return the feed resulting from the data set
+     *
+     * @param $type The feed type "rss" or "atom" to export as
+     * @return string
+     */
+    public function export($type, $ignoreExceptions = false)
+    {
+        $type = ucfirst(strtolower($type));
+        if ($type !== 'Rss' || $type !== 'Atom') {
+            require_once 'Zend/Feed/Exception.php';
+            throw new Zend_Feed_Exception('Invalid feed type specified: ' . $type . '.'
+            . ' Should be one of "rss" or "atom".');
+        }
+        $rendererClass = 'Zend_Feed_Writer_Feed_' . $type;
+        $renderer = new $renderClass($this);
+        if ($ignoreExceptions) {
+            $renderer->ignoreExceptions();
+        }
+        return $renderer->saveXml();
+    }
+
 
 }

@@ -268,7 +268,7 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('http://www.example.com/id', $writer->getId());
     }
 
-    public function testStesIdAcceptsUrns()
+    public function testSetsIdAcceptsUrns()
     {
         $writer = new Zend_Feed_Writer;
         $writer->setId('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6');
@@ -493,20 +493,22 @@ class Zend_Feed_WriterTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_null($writer->getFeedLinks()));
     }
 
-    public function testAddsNewEntryToInternalCollection()
+    public function testCreatesNewEntryDataContainer()
     {
         $writer = new Zend_Feed_Writer;
-        $entry = $writer->addEntry();
+        $entry = $writer->createEntry();
         $this->assertTrue($entry instanceof Zend_Feed_Writer_Entry);
     }
 
-    public function testOrdersEntriesByDateIfRequested()
+    public function testAddsAndOrdersEntriesByDateIfRequested()
     {
         $writer = new Zend_Feed_Writer;
-        $entry = $writer->addEntry();
+        $entry = $writer->createEntry();
         $entry->setDateCreated(1234567890);
-        $entry2 = $writer->addEntry();
+        $entry2 = $writer->createEntry();
         $entry2->setDateCreated(1230000000);
+        $writer->addEntry($entry);
+        $writer->addEntry($entry2);
         $writer->orderByDate();
         $this->assertEquals(1230000000, $writer->getEntry(1)->getDateCreated()->get(Zend_Date::TIMESTAMP));
     }

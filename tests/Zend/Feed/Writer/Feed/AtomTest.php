@@ -164,5 +164,4 @@ class Zend_Feed_Writer_Feed_AtomTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($feed->getLink(), $feed->getId());
     }
 
-
 }

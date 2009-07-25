@@ -1,1 +1,4 @@
 
+$writer = new Zend_Feed_Writer;
+$writer->setTitle('Something');
+$entry = $writer->createEntry();
