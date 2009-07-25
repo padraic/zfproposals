@@ -41,7 +41,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     {
         $feed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
         try {
-            $feed->build();
+            $feed->render();
         } catch (Zend_Feed_Exception $e) {
             $this->fail('Valid Writer object caused an exception when building which should never happen');
         }
@@ -51,7 +51,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     {
         $this->_validWriter->setEncoding('iso-8859-1');
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('iso-8859-1', $feed->getEncoding());
     }
@@ -59,7 +59,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedEncodingDefaultIsUsedIfEncodingNotSetByHand()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('utf-8', $feed->getEncoding());
     }
@@ -67,7 +67,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedTitleHasBeenSet()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('This is a test feed.', $feed->getTitle());
     }
@@ -75,7 +75,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedSubtitleHasBeenSet()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('This is a test description.', $feed->getDescription());
     }
@@ -83,7 +83,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedUpdatedDateHasBeenSet()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals(1234567890, $feed->getDateModified()->get(Zend_Date::TIMESTAMP));
     }
@@ -92,7 +92,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     {
         $this->_validWriter->setGenerator('FooFeedBuilder', '1.00', 'http://www.example.com');
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('FooFeedBuilder', $feed->getGenerator());
     }
@@ -100,7 +100,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedGeneratorDefaultIsUsedIfGeneratorNotSetByHand()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('Zend_Feed_Writer', $feed->getGenerator());
     }
@@ -109,7 +109,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     {
         $this->_validWriter->setLanguage('fr');
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('fr', $feed->getLanguage());
     }
@@ -117,7 +117,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedLanguageDefaultIsUsedIfGeneratorNotSetByHand()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals(null, $feed->getLanguage());
     }
@@ -125,7 +125,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedIncludesLinkToHtmlVersionOfFeed()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('http://www.example.com', $feed->getLink());
     }
@@ -133,7 +133,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedIncludesLinkToXmlAtomWhereTheFeedWillBeAvailable()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('http://www.example.com/atom', $feed->getFeedLink());
     }
@@ -141,7 +141,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedHoldsAnyAuthorAdded()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $author = $feed->getAuthor();
         $this->assertEquals('joe@example.com (Joe)', $feed->getAuthor());
@@ -151,7 +151,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     {
         $this->_validWriter->setId('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6');
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6', $feed->getId());
     }
@@ -159,7 +159,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
     public function testFeedIdDefaultIsUsedIfGeneratorNotSetByHand()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
-        $atomFeed->build();
+        $atomFeed->render();
         $feed = Zend_Feed_Reader::importString($atomFeed->saveXml());
         $this->assertEquals($feed->getLink(), $feed->getId());
     }

@@ -6,7 +6,7 @@ require_once 'Zend/Feed/Writer/Renderer/Feed/Atom.php';
 require_once 'Zend/Feed/Reader.php';
 require_once 'Zend/Version.php';
 
-class Zend_Feed_Writer_Entry_AtomTest extends PHPUnit_Framework_TestCase
+class Zend_Feed_Writer_Renderer_Entry_AtomTest extends PHPUnit_Framework_TestCase
 {
 
     protected $_validWriter = null;
@@ -38,6 +38,9 @@ class Zend_Feed_Writer_Entry_AtomTest extends PHPUnit_Framework_TestCase
         $this->_validEntry = null;
     }
 
-    // Tests standard Atom Feed elements
+    public function testFoo()
+    {
+        $renderer = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
+    }
 
 }

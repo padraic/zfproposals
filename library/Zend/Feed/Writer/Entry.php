@@ -287,6 +287,33 @@ class Zend_Feed_Writer_Entry
     }
 
     /**
+     * Set the feed character encoding
+     *
+     * @return string|null
+     */
+    public function setEncoding($encoding)
+    {
+        if (empty($encoding) || !is_string($encoding)) {
+            require_once 'Zend/Feed/Exception.php';
+            throw new Zend_Feed_Exception('Invalid parameter: parameter must be a non-empty string');
+        }
+        $this->_data['encoding'] = $encoding;
+    }
+
+    /**
+     * Get the feed character encoding
+     *
+     * @return string|null
+     */
+    public function getEncoding()
+    {
+        if (!array_key_exists('encoding', $this->_data)) {
+            return null;
+        }
+        return $this->_data['encoding'];
+    }
+
+    /**
      * Get the specified author
      *
      * @param  int $index

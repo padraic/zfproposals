@@ -41,12 +41,14 @@ class Zend_Feed_Writer_Renderer_Feed_Atom implements Zend_Feed_Writer_RendererIn
 
     protected $_ignoreExceptions = false;
 
+    protected $_exceptions = array();
+
     public function __construct (Zend_Feed_Writer $container)
     {
         $this->_container = $container;
     }
 
-    public function build()
+    public function render() // refactor later into many methods with error checks, standards checks and escaping
     {
         if (!$this->_container->getEncoding()) {
             $this->_container->setEncoding('utf-8');
@@ -136,6 +138,20 @@ class Zend_Feed_Writer_Renderer_Feed_Atom implements Zend_Feed_Writer_RendererIn
                 }
             }
         }
+        foreach ($this->_container as $entry) {
+            if ($this->getDataContainer()->getEncoding()) {
+                $entry->setEncoding($this->getDataContainer()->getEncoding());
+            }
+            $renderer = new Zend_Feed_Writer_Renderer_Entry_Atom($entry);
+            if ($this->_ignoreExceptions === true) {
+                $renderer->ignoreExceptions();
+            }
+            $renderer->render();
+            $element = $renderer->getElement();
+            $imported = $this->_dom->importNode($element, true);
+            $root->appendChild($imported);
+        }
+        return $this;
     }
 
     public function saveXml()
@@ -165,6 +181,11 @@ class Zend_Feed_Writer_Renderer_Feed_Atom implements Zend_Feed_Writer_RendererIn
             throw new Zend_Feed_Exception('Invalid parameter: $bool. Should be TRUE or FALSE (defaults to TRUE if null)');
         }
         $this->_ignoreExceptions = $bool;
+    }
+
+    public function getExceptions()
+    {
+        return $this->_exceptions;
     }
 
 }
