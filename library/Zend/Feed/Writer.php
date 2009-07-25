@@ -536,6 +536,15 @@ class Zend_Feed_Writer implements Iterator, Countable
         $this->_entries[] = $entry;
     }
 
+    public function removeEntry($index)
+    {
+        if (isset($this->_entries[$index])) {
+            unset($this->_entries[$index]);
+        }
+        require_once 'Zend/Feed/Exception.php';
+        throw new Zend_Feed_Exception('Undefined index: ' . $index . '. Entry does not exist.');
+    }
+
     public function getEntry($index = 0)
     {
         if (isset($this->_entries[$index])) {
@@ -545,7 +554,7 @@ class Zend_Feed_Writer implements Iterator, Countable
         throw new Zend_Feed_Exception('Undefined index: ' . $index . '. Entry does not exist.');
     }
 
-    public function orderByDate() // partially tested - created v modified?
+    public function orderByDate() // partially tested - created v modified? Check prevailing practice
     {
         // maybe not the most efficient way - but it works until something better comes along
         $timestamp = time();

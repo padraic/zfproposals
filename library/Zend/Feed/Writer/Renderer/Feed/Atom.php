@@ -13,7 +13,7 @@
  * to padraic dot brady at yahoo dot com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Feed_Writer_Feed_Atom
+ * @package    Zend_Feed_container_Renderer_Feed_Atom
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
@@ -22,67 +22,66 @@ require_once 'Zend/Feed/Writer.php';
 
 require_once 'Zend/Version.php';
 
-require_once 'Zend/Feed/Writer/Entry/Atom.php';
+require_once 'Zend/Feed/Writer/RendererInterface.php';
+
+require_once 'Zend/Feed/Writer/Renderer/Entry/Atom.php';
 
 /**
  * @category   Zend
- * @package    Zend_Feed_Writer_Feed_Atom
+ * @package    Zend_Feed_container_Renderer_Feed_Atom
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Feed_Writer_Feed_Atom
+class Zend_Feed_container_Renderer_Feed_Atom implements Zend_Feed_container_RendererInterface
 {
 
-    protected $_writer = null;
+    protected $_container = null;
 
     protected $_dom = null;
 
-    public function __construct (Zend_Feed_Writer $writer)
-    {
-        $this->_writer = $writer;
-    }
+    protected $_ignoreExceptions = false;
 
-    public function getWriter()
+    public function __construct (Zend_Feed_container $container)
     {
-        return $this->_writer;
+        $this->_container = $container;
     }
 
     public function build()
     {
-        if (!$this->_writer->getEncoding()) {
-            $this->_writer->setEncoding('utf-8');
+        if (!$this->_container->getEncoding()) {
+            $this->_container->setEncoding('utf-8');
         }
-        $this->_dom = new DOMDocument('1.0', $this->_writer->getEncoding());
+        $this->_dom = new DOMDocument('1.0', $this->_container->getEncoding());
         $this->_dom->formatOutput = true;
-        $ns = Zend_Feed_Writer::NAMESPACE_ATOM_10;
+        $ns = Zend_Feed_container::NAMESPACE_ATOM_10;
         // create the root element COMPULSORY
         $root = $this->_dom->createElementNS($ns, 'feed');
         $this->_dom->appendChild($root);
         // set the language OPTIONAL
-        if ($this->_writer->getLanguage()) {
-            $root->setAttribute('xml:lang', $this->_writer->getLanguage());
+        if ($this->_container->getLanguage()) {
+            $root->setAttribute('xml:lang', $this->_container->getLanguage());
         }
         // set the title (assumed text) COMPULSORY
         $title = $this->_dom->createElement('title');
         $root->appendChild($title);
         $title->setAttribute('type', 'text');
-        $title->nodeValue = $this->_writer->getTitle();
+        $title->nodeValue = $this->_container->getTitle();
         // set the subtitle (assumed text) OPTIONAL
-        if ($this->_writer->getDescription()) {
+        if ($this->_container->getDescription()) {
             $subtitle = $this->_dom->createElement('subtitle');
             $root->appendChild($subtitle);
             $subtitle->setAttribute('type', 'text');
-            $subtitle->nodeValue = $this->_writer->getDescription();
+            $subtitle->nodeValue = $this->_container->getDescription();
         }
         // set the updated/modified date COMPULSORY
         $updated = $this->_dom->createElement('updated');
         $root->appendChild($updated);
-        $updated->nodeValue = $this->_writer->getDateModified()->get(Zend_Date::ISO_8601);
+        $updated->nodeValue = $this->_container->getDateModified()->get(Zend_Date::ISO_8601);
         // set the generator OPTIONAL
-        if (!$this->_writer->getGenerator()) {
-            $this->_writer->setGenerator('Zend_Feed_Writer', Zend_Version::VERSION, 'http://framework.zend.com');
+        if (!$this->_container->getGenerator()) {
+            $this->_container->setGenerator('Zend_Feed_container', Zend_Version::VERSION, 'http://framework.zend.com');
         }
-        $gdata = $this->_writer->getGenerator();
+        $gdata = $this->_container->getGenerator();
         $generator = $this->_dom->createElement('generator');
         $root->appendChild($generator);
         $generator->nodeValue = $gdata['name'];
@@ -97,10 +96,10 @@ class Zend_Feed_Writer_Feed_Atom
         $root->appendChild($link);
         $link->setAttribute('rel', 'alternate');
         $link->setAttribute('type', 'text/html');
-        $link->setAttribute('href', $this->_writer->getLink());
+        $link->setAttribute('href', $this->_container->getLink());
         // set XML link to retrieve this XML feed file OPTIONAL
-        if ($this->_writer->getFeedLinks()) {
-            $flinks = $this->_writer->getFeedLinks();
+        if ($this->_container->getFeedLinks()) {
+            $flinks = $this->_container->getFeedLinks();
             foreach ($flinks as $type => $href) {
                 $mime = 'application/' . strtolower($type) . '+xml';
                 $flink = $this->_dom->createElement('link');
@@ -111,15 +110,15 @@ class Zend_Feed_Writer_Feed_Atom
             }
         }
         // set the feed id
-        if (!$this->_writer->getId()) {
-            $this->_writer->setId($this->_writer->getLink());
+        if (!$this->_container->getId()) {
+            $this->_container->setId($this->_container->getLink());
         }
         $id = $this->_dom->createElement('id');
         $root->appendChild($id);
-        $id->nodeValue = $this->_writer->getId();
+        $id->nodeValue = $this->_container->getId();
         // add all authors
-        if ($this->_writer->getAuthors()) {
-            $authors = $this->_writer->getAuthors();
+        if ($this->_container->getAuthors()) {
+            $authors = $this->_container->getAuthors();
             foreach ($authors as $data) {
                 $author = $this->_dom->createElement('author');
                 $name = $this->_dom->createElement('name');
@@ -138,17 +137,34 @@ class Zend_Feed_Writer_Feed_Atom
                 }
             }
         }
-        // append the entries we need!
-        foreach ($this->_writer as $entry) {
-            $builder = new Zend_Feed_Writer_Entry_Atom($entry, $this->_dom);
-            $builder->build();
-            $root->appendChild($builder->getElement());
-        }
     }
 
     public function saveXml()
     {
         return $this->_dom->saveXml();
+    }
+
+    public function getDomDocument()
+    {
+        return $this->_dom;
+    }
+
+    public function getElement(
+        return $this->_dom->documentElement;
+    );
+
+    public function getDataContainer()
+    {
+        return $this->_container;
+    }
+
+    public function ignoreExceptions($bool = true)
+    {
+        if (!is_bool($bool)) {
+            require_once 'Zend/Feed/Exception.php';
+            throw new Zend_Feed_Exception('Invalid parameter: $bool. Should be TRUE or FALSE (defaults to TRUE if null)');
+        }
+        $this->_ignoreExceptions = $bool;
     }
 
 }

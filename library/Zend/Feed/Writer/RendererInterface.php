@@ -37,4 +37,6 @@ interface Zend_Feed_Writer_RendererInterface
 
     public function getDataContainer();
 
+    public function ignoreExceptions();
+
 }
