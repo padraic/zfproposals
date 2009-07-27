@@ -195,7 +195,8 @@ class Zend_Feed_Writer_Entry
      */
     public function setId($id)
     {
-        if (empty($id) || !is_string($id) || !Zend_Uri::check($id)) {
+        if ((empty($id) || !is_string($id) || !Zend_Uri::check($id)) &&
+        !preg_match("#^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{1,31}:([a-zA-Z0-9\(\)\+\,\.\:\=\@\;\$\_\!\*\-]|%[0-9a-fA-F]{2})*#", $id)) {
             require_once 'Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('Invalid parameter: parameter must be a non-empty string and valid URI/IRI');
         }

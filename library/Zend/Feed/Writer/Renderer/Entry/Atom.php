@@ -55,12 +55,12 @@ class Zend_Feed_Writer_Renderer_Entry_Atom implements Zend_Feed_Writer_RendererI
         $entry->appendChild($title);
         $title->setAttribute('type', 'text');
         $title->nodeValue = $this->_container->getTitle();
-        // set the subtitle (assumed text) OPTIONAL
+        // set the summary(assumed text) OPTIONAL
         if ($this->_container->getDescription()) {
-            $subtitle = $this->_dom->createElement('subtitle');
-            $entry->appendChild($subtitle);
-            $subtitle->setAttribute('type', 'text');
-            $subtitle->nodeValue = $this->_container->getDescription();
+            $summary = $this->_dom->createElement('summary');
+            $entry->appendChild($summary);
+            $summary->setAttribute('type', 'text');
+            $summary->nodeValue = $this->_container->getDescription();
         }
         // set the updated/modified date COMPULSORY
         $updated = $this->_dom->createElement('updated');

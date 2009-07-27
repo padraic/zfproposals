@@ -28,8 +28,6 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
         $this->_validWriter = null;
     }
 
-    // Tests standard Atom Feed elements
-
     public function testSetsWriterInConstructor()
     {
         $writer = new Zend_Feed_Writer;
@@ -156,7 +154,7 @@ class Zend_Feed_Writer_Renderer_Feed_AtomTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6', $feed->getId());
     }
 
-    public function testFeedIdDefaultIsUsedIfGeneratorNotSetByHand()
+    public function testFeedIdDefaultIsUsedIfNotSetByHand()
     {
         $atomFeed = new Zend_Feed_Writer_Renderer_Feed_Atom($this->_validWriter);
         $atomFeed->render();
