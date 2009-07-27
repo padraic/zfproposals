@@ -67,11 +67,9 @@ class Zend_Feed_Writer_Renderer_Entry_Atom implements Zend_Feed_Writer_RendererI
         $entry->appendChild($updated);
         $updated->nodeValue = $this->_container->getDateModified()->get(Zend_Date::ISO_8601);
         // set the published/created date COMPULSORY
-        if ($this->_container->getDateCreated()) {
-            $published = $this->_dom->createElement('published');
-            $entry->appendChild($published);
-            $published->nodeValue = $this->_container->getDateCreated()->get(Zend_Date::ISO_8601);
-        }
+        $published = $this->_dom->createElement('published');
+        $entry->appendChild($published);
+        $published->nodeValue = $this->_container->getDateCreated()->get(Zend_Date::ISO_8601);
         // set HTML link to entry source COMPULSORY
         $link = $this->_dom->createElement('link');
         $entry->appendChild($link);

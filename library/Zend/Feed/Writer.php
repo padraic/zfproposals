@@ -34,6 +34,16 @@ require_once 'Zend/Uri.php';
 require_once 'Zend/Feed/Writer/Entry.php';
 
 /**
+ * @see Zend_Feed_Writer_Renderer_Feed_Atom
+ */
+require_once 'Zend/Feed/Writer/Renderer/Feed/Atom.php';
+
+/**
+ * @see Zend_Feed_Writer_Renderer_Feed_Rss
+ */
+//require_once 'Zend/Feed/Writer/Renderer/Feed/Rss.php';
+
+/**
  * @category   Zend
  * @package    Zend_Feed_Writer
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -639,17 +649,17 @@ class Zend_Feed_Writer implements Iterator, Countable
     public function export($type, $ignoreExceptions = false)
     {
         $type = ucfirst(strtolower($type));
-        if ($type !== 'Rss' || $type !== 'Atom') {
+        if ($type !== 'Rss' && $type !== 'Atom') {
             require_once 'Zend/Feed/Exception.php';
             throw new Zend_Feed_Exception('Invalid feed type specified: ' . $type . '.'
             . ' Should be one of "rss" or "atom".');
         }
-        $rendererClass = 'Zend_Feed_Writer_Feed_' . $type;
+        $renderClass = 'Zend_Feed_Writer_Renderer_Feed_' . $type;
         $renderer = new $renderClass($this);
         if ($ignoreExceptions) {
             $renderer->ignoreExceptions();
         }
-        return $renderer->saveXml();
+        return $renderer->render()->saveXml();
     }
 
 
