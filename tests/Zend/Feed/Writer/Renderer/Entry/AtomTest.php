@@ -139,35 +139,4 @@ class Zend_Feed_Writer_Renderer_Entry_AtomTest extends PHPUnit_Framework_TestCas
         $this->assertEquals($entry->getLink(), $entry->getId());
     }
 
-    public function testFoo()
-    {
-        $writer = new Zend_Feed_Writer;
-        /**
-         * Set Feed level data
-         */
-        $writer->setTitle('Joe Speaks About Many Things');
-        $writer->setLink('http://blog.example.com/joe');
-        $writer->setDescription('Joe Bloggs, Average Citizen, Earth.');
-        $writer->setFeedLink('http://blog.example.com/joe/atom', 'atom');
-        $writer->setFeedLink('http://blog.example.com/joe/rss', 'rss');
-        $writer->setDateModified(time());
-        /**
-         * Add a single Entry
-         */
-        $entry = $writer->createEntry();
-        $entry->setTitle('This is my new blog');
-        $entry->setLink('http://blog.example.com/joe/entry/1');
-        $entry->setDescription('Post about my new blog');
-        $entry->setContent('Do you like my new blog? Let me know!');
-        $entry->setDateCreated(time());
-        $entry->setDateModified(time());
-        $entry->addAuthor('Joe', 'joe@example.com');
-        $writer->addEntry($entry); // manual addition post-creation
-        /**
-         * Render and print the feed XML
-         */
-        echo $writer->export('atom');
-        exit;
-    }
-
 }
