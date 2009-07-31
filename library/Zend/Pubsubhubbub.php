@@ -107,8 +107,8 @@ class Zend_Pubsubhubbub
 
     /**
      * Return the singleton instance of the HTTP Client. Note that
-     * the instance is reset and cleared of previous parameters and
-     * Authorization header values.
+     * the instance is reset and cleared of previous parameters GET/POST.
+     * Headers are NOT reset but handled by this component if applicable.
      *
      * @return Zend_Http_Client
      */

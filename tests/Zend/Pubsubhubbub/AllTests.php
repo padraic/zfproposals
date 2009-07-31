@@ -34,6 +34,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/Pubsubhubbub/PubsubhubbubTest.php';
 require_once 'Zend/Pubsubhubbub/PublisherTest.php';
+require_once 'Zend/Pubsubhubbub/SubscriberTest.php';
 
 
 class Zend_Pubsubhubbub_AllTests
@@ -49,6 +50,7 @@ class Zend_Pubsubhubbub_AllTests
 
         $suite->addTestSuite('Zend_Pubsubhubbub_PubsubhubbubTest');
         $suite->addTestSuite('Zend_Pubsubhubbub_PublisherTest');
+        $suite->addTestSuite('Zend_Pubsubhubbub_SubscriberTest');
 
         return $suite;
     }
