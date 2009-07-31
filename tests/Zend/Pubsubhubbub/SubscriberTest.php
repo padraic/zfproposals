@@ -147,4 +147,98 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
         ), $this->_subscriber->getParameters());
     }
 
+    public function testCanSetTopicUrl()
+    {
+        $this->_subscriber->setTopicUrl('http://www.example.com/topic');
+        $this->assertEquals('http://www.example.com/topic', $this->_subscriber->getTopicUrl());
+    }
+
+    public function testThrowsExceptionOnSettingEmptyTopicUrl()
+    {
+        try {
+            $this->_subscriber->setTopicUrl('');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+
+    public function testThrowsExceptionOnSettingNonStringTopicUrl()
+    {
+        try {
+            $this->_subscriber->setTopicUrl(123);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+
+    public function testThrowsExceptionOnSettingInvalidTopicUrl()
+    {
+        try {
+            $this->_subscriber->setTopicUrl('http://');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testCanSetCallbackUrl()
+    {
+        $this->_subscriber->setCallbackUrl('http://www.example.com/callback');
+        $this->assertEquals('http://www.example.com/callback', $this->_subscriber->getCallbackUrl());
+    }
+
+    public function testThrowsExceptionOnSettingEmptyCallbackUrl()
+    {
+        try {
+            $this->_subscriber->setCallbackUrl('');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+
+    public function testThrowsExceptionOnSettingNonStringCallbackUrl()
+    {
+        try {
+            $this->_subscriber->setCallbackUrl(123);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+
+    public function testThrowsExceptionOnSettingInvalidCallbackUrl()
+    {
+        try {
+            $this->_subscriber->setCallbackUrl('http://');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testCanSetLeaseSeconds()
+    {
+        $this->_subscriber->setLeaseSeconds('10000');
+        $this->assertEquals(10000, $this->_subscriber->getLeaseSeconds());
+    }
+
+    public function testThrowsExceptionOnSettingZeroAsLeaseSeconds()
+    {
+        try {
+            $this->_subscriber->setLeaseSeconds(0);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testThrowsExceptionOnSettingLessThanZeroAsLeaseSeconds()
+    {
+        try {
+            $this->_subscriber->setLeaseSeconds(-1);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testThrowsExceptionOnSettingAnyScalarTypeCastToAZeroOrLessIntegerAsLeaseSeconds()
+    {
+        try {
+            $this->_subscriber->setLeaseSeconds('0aa');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
 }

@@ -40,16 +40,41 @@ class Zend_Pubsubhubbub_Subscriber
     protected $_hubUrls = array();
 
     /**
-     * An array of topic (Atom or RSS feed) URLs which have been updated and
-     * whose updated status will be notified to all Hub Servers.
+     * An array of optional parameters to be included in any
+     * (un)subscribe requests.
      *
      * @var array
      */
     protected $_parameters = array();
 
     /**
+     * The URL of the topic (Rss or Atom feed) which is the subject of
+     * our current intent to subscribe to/unsubscribe from updates from
+     * the currently configured Hub Servers.
+     *
+     * @var string
+     */
+    protected $_topicUrl = '';
+
+    /**
+     * The URL Hub Servers must use when communicating with this Subscriber
+     *
+     * @var string
+     */
+    protected $_callbackUrl = '';
+
+    /**
+     * The number of seconds for which the subscriber would like to have the
+     * subscription active. Defaults to specified Hub default of 2592000
+     * seconds (30 days) if not supplied.
+     *
+     * @var int
+     */
+    protected $_leaseSeconds = 2592000;
+
+    /**
      * Constructor; accepts an array or Zend_Config instance to preset
-     * options for the Publisher without calling all supported setter
+     * options for the Subscriber without calling all supported setter
      * methods in turn.
      *
      * @param array|Zend_Config $options Options array or Zend_Config instance
@@ -78,9 +103,100 @@ class Zend_Pubsubhubbub_Subscriber
         if (array_key_exists('hubUrls', $config)) {
             $this->addHubUrls($config['hubUrls']);
         }
+        if (array_key_exists('callbackUrl', $config)) {
+            $this->setCallbackUrl($config['callbackUrl']);
+        }
+        if (array_key_exists('topicUrl', $config)) {
+            $this->setTopicUrl($config['topicUrl']);
+        }
+        if (array_key_exists('leaseSeconds', $config)) {
+            $this->setLeaseSeconds($config['leaseSeconds']);
+        }
         if (array_key_exists('parameters', $config)) {
             $this->setParameters($config['parameters']);
         }
+    }
+
+    /**
+     * Set the topic URL (RSS or Atom feed) to which the intended (un)subscribe
+     * event will relate
+     *
+     * @param string $url
+     */
+    public function setTopicUrl($url)
+    {
+        if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
+                .' of "' . $url . '" must be a non-empty string and a valid'
+                .'URL');
+        }
+        $this->_topicUrl = $url;
+    }
+
+    /**
+     * Set the topic URL (RSS or Atom feed) to which the intended (un)subscribe
+     * event will relate
+     *
+     * @return string
+     */
+    public function getTopicUrl()
+    {
+        return $this->_topicUrl;
+    }
+
+    /**
+     * Set the number of seconds for which any subscription will remain valid
+     *
+     * @param int $seconds
+     */
+    public function setLeaseSeconds($seconds)
+    {
+        $seconds = intval($seconds);
+        if ($seconds <= 0) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Expected lease seconds'
+            . ' must be an integer greater than zero');
+        }
+        $this->_leaseSeconds = $seconds;
+    }
+
+    /**
+     * Get the number of lease seconds on subscriptions
+     *
+     * @return int
+     */
+    public function getLeaseSeconds()
+    {
+        return $this->_leaseSeconds;
+    }
+
+    /**
+     * Get the callback URL to be used by Hub Servers when communicating with
+     * this Subscriber
+     *
+     * @param string $url
+     */
+    public function setCallbackUrl($url)
+    {
+        if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
+                .' of "' . $url . '" must be a non-empty string and a valid'
+                .'URL');
+        }
+        $this->_callbackUrl = $url;
+    }
+
+    /**
+     * Get the callback URL to be used by Hub Servers when communicating with
+     * this Subscriber
+     *
+     * @return string
+     */
+    public function getCallbackUrl()
+    {
+        return $this->_callbackUrl;
     }
 
     /**
@@ -137,7 +253,7 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Add an optional parameter to the update notification requests
+     * Add an optional parameter to the (un)subscribe requests
      *
      * @param string $name
      * @param string|null $value
@@ -166,7 +282,7 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Add an optional parameter to the update notification requests
+     * Add an optional parameter to the (un)subscribe requests
      *
      * @param string $name
      * @param string|null $value
@@ -179,7 +295,7 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Remove an optional parameter for the notification requests
+     * Remove an optional parameter for the (un)subscribe requests
      *
      * @param string $name
      */
@@ -196,7 +312,7 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Return an array of optional parameters for notification requests
+     * Return an array of optional parameters for (un)subscribe requests
      *
      * @return array
      */
@@ -205,19 +321,63 @@ class Zend_Pubsubhubbub_Subscriber
         return $this->_parameters;
     }
 
+    /**
+     * Subscribe to one or more Hub Servers using the stored Hub URLs
+     * for the given Topic URL (RSS or Atom feed)
+     *
+     */
     public function subscribe()
     {
-
+        $client = $this->_getHttpClient('subscribe');
     }
 
+    /**
+     * Unsubscribe from one or more Hub Servers using the stored Hub URLs
+     * for the given Topic URL (RSS or Atom feed)
+     *
+     */
     public function unsubscribe()
     {
-
+        $client = $this->_getHttpClient('unsubscribe');
     }
 
+    /**
+     * This should be called when a request is received at this Subscriber's
+     * configured Callback URL, which is used by all Hub Servers to pass
+     * responding or notification requests to.
+     *
+     */
     public function handleCallback()
     {
 
+    }
+
+    /**
+     * Get a basic prepared HTTP client for use
+     *
+     * @param string $mode Must be "subscribe" or "unsubscribe"
+     * @return Zend_Http_Client
+     */
+    protected function _getHttpClient($mode)
+    {
+        if (!in_array($mode, array('subscribe', 'unsubscribe'))) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid mode specified: '
+            . $mode . ' which should have been "subscribe" or "unsubscribe"');
+        }
+        $client = Zend_Pubsubhubbub::getHttpClient();
+        $client->setMethod(Zend_Http_Client::POST);
+        $client->setConfig(array('useragent' => 'Zend_Pubsubhubbub_Subscriber/'
+            . Zend_Version::VERSION));
+        $params = array();
+        $params[] = 'hub.mode=' . $mode;
+        $optParams = $this->getParameters();
+        foreach ($optParams as $name => $value) {
+            $params[] = urlencode($name) . '=' . urlencode($value);
+        }
+        $paramString = implode('&', $params);
+        $client->setRawData($paramString);
+        return $client;
     }
 
 }
