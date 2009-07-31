@@ -17,6 +17,14 @@ class Zend_Pubsubhubbub_PubsubhubbubTest extends PHPUnit_Framework_TestCase
         $this->assertType('Test_Http_Client_Pubsub', Zend_Pubsubhubbub::getHttpClient());
     }
 
+    public function testCanDetectHubs()
+    {
+        $feed = Zend_Feed_Reader::importFile(dirname(__FILE__) . '/_files/rss20.xml');
+        $this->assertEquals(array(
+            'http://www.example.com/hub', 'http://www.example.com/hub2'
+        ), Zend_Pubsubhubbub::detectHubs($feed));
+    }
+
 }
 
 class Test_Http_Client_Pubsub extends Zend_Http_Client {}

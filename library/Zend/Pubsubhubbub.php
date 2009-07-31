@@ -34,6 +34,16 @@ require_once 'Zend/Uri.php';
 require_once 'Zend/Version.php';
 
 /**
+ * @see Zend_Feed_Reader
+ */
+require_once 'Zend/Feed/Reader.php';
+
+/**
+ * @see Zend_Feed_Abstract
+ */
+require_once 'Zend/Feed/Abstract.php';
+
+/**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -48,6 +58,40 @@ class Zend_Pubsubhubbub
      * @var Zend_Http_Client
      */
     protected static $httpClient = null;
+
+    /**
+     * Simple utility function which imports any feed URL and
+     * determines the existence of Hub Server endpoints. This works
+     * best if directly given an instance of Zend_Feed_Reader_Atom|Rss
+     * to leverage off.
+     *
+     * @param Zend_Feed_Reader_FeedAbstract|Zend_Feed_Abstract|string $source
+     */
+    public static function detectHubs($source)
+    {
+        if (is_string($source)) {
+            $feed = Zend_Feed_Reader::import($source);
+        } elseif (is_object($source) && $source instanceof Zend_Feed_Reader_FeedAbstract) {
+            $feed = $source;
+        } elseif (is_object($source) && $source instanceof Zend_Feed_Abstract) {
+            $feed = Zend_Feed_Reader::importFeed($source);
+        } else {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('The source parameter was'
+            . ' invalid, i.e. not a URL string or an instance of type'
+            . ' Zend_Feed_Reader_FeedAbstract or Zend_Feed_Abstract');
+        }
+        $atom = $feed->getExtension('Atom');
+        $hubs = array();
+        $list = $atom->getXpath()
+            ->evaluate($atom->getXpathPrefix() . '//atom:link[@rel="hub"]/@href');
+        if ($list->length) {
+            foreach($list as $url) {
+                $hubs[] = $url->nodeValue;
+            }
+        }
+        return $hubs;
+    }
 
     /**
      * Allows the external environment to make Zend_Oauth use a specific
