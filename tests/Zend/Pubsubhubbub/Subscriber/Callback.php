@@ -67,9 +67,9 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         }
         if (!$this->isValid($httpGetData)) {
             $this->getHttpResponse()->setHttpResponseCode(404);
-            return;
+        } else {
+            $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
         }
-        $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
         if ($sendResponse) {
             $this->sendResponse();
         }
