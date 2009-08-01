@@ -538,50 +538,6 @@ class Zend_Pubsubhubbub_Subscriber
         return $this->_storage;
     }
 
-    public function subscribeToTopic($url)
-    {
-        if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $url . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        $client = $this->_getHttpClient();
-        $client->setUri($url);
-        $response = $client->request();
-        if ($response->getStatus() !== '204') {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Notification to Hub Server '
-            . 'at "' . $url . '" appears to have failed with a status code of "'
-            . $response->getStatus() . '" and message "'
-            . $response->getMessage() . '"');
-        }
-    }
-
-    public function unsubscribeFromTopic($url)
-    {
-        if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $url . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        $client = $this->_getHttpClient();
-        $client->setUri($url);
-        $response = $client->request();
-        if ($response->getStatus() !== '204') {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Notification to Hub Server '
-            . 'at "' . $url . '" appears to have failed with a status code of "'
-            . $response->getStatus() . '" and message "'
-            . $response->getMessage() . '"');
-        }
-    }
-
-    /**
-     * TODO: Add same as last two methods only Hub (not Topic) specific
-     */
-
     /**
      * Subscribe to one or more Hub Servers using the stored Hub URLs
      * for the given Topic URL (RSS or Atom feed)
@@ -649,12 +605,6 @@ class Zend_Pubsubhubbub_Subscriber
                     'response' => $response,
                     'hubUrl' => $url
                 );
-            /**
-             * At first I thought it was needed, but the backend storage will
-             * allow tracking async without any user interference. It's left
-             * here in case the user is interested in knowing what Hubs
-             * are using async verification modes
-             */
             } elseif ($response->getStatus() == '202') {
                 $this->_asyncHubs[] = array(
                     'response' => $response,
@@ -662,17 +612,6 @@ class Zend_Pubsubhubbub_Subscriber
                 );
             }
         }
-    }
-
-    /**
-     * This should be called when a request is received at this Subscriber's
-     * configured Callback URL, which is used by all Hub Servers to pass
-     * responding or notification requests to.
-     *
-     */
-    public function handleCallback() // MOVE TO SEPARATE CLASS?
-    {
-
     }
 
     /**
@@ -781,7 +720,8 @@ class Zend_Pubsubhubbub_Subscriber
      */
     protected function _generateToken($hubUrl)
     {
-
+        // simple token - impl. can be updated later
+        return uniqid(rand(), true);
     }
 
 }
