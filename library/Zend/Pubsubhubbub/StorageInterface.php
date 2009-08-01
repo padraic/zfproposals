@@ -19,6 +19,15 @@
  */
 
 /**
+ * NOTE: Interface requires the setting of sufficient data to create a tuple
+ * to uniquely identify each entry in a filename. The type is used as a postfix
+ * depending on what context the Storage class implementation is being used,
+ * e.g. subscription, unsubscription, etc. At a later date, if feasible, can
+ * migrate to using Zend_Cache as an alternative - but this interface will
+ * remain enforced.
+ */
+
+/**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -27,6 +36,37 @@
 interface Zend_Pubsubhubbub_StorageInterface
 {
 
+    /**
+     * Store data which is associated with the given Hub Server URL and Topic
+     * URL and where that data relates to the given Type. The Types supported
+     * include: "subscription", "unsubscription". These Type strings may also
+     * be referenced by constants on the Zend_Pubsubhubbub class.
+     *
+     * @param string|integer|array $data
+     * @param string $hubUrl The Hub Server URL
+     * @param string $topicUrl The Topic (RSS or Atom feed) URL
+     * @param string $type
+     */
+    public function store($data, $hubUrl, $topicUrl, $type);
 
+    /**
+     * Get data which is associated with the given Hub Server URL and Topic
+     * URL and where that data relates to the given Type. The Types supported
+     * include: "subscription", "unsubscription". These Type strings may also
+     * be referenced by constants on the Zend_Pubsubhubbub class.
+     *
+     * @param string $hubUrl The Hub Server URL
+     * @param string $topicUrl The Topic (RSS or Atom feed) URL
+     * @param string $type
+     * @return string|array
+     */
+    public function get($hubUrl, $topicUrl, $type);
+
+    /**
+     * If implemented: deletes all records for any given valid Type
+     *
+     * @param string $type
+     */
+    public function cleanup($type);
 
 }
