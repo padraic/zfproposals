@@ -24,6 +24,11 @@
 require_once 'Zend/Pubsubhubbub.php';
 
 /**
+ * @see Zend_Pubsubhubbub_HttpResponse
+ */
+require_once 'Zend/Pubsubhubbub/HttpResponse.php';
+
+/**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -41,21 +46,45 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     protected $_storage = null;
 
     /**
+     * An instance of a class handling Http Responses. This is implemented in
+     * Zend_Pubsubhubbub_HttpResponse which shares an unenforced interface with
+     * (i.e. not inherited from) Zend_Controller_Response_Http.
+     *
+     * @var Zend_Pubsubhubbub_HttpResponse|Zend_Controller_Response_Http
+     */
+    protected $_httpResponse = null;
+
+    /**
      * Handle any callback from a Hub Server responding to a subscription or
      * unsubscription request. This should be the Hub Server confirming the
      * the request prior to taking action on it.
      *
      */
-    public function handle(array $httpGetData = null)
+    public function handle(array $httpGetData = null, $sendResponse = false)
     {
         if ($httpGetData === null) {
             $httpGetData = $_GET;
         }
         if (!$this->isValid($httpGetData)) {
-            // 404!
+            $this->getHttpResponse()->setHttpResponseCode(404);
             return;
         }
-        // 2xx with hub.challenge attached!
+        $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
+        if ($sendResponse) {
+            $this->sendResponse();
+        }
+    }
+
+    /**
+     * Send the response, including all headers.
+     * If you wish to handle this via Zend_Controller, use the getter methods
+     * to retrieve any data needed to be set on your HTTP Response object.
+     *
+     * @return void
+     */
+    public function sendResponse()
+    {
+        $this->getHttpResponse()->sendResponse();
     }
 
     /**
@@ -133,6 +162,38 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         return $this->_storage;
     }
 
+    /**
+     * An instance of a class handling Http Responses. This is implemented in
+     * Zend_Pubsubhubbub_HttpResponse which shares an unenforced interface with
+     * (i.e. not inherited from) Zend_Controller_Response_Http.
+     *
+     * @param Zend_Pubsubhubbub_HttpResponse|Zend_Controller_Response_Http $httpResponse
+     */
+    public function setHttpResponse($httpResponse)
+    {
+        if (!$httpResponse instanceof Zend_Pubsubhubbub_HttpResponse
+        || !$httpResponse instanceof Zend_Controller_Response_Http) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('HTTP Response object must'
+            . ' implement one of Zend_Pubsubhubbub_HttpResponse or'
+            . ' Zend_Controller_Response_Http');
+        }
+        $this->_httpResponse = $httpResponse;
+    }
 
+    /**
+     * An instance of a class handling Http Responses. This is implemented in
+     * Zend_Pubsubhubbub_HttpResponse which shares an unenforced interface with
+     * (i.e. not inherited from) Zend_Controller_Response_Http.
+     *
+     * @return Zend_Pubsubhubbub_HttpResponse|Zend_Controller_Response_Http
+     */
+    public function getHttpResponse()
+    {
+        if ($this->_httpResponse === null) {
+            $this->_httpResponse = new Zend_Pubsubhubbub_HttpResponse;
+        }
+        return $this->_httpResponse;
+    }
 
 }
