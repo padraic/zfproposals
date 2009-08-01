@@ -47,7 +47,7 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
      */
-    public function store($data, $hubUrl, $topicUrl, $type);
+    public function store($data, $type, $topicUrl, $hubUrl = null);
 
     /**
      * Get data which is associated with the given Hub Server URL and Topic
@@ -60,7 +60,17 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $type
      * @return string
      */
-    public function get($hubUrl, $topicUrl, $type);
+    public function get($type, $topicUrl, $hubUrl = null);
+
+    /**
+     * Checks for the existence of a record agreeing with the given parameters
+     *
+     * @param string $hubUrl The Hub Server URL
+     * @param string $topicUrl The Topic (RSS or Atom feed) URL
+     * @param string $type
+     * @return bool
+     */
+    public function exists($type, $topicUrl, $hubUrl = null);
 
     /**
      * If implemented: deletes all records for any given valid Type

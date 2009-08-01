@@ -91,14 +91,14 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
      */
-    public function store($data, $hubUrl, $topicUrl, $type)
+    public function store($data, $type, $topicUrl, $hubUrl = null)
     {
         if (empty($data) || !is_string($data)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
                 .' of "' . $data . '" must be a non-empty string');
         }
-        if (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl)) {
+        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
                 .' of "' . $hubUrl . '" must be a non-empty string and a valid'
@@ -116,7 +116,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
                 .' of "' . $type . '" must be a non-empty string and a valid'
                 . ' type for storage');
         }
-        $filename = $this->_getFilename($hubUrl, $topicUrl, $type);
+        $filename = $this->_getFilename($type, $topicUrl, $hubUrl);
         $path = $this->getDirectory() . '/' . $filename;
         file_put_contents($path, $data);
     }
@@ -132,9 +132,9 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $type
      * @return string
      */
-    public function get($hubUrl, $topicUrl, $type)
+    public function get($type, $topicUrl, $hubUrl = null)
     {
-        if (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl)) {
+        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
                 .' of "' . $hubUrl . '" must be a non-empty string and a valid'
@@ -152,12 +152,48 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
                 .' of "' . $type . '" must be a non-empty string and a valid'
                 . ' type for storage');
         }
-        $filename = $this->_getFilename($hubUrl, $topicUrl, $type);
+        $filename = $this->_getFilename($type, $topicUrl, $hubUrl);
         $path = $this->getDirectory() . '/' . $filename;
         if (!file_exists($path) || !is_readable($path)) {
             return false;
         }
         return file_get_contents($path);
+    }
+
+    /**
+     * Checks for the existence of a record agreeing with the given parameters
+     *
+     * @param string $hubUrl The Hub Server URL
+     * @param string $topicUrl The Topic (RSS or Atom feed) URL
+     * @param string $type
+     * @return bool
+     */
+    public function exists($type, $topicUrl, $hubUrl = null, $data = null)
+    {
+        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
+                .' of "' . $hubUrl . '" must be a non-empty string and a valid'
+                .'URL');
+        }
+        if (empty($topicUrl) || !is_string($topicUrl) || !Zend_Uri::check($topicUrl)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
+                .' of "' . $topicUrl . '" must be a non-empty string and a valid'
+                .'URL');
+        }
+        if (!in_array($type, array('subscription', 'unsubscription'))) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "type"'
+                .' of "' . $type . '" must be a non-empty string and a valid'
+                . ' type for storage');
+        }
+        $filename = $this->_getFilename($type, $topicUrl, $hubUrl, $data);
+        $path = $this->getDirectory() . '/' . $filename;
+        if (!file_exists($path) || !is_readable($path)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -180,10 +216,16 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $type
      * @return string
      */
-    protected function _getFilename($hubUrl, $topicUrl, $type)
+    protected function _getFilename($type, $topicUrl, $hubUrl = null, $data = null)
     {
+        if ($hubUrl === null) {
+            $hubUrl = '';
+        }
+        if ($data === null) {
+            $data = '';
+        }
         return preg_replace(array("/+/", "/\//", "/=/"),
-            array('_', '.', ''), base64_encode(sha1($hubUrl . $topicUrl . $type)));
+            array('_', '.', ''), base64_encode(sha1($type . $topicUrl . $hubUrl . $data)));
     }
 
     /**
