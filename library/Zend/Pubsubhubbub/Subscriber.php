@@ -142,6 +142,14 @@ class Zend_Pubsubhubbub_Subscriber
     protected $_asyncHubs = array();
 
     /**
+     * An instance of Zend_Pubsubhubbub_StorageInterface used to background
+     * save any verification tokens associated with a subscription or other.
+     *
+     * @var Zend_Pubsubhubbub_StorageInterface
+     */
+    protected $_storage = null;
+
+    /**
      * Constructor; accepts an array or Zend_Config instance to preset
      * options for the Subscriber without calling all supported setter
      * methods in turn.
@@ -503,6 +511,33 @@ class Zend_Pubsubhubbub_Subscriber
         return $this->_parameters;
     }
 
+    /**
+     * Sets an instance of Zend_Pubsubhubbub_StorageInterface used to background
+     * save any verification tokens associated with a subscription or other.
+     *
+     * @param Zend_Pubsubhubbub_StorageInterface $storage
+     */
+    public function setStorage(Zend_Pubsubhubbub_StorageInterface $storage)
+    {
+        $this->_storage = $storage;
+    }
+
+    /**
+     * Gets an instance of Zend_Pubsubhubbub_StorageInterface used to background
+     * save any verification tokens associated with a subscription or other.
+     *
+     * @return Zend_Pubsubhubbub_StorageInterface
+     */
+    public function getStorage()
+    {
+        if ($this->_storage === null) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('No storage object has been'
+            . ' set that implements Zend_Pubsubhubbub_StorageInterface');
+        }
+        return $this->_storage;
+    }
+
     public function subscribeToTopic($url)
     {
         if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
@@ -554,7 +589,7 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function subscribeAll()
     {
-        $client = $this->_getHttpClient('subscribe');
+        $client = $this->_getHttpClient();
         $hubs = $this->getHubUrls();
         if (empty($hubs)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
@@ -565,6 +600,7 @@ class Zend_Pubsubhubbub_Subscriber
         $this->_asyncHubs = array();
         foreach ($hubs as $url) {
             $client->setUri($url);
+            $client->setRawData($this->_getRequestParameters($url, 'subscribe'));
             $response = $client->request();
             if ($response->getStatus() !== '204'
             && $response->getStatus() !== '202') {
@@ -572,9 +608,16 @@ class Zend_Pubsubhubbub_Subscriber
                     'response' => $response,
                     'hubUrl' => $url
                 );
+            /**
+             * At first I thought it was needed, but the backend storage will
+             * allow tracking async without any user interference. It's left
+             * here in case the user is interested in knowing what Hubs
+             * are using async verification modes
+             */
             } elseif ($response->getStatus() == '202') {
                 $this->_asyncHubs[] = array(
-
+                    'response' => $response,
+                    'hubUrl' => $url
                 );
             }
         }
@@ -587,7 +630,7 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function unsubscribeAll()
     {
-        $client = $this->_getHttpClient('unsubscribe');
+        $client = $this->_getHttpClient();
         $hubs = $this->getHubUrls();
         if (empty($hubs)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
@@ -595,8 +638,10 @@ class Zend_Pubsubhubbub_Subscriber
             . ' have been set so no subscriptions can be attempted');
         }
         $this->_errors = array();
+        $this->_asyncHubs = array();
         foreach ($hubs as $url) {
             $client->setUri($url);
+            $client->setRawData($this->_getRequestParameters($url, 'unsubscribe'));
             $response = $client->request();
             if ($response->getStatus() !== '204'
             && $response->getStatus() !== '202') {
@@ -604,11 +649,17 @@ class Zend_Pubsubhubbub_Subscriber
                     'response' => $response,
                     'hubUrl' => $url
                 );
-            }
-            // handle asynchronous subscriptions
-            if ($response->getStatus() == '202') {
-                // check verify_token return
-                // inform subscriber - how?
+            /**
+             * At first I thought it was needed, but the backend storage will
+             * allow tracking async without any user interference. It's left
+             * here in case the user is interested in knowing what Hubs
+             * are using async verification modes
+             */
+            } elseif ($response->getStatus() == '202') {
+                $this->_asyncHubs[] = array(
+                    'response' => $response,
+                    'hubUrl' => $url
+                );
             }
         }
     }
@@ -664,27 +715,37 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Get a basic prepared HTTP client for use depending on whether we intend
-     * making a subscribe or unsubscribe request to the Hub Server
+     * Get a basic prepared HTTP client for use
      *
      * @param string $mode Must be "subscribe" or "unsubscribe"
      * @return Zend_Http_Client
      */
-    protected function _getHttpClient($mode)
+    protected function _getHttpClient()
+    {
+        $client = Zend_Pubsubhubbub::getHttpClient();
+        $client->setMethod(Zend_Http_Client::POST);
+        $client->setConfig(array('useragent' => 'Zend_Pubsubhubbub_Subscriber/'
+            . Zend_Version::VERSION));
+        return $client;
+    }
+
+    /**
+     * Return a list of standard protocol/optional parameters for addition to
+     * client's POST body that are specific to the current Hub Server URL
+     *
+     * @param string $hubUrl
+     */
+    protected function _getRequestParameters($hubUrl, $mode)
     {
         if (!in_array($mode, array('subscribe', 'unsubscribe'))) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid mode specified: "'
             . $mode . '" which should have been "subscribe" or "unsubscribe"');
         }
-        $client = Zend_Pubsubhubbub::getHttpClient();
-        $client->setMethod(Zend_Http_Client::POST);
-        $client->setConfig(array('useragent' => 'Zend_Pubsubhubbub_Subscriber/'
-            . Zend_Version::VERSION));
         $params = array();
-        $params[] = 'hub.mode=' . $mode;
-        $params[] = 'hub.callback=' . urlencode($this->getCallbackUrl());
-        $params[] = 'hub.topic=' . urlencode($this->getTopicUrl());
+        $params[] = array('hub.mode', $mode);
+        $params[] = array('hub.callback', $this->getCallbackUrl());
+        $params[] = array('hub.topic', $this->getTopicUrl());
         if ($this->getPreferredVerificationMode()
         == Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC) {
             $vmodes = array(Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC,
@@ -694,19 +755,21 @@ class Zend_Pubsubhubbub_Subscriber
             Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC);
         }
         foreach($vmodes as $vmode) {
-            $params[] = 'hub.verify=' . urlencode($vmode);
+            $params[] = array('hub.verify', $vmode);
         }
-        $params[] = 'hub.verify_token=' . urlencode($this->getVerificationToken());
+        $params[] = array('hub.verify_token', $this->getVerificationToken($hubUrl));
         if ($mode == 'subscribe') {
-            $params[] = 'hub.lease_seconds=' . urlencode($this->getLeaseSeconds());
+            $params[] = array('hub.lease_seconds', $this->getLeaseSeconds());
         }
         $optParams = $this->getParameters();
         foreach ($optParams as $name => $value) {
-            $params[] = urlencode($name) . '=' . urlencode($value);
+            $params[] = array($name, $value);
         }
-        $paramString = implode('&', $params);
-        $client->setRawData($paramString);
-        return $client;
+        $paramsEncoded = array();
+        foreach ($params as $param) {
+            $paramsEncoded[] = urlencode($param[0]) . '=' . urlencode($param[1]);
+        }
+        return implode('&', $paramsEncoded);
     }
 
     /**

@@ -299,4 +299,18 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
 
+    public function testCanSetStorageImplementation()
+    {
+        $this->_subscriber->setStorage(new Zend_Pubsubhubbub_Storage_Filesystem);
+        $this->assertTrue($this->_subscriber->getStorage() instanceof Zend_Pubsubhubbub_Storage_Filesystem);
+    }
+
+    public function testGetStorageThrowsExceptionIfNoneSet()
+    {
+        try {
+            $this->_subscriber->getStorage();
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
 }
