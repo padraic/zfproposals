@@ -42,7 +42,7 @@ interface Zend_Pubsubhubbub_StorageInterface
      * include: "subscription", "unsubscription". These Type strings may also
      * be referenced by constants on the Zend_Pubsubhubbub class.
      *
-     * @param string|integer|array $data
+     * @param string|integer $data
      * @param string $hubUrl The Hub Server URL
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
@@ -58,7 +58,7 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $hubUrl The Hub Server URL
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
-     * @return string|array
+     * @return string
      */
     public function get($hubUrl, $topicUrl, $type);
 

@@ -35,6 +35,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'Zend/Pubsubhubbub/PubsubhubbubTest.php';
 require_once 'Zend/Pubsubhubbub/PublisherTest.php';
 require_once 'Zend/Pubsubhubbub/SubscriberTest.php';
+require_once 'Zend/Pubsubhubbub/Storage/FilesystemTest.php';
 
 
 class Zend_Pubsubhubbub_AllTests
@@ -51,6 +52,7 @@ class Zend_Pubsubhubbub_AllTests
         $suite->addTestSuite('Zend_Pubsubhubbub_PubsubhubbubTest');
         $suite->addTestSuite('Zend_Pubsubhubbub_PublisherTest');
         $suite->addTestSuite('Zend_Pubsubhubbub_SubscriberTest');
+        $suite->addTestSuite('Zend_Pubsubhubbub_Storage_FilesystemTest');
 
         return $suite;
     }

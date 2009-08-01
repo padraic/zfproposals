@@ -58,10 +58,11 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      */
     public function setDirectory()
     {
-        if (!is_writable($directory)) {
+        if (!file_exists($directory) || !is_writable($directory)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('The directory "'
-            . $directory . '" is not writable and therefore cannot be used');
+            . $directory . '" is not writable or does not exist and therefore'
+            . ' cannot be used');
         }
         $this->_directory = rtrim($directory, '/\\');
     }
@@ -85,13 +86,18 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * include: "subscription", "unsubscription". These Type strings may also
      * be referenced by constants on the Zend_Pubsubhubbub class.
      *
-     * @param string|integer|array $data
+     * @param string|integer $data
      * @param string $hubUrl The Hub Server URL
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
      */
     public function store($data, $hubUrl, $topicUrl, $type)
     {
+        if (empty($data) || !is_string($data)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
+        }
         if (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
@@ -112,6 +118,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
         }
         $filename = $this->_getFilename($hubUrl, $topicUrl, $type);
         $path = $this->getDirectory() . '/' . $filename;
+        file_put_contents($path, $data);
     }
 
     /**
@@ -123,7 +130,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $hubUrl The Hub Server URL
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
      * @param string $type
-     * @return string|array
+     * @return string
      */
     public function get($hubUrl, $topicUrl, $type)
     {
@@ -147,29 +154,26 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
         }
         $filename = $this->_getFilename($hubUrl, $topicUrl, $type);
         $path = $this->getDirectory() . '/' . $filename;
+        if (!file_exists($path) || !is_readable($path)) {
+            return false;
+        }
+        return file_get_contents($path);
     }
 
     /**
-     * If implemented: deletes all records for any given valid Type
+     * When/If implemented: deletes all records for any given valid Type
      *
      * @param string $type
      */
     public function cleanup($type)
     {
-
+        require_once 'Zend/Pubsubhubbub/Exception.php';
+        throw new Zend_Pubsubhubbub_Exception('Not Implemented');
     }
 
     /**
-     * Detect and return the path to a writable temporary directory
-     *
-     */
-    protected function _getTempDirectory()
-    {
-
-    }
-
-    /**
-     * Based on parameters, generate a valid filename for a store entry
+     * Based on parameters, generate a valid one-way hashed filename for a
+     * store entry
      *
      * @param string $hubUrl The Hub Server URL
      * @param string $topicUrl The Topic (RSS or Atom feed) URL
@@ -178,7 +182,73 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      */
     protected function _getFilename($hubUrl, $topicUrl, $type)
     {
+        return preg_replace(array("/+/", "/\//", "/=/"),
+            array('_', '.', ''), base64_encode(sha1($hubUrl . $topicUrl . $type)));
+    }
 
+    /**
+     * Detect and return the path to a writable temporary directory.
+     * Harder than it looks!
+     *
+     * @see Zend_File_Transfer_Adapter_Abstract for the original impl.
+     *
+     * @return string
+     * @throws Zend_Pubsubhubbub_Exception if unable to determine directory
+     */
+    protected function _getTempDirectory()
+    {
+        $tmpdir = array();
+        foreach (array($_ENV, $_SERVER) as $tab) {
+            foreach (array('TMPDIR', 'TEMP', 'TMP', 'windir', 'SystemRoot') as $key) {
+                if (isset($tab[$key])) {
+                    if (($key == 'windir') or ($key == 'SystemRoot')) {
+                        $dir = realpath($tab[$key] . '\\temp');
+                    } else {
+                        $dir = realpath($tab[$key]);
+                    }
+                    if ($this->_isGoodTmpDir($dir)) {
+                        return $dir;
+                    }
+                }
+            }
+        }
+        if (function_exists('sys_get_temp_dir')) {
+            $dir = sys_get_temp_dir();
+            if ($this->_isGoodTmpDir($dir)) {
+        	    return $dir;
+            }
+        }
+        $tempFile = tempnam(md5(uniqid(rand(), TRUE)), '');
+        if ($tempFile) {
+            $dir = realpath(dirname($tempFile));
+            unlink($tempFile);
+            if ($this->_isGoodTmpDir($dir)) {
+                return $dir;
+            }
+        }
+        if ($this->_isGoodTmpDir('/tmp')) {
+            return '/tmp';
+        }
+        if ($this->_isGoodTmpDir('\\temp')) {
+            return '\\temp';
+        }
+        require_once 'Zend/Pubsubhubbub/Exception.php';
+        throw new Zend_Pubsubhubbub_Exception('Could not determine temp'
+        . ' directory, please specify a cache_dir manually');
+    }
+
+    /**
+     * Verify if the given temporary directory is readable and writable
+     *
+     * @param $dir temporary directory
+     * @return boolean true if the directory is ok
+     */
+    protected function _isGoodTmpDir($dir)
+    {
+        if (is_readable($dir) && is_writable($dir)) {
+            return true;
+        }
+    	return false;
     }
 
 }
