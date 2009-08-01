@@ -71,7 +71,6 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
 
-
     public function testThrowsExceptionOnSettingNonStringHubServerUrl()
     {
         try {
@@ -79,7 +78,6 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
             $this->fail('Should not fail as an Exception would be raised and caught');
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
-
 
     public function testThrowsExceptionOnSettingInvalidHubServerUrl()
     {
@@ -237,6 +235,66 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
     {
         try {
             $this->_subscriber->setLeaseSeconds('0aa');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testCanSetPreferredVerificationMode()
+    {
+        $this->_subscriber->setPreferredVerificationMode(Zend_Pubsubhubbub::VERIFICATION_MODE_ASYNC);
+        $this->assertEquals(Zend_Pubsubhubbub::VERIFICATION_MODE_ASYNC, $this->_subscriber->getPreferredVerificationMode());
+    }
+
+    public function testSetsPreferredVerificationModeThrowsExceptionOnSettingBadMode()
+    {
+        try {
+            $this->_subscriber->setPreferredVerificationMode('abc');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testPreferredVerificationModeDefaultsToSync()
+    {
+        $this->assertEquals(Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC, $this->_subscriber->getPreferredVerificationMode());
+    }
+
+    public function testCanSetVerificationToken()
+    {
+        $this->_subscriber->setVerificationToken('http://www.example.com/hub', 'abc');
+        $this->assertEquals('abc', $this->_subscriber->getVerificationToken('http://www.example.com/hub'));
+    }
+
+    public function testCanGetAllVerificationTokensIndexedByHub()
+    {
+        $this->_subscriber->setVerificationToken('http://www.example.com/hub', 'abc');
+        $this->_subscriber->setVerificationToken('http://www.example.com/hub2', 'cba');
+        $this->assertEquals(array(
+            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
+        ), $this->_subscriber->getVerificationTokens());
+    }
+
+    public function testCanSetAllVerificationTokensUsingArrayIndexedByHub()
+    {
+        $this->_subscriber->setVerificationTokens(array(
+            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
+        ));
+        $this->assertEquals(array(
+            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
+        ), $this->_subscriber->getVerificationTokens());
+    }
+
+    public function testSetsVerificationTokenThrowsExceptionOnSettingBadToken()
+    {
+        try {
+            $this->_subscriber->setVerificationToken('http://www.example.com/hub', '');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testSetsVerificationTokenThrowsExceptionOnSettingBadUrl()
+    {
+        try {
+            $this->_subscriber->setVerificationToken('http://', 'abc');
             $this->fail('Should not fail as an Exception would be raised and caught');
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }

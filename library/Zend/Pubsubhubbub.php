@@ -53,6 +53,12 @@ class Zend_Pubsubhubbub
 {
 
     /**
+     * String constants for use
+     */
+    const VERIFICATION_MODE_SYNC = 'sync';
+    const VERIFICATION_MODE_ASYNC = 'async';
+
+    /**
      * Singleton instance if required of the HTTP client
      *
      * @var Zend_Http_Client
