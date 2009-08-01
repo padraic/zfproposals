@@ -371,6 +371,16 @@ class Zend_Pubsubhubbub_Subscriber
             . Zend_Version::VERSION));
         $params = array();
         $params[] = 'hub.mode=' . $mode;
+        $params[] = 'hub.callback=' . urlencode($this->getCallbackUrl());
+        $params[] = 'hub.topic=' . urlencode($this->getTopicUrl());
+        $vmodes = $this->getVerificationModes(); // NOT IMPLEMENTED YET
+        foreach($vmodes as $vmode) {
+            $params[] = 'hub.verify=' . urlencode($vmode);
+        }
+        $params[] = 'hub.verify_token=' . urlencode($this->getVerificationToken()); // NOT IMPLEMENTED YET
+        if ($mode == 'subscribe') {
+            $params[] = 'hub.lease_seconds=' . urlencode($this->getLeaseSeconds());
+        }
         $optParams = $this->getParameters();
         foreach ($optParams as $name => $value) {
             $params[] = urlencode($name) . '=' . urlencode($value);
