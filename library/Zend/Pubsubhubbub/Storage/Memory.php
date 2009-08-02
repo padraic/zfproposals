@@ -61,108 +61,76 @@ class Zend_Pubsubhubbub_Storage_Memory implements Zend_Pubsubhubbub_StorageInter
      * include: "subscription", "unsubscription". These Type strings may also
      * be referenced by constants on the Zend_Pubsubhubbub class.
      *
-     * @param string|integer $data
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
+     * @param string $token
      */
-    public function store($data, $type, $topicUrl, $hubUrl = null)
+    public function setVerifyToken($key, $token)
     {
-        if (empty($data) || !is_string($data)) {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "key"'
+                .' of "' . $key . '" must be a non-empty string');
+        }
+        if (empty($token) || !is_string($token)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "token"'
+                . ' must be a non-empty string');
+        }
+        $key = $this->_getSecureKey($key);
+        apc_store($key, $token);
+    }
+
+    /**
+     * Get data associated with the given key
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getVerifyToken($key)
+    {
+        if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
                 .' of "' . $data . '" must be a non-empty string');
         }
-        if (empty($topicUrl) || !is_string($topicUrl) || !Zend_Uri::check($topicUrl)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $topicUrl . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        if (!in_array($type, array('subscription', 'unsubscription'))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "type"'
-                .' of "' . $type . '" must be a non-empty string and a valid'
-                . ' type for storage');
-        }
-        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $hubUrl . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        $key = $this->_getKey($type, $topicUrl, $hubUrl);
-        apc_store($key, $data);
-    }
-
-    /**
-     * Get data which is associated with the given Hub Server URL and Topic
-     * URL and where that data relates to the given Type. The Types supported
-     * include: "subscription", "unsubscription". These Type strings may also
-     * be referenced by constants on the Zend_Pubsubhubbub class.
-     *
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
-     * @return string
-     */
-    public function get($type, $topicUrl, $hubUrl = null)
-    {
-        if (empty($topicUrl) || !is_string($topicUrl) || !Zend_Uri::check($topicUrl)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $topicUrl . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $hubUrl . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        if (!in_array($type, array('subscription', 'unsubscription'))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "type"'
-                .' of "' . $type . '" must be a non-empty string and a valid'
-                . ' type for storage');
-        }
-        $key = $this->_getKey($type, $topicUrl, $hubUrl);
+        $key = $this->_getSecureKey($key);
         return apc_fetch($key);
     }
 
     /**
-     * Checks for the existence of a record agreeing with the given parameters
+     * Checks for the existence of a record agreeing with the given key
      *
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
      * @return bool
      */
-    public function exists($type, $topicUrl, $hubUrl = null)
+    public function hasVerifyToken($key)
     {
-        if (empty($topicUrl) || !is_string($topicUrl) || !Zend_Uri::check($topicUrl)) {
+        if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $topicUrl . '" must be a non-empty string and a valid'
-                .'URL');
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
         }
-        if (!is_null($hubUrl) && (empty($hubUrl) || !is_string($hubUrl) || !Zend_Uri::check($hubUrl))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $hubUrl . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        if (!in_array($type, array('subscription', 'unsubscription'))) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "type"'
-                .' of "' . $type . '" must be a non-empty string and a valid'
-                . ' type for storage');
-        }
-        $key = $this->_getKey($type, $topicUrl, $hubUrl);
+        $key = $this->_getSecureKey($key);
         if (apc_fetch($key)) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Deletes a record with the given key
+     *
+     * @param string $key
+     */
+    public function removeVerifyToken($key)
+    {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
+        }
+        $key = $this->_getSecureKey($key);
+        apc_delete($key);
     }
 
     /**
@@ -180,18 +148,13 @@ class Zend_Pubsubhubbub_Storage_Memory implements Zend_Pubsubhubbub_StorageInter
      * Based on parameters, generate a valid one-way hashed key for a
      * store entry
      *
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
      * @return string
      */
-    protected function _getKey($type, $topicUrl, $hubUrl = null)
+    protected function _getSecureKey($key)
     {
-        if ($hubUrl === null) {
-            $hubUrl = '';
-        }
         return preg_replace(array("/+/", "/\//", "/=/"),
-            array('_', '.', ''), base64_encode(sha1($type . $topicUrl . $hubUrl)));
+            array('_', '.', ''), base64_encode(sha1($key)));
     }
 
 }
