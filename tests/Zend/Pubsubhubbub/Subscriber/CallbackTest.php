@@ -146,7 +146,9 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHas implements Zend_Pubsubhubbub_StorageInterface
 {
     public function setVerifyToken($key, $token){}
-    public function getVerifyToken($key){return hash('sha256', 'cba');}
+    public function getVerifyToken($key){
+        if ($key == 'verifytokenkey') return hash('sha256', 'cba');
+    }
     public function hasVerifyToken($key){return true;}
     public function removeVerifyToken($key){}
     public function cleanup($type){}

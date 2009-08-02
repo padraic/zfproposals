@@ -224,7 +224,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         // assume we have it for now - later worry about detection!
         $path = parse_url($callbackUrl, PHP_URL_PATH);
         $parts = explode('/', $path);
-        $tokenKey = ltrim('/\\', urldecode(array_pop($parts))); // check urldecode needed?
+        $tokenKey = urldecode(ltrim(array_pop($parts), '/\\')); // check urldecode needed?
         return $tokenKey;
     }
 
