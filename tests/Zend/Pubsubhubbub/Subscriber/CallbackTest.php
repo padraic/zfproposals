@@ -7,13 +7,14 @@ require_once 'Zend/Pubsubhubbub/StorageInterface.php';
 class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCase
 {
 
-    protected $_originalRequestUri = null;
+    protected $_originalServer = null;
 
     public function setUp()
     {
         $this->_callback = new Zend_Pubsubhubbub_Subscriber_Callback;
         $this->_callback->setStorage(new Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHas);
-        $this->_get = array( // a full valid array
+
+        $this->_get = array(
             'hub.mode' => 'subscribe',
             'hub.topic' => 'http://www.example.com/topic',
             'hub.challenge' => 'abc',
@@ -21,20 +22,18 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
             'hub.mode' => 'subscribe',
             'hub.lease_seconds' => '1234567'
         );
-        if (isset($_SERVER['REQUEST_URI'])) {
-            $this->_originalRequestUri = $_SERVER['REQUEST_URI'];
-        }
-        $_SERVER['REQUEST_URI'] = 'http://www.example.com/some/path/callback/verifytokenkey';
+
+        $this->_originalServer = $_SERVER;
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['HTTPS'] = '';
+        $_SERVER['HTTP_HOST'] = 'www.example.com';
+        $_SERVER['SERVER_NAME'] = 'www.example.com';
+        $_SERVER['SERVER_PORT'] = '80';
     }
 
     public function tearDown()
     {
-        if (isset($_SERVER['REQUEST_URI'])) {
-            unset($_SERVER['REQUEST_URI']);
-        }
-        if (!is_null($this->_originalRequestUri)) {
-            $_SERVER['REQUEST_URI'] = $this->_originalRequestUri;
-        }
+        $_SERVER = $this->_originalServer;
     }
 
 

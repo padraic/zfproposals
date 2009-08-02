@@ -216,16 +216,68 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * the Callback URL (which we are handling with this class!) as a URI
      * path part (the last part by convention).
      *
+     * Since specification disallows use of query string, attempt to detect
+     * based the URI being requested (if we can discover it)
+     *
      * @return string
      */
     public function _detectVerifyTokenKey()
     {
-        $callbackUrl = $_SERVER['REQUEST_URI'];
-        // assume we have it for now - later worry about detection!
+        $callbackUrl = $this->_detectCallbackUrl();
         $path = parse_url($callbackUrl, PHP_URL_PATH);
         $parts = explode('/', $path);
         $tokenKey = urldecode(ltrim(array_pop($parts), '/\\')); // check urldecode needed?
         return $tokenKey;
+    }
+
+    /**
+     * Attempt to detect the callback URL
+     */
+    protected function _detectCallbackUrl()
+    {
+        $callbackUrl = '';
+        if (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
+            $callbackUrl = $_SERVER['HTTP_X_REWRITE_URL'];
+        } elseif (isset($_SERVER['REQUEST_URI'])) {
+            $callbackUrl = $_SERVER['REQUEST_URI'];
+            $scheme = 'http';
+            if ($_SERVER['HTTPS'] == 'on') {
+                $scheme = 'https';
+            }
+            $schemeAndHttpHost = $scheme . '://' . $this->_getHttpHost();
+            if (strpos($callbackUrl, $schemeAndHttpHost) === 0) {
+                $callbackUrl = substr($callbackUrl, strlen($schemeAndHttpHost));
+            }
+        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
+            $callbackUrl= $_SERVER['ORIG_PATH_INFO'];
+            if (!empty($_SERVER['QUERY_STRING'])) {
+                $callbackUrl .= '?' . $_SERVER['QUERY_STRING'];
+            }
+        }
+        return $callbackUrl;
+    }
+
+    /**
+     * Get the HTTP host
+     *
+     * @return string
+     */
+    public function _getHttpHost()
+    {
+        if (!empty($_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'];
+        }
+        $scheme = 'http';
+        if ($_SERVER['HTTPS'] == 'on') {
+            $scheme = 'https';
+        }
+        $name = $_SERVER['SERVER_NAME'];
+        $port = $_SERVER['SERVER_PORT'];
+        if (($scheme == 'http' && $port == 80) || ($scheme == 'https' && $port == 443)) {
+            return $name;
+        } else {
+            return $name . ':' . $port;
+        }
     }
 
 }
