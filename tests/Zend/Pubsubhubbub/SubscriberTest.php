@@ -178,6 +178,14 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
 
+    public function testThrowsExceptionOnMissingTopicUrl()
+    {
+        try {
+            $this->_subscriber->getTopicUrl();
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
     public function testCanSetCallbackUrl()
     {
         $this->_subscriber->setCallbackUrl('http://www.example.com/callback');
@@ -206,6 +214,14 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
     {
         try {
             $this->_subscriber->setCallbackUrl('http://');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testThrowsExceptionOnMissingCallbackUrl()
+    {
+        try {
+            $this->_subscriber->getCallbackUrl();
             $this->fail('Should not fail as an Exception would be raised and caught');
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }

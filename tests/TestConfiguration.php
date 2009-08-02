@@ -96,7 +96,17 @@ define('TESTS_ZEND_DB_ADAPTER_DB2_DATABASE', 'sample');
  * under your web server(s) document root and set this constant to point to the
  * URL of this directory.
  */
-define('TESTS_ZEND_HTTP_CLIENT_BASEURI', false);
+define('TESTS_ZEND_HTTP_CLIENT_BASEURI', 'http://localhost/zftests');
+
+/**
+ * Zend_Pubsubhubbub tests
+ *
+ * To enable the dynamic Zend_Http_Client tests, you will need to symbolically
+ * link or copy the files in tests/Zend/Http/Client/_files to a directory
+ * under your web server(s) document root and set this constant to point to the
+ * URL of this directory.
+ */
+define('TESTS_ZEND_PUBSUBHUBBUB_BASEURI', 'http://localhost/zftests');
 
 /**
  * HTTP proxy to be used for testing the Proxy adapter. Set to a string of

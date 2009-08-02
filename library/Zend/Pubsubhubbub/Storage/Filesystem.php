@@ -190,7 +190,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      */
     protected function _getFilename($key)
     {
-        return preg_replace(array("/+/", "/\//", "/=/"),
+        return preg_replace(array("/\+/", "/\//", "/\=/"),
             array('_', '.', ''), base64_encode(sha1($key)));
     }
 

@@ -210,6 +210,11 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function getTopicUrl()
     {
+        if (empty($this->_topicUrl)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('A valid Topic (RSS or Atom'
+            . ' feed) URL MUST be set before attempting any operation');
+        }
         return $this->_topicUrl;
     }
 
@@ -264,6 +269,11 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function getCallbackUrl()
     {
+        if (empty($this->_callbackUrl)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('A valid Callback URL MUST be'
+            . ' set before attempting any operation');
+        }
         return $this->_callbackUrl;
     }
 
@@ -577,8 +587,8 @@ class Zend_Pubsubhubbub_Subscriber
             . $mode . '" which should have been "subscribe" or "unsubscribe"');
         }
         $params = array();
-        $params[] = array('hub.mode', $mode);
-        $params[] = array('hub.topic', $this->getTopicUrl());
+        $params['hub.mode'] = $mode;
+        $params['hub.topic'] = $this->getTopicUrl();
         if ($this->getPreferredVerificationMode()
         == Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC) {
             $vmodes = array(Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC,
@@ -587,8 +597,9 @@ class Zend_Pubsubhubbub_Subscriber
             $vmodes = array(Zend_Pubsubhubbub::VERIFICATION_MODE_ASYNC,
             Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC);
         }
+        $params['hub.verify'] = array();
         foreach($vmodes as $vmode) {
-            $params[] = array('hub.verify', $vmode);
+            $params['hub.verify'][] = $vmode;
         }
         /**
          * Establish a persistent verify_token and attach key to callback
@@ -597,34 +608,34 @@ class Zend_Pubsubhubbub_Subscriber
         $key = $this->_generateVerifyTokenKey($mode, $hubUrl);
         $token = $this->_generateVerifyToken();
         $this->getStorage()->setVerifyToken($key, hash('sha256', $token));
-        $params[] = array('hub.verify_token', $token);
+        $params['hub.verify_token'] = $token;
         // NOTE: Query String cannot be used per spec
-        $params[] = array('hub.callback',
-            $this->getCallbackUrl() . '/' . urlencode($key));
+        $params['hub.callback'] = $this->getCallbackUrl() . '/' . urlencode($key);
         if ($mode == 'subscribe') {
-            $params[] = array('hub.lease_seconds', $this->getLeaseSeconds());
+            $params['hub.lease_seconds'] = $this->getLeaseSeconds();
         }
         $optParams = $this->getParameters();
         foreach ($optParams as $name => $value) {
-            $params[] = array($name, $value);
+            $params[$name] = $value;
         }
-        $paramsEncoded = array();
-        foreach ($params as $param) {
-            $paramsEncoded[] = urlencode($param[0]) . '=' . urlencode($param[1]);
-        }
-        return implode('&', $paramsEncoded);
+        return $this->_toByteValueOrderedString(
+            $this->_urlEncode($params)
+        );
     }
 
     /**
      * Simple helper to generate a verification token used in (un)subscribe
      * requests to a Hub Server. Follows no particular method, which means
-     * it probably ought to be improved/changed in future.
+     * it might be improved/changed in future.
      *
      * @param string $hubUrl The Hub Server URL for which this token will apply
      * @return string
      */
     protected function _generateVerifyToken()
     {
+        if (!empty($this->_testStaticToken)) {
+            return $this->_testStaticToken;
+        }
         return uniqid(rand(), true) . time();
     }
 
@@ -640,6 +651,66 @@ class Zend_Pubsubhubbub_Subscriber
         $keyBase = $type . $hubUrl . $this->getTopicUrl();
         $key = sha1($keyBase);
         return $key;
+    }
+
+    /**
+     * URL Encode an array of parameters
+     *
+     * @param array $params
+     * @return array
+     */
+    protected function _urlEncode(array $params)
+    {
+        $encoded = array();
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                $ekey = urlencode($key);
+                $encoded[$ekey] = array();
+                foreach ($value as $duplicateKey) {
+                    $encoded[$ekey][] = urlencode($duplicateKey);
+                }
+            } else {
+                $encoded[urlencode($key)] = urlencode($value);
+            }
+        }
+        return $encoded;
+    }
+
+    /**
+     * Order outgoing parameters
+     *
+     * @param array $params
+     * @return array
+     */
+    protected function _toByteValueOrderedString(array $params)
+    {
+        $return = array();
+        uksort($params, 'strnatcmp');
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                /**
+                 * We skip sorting values simply because per spec, the order
+                 * of these values imposes an order of preference we should
+                 * not interfere with.
+                 */
+                //natsort($value);
+                foreach ($value as $keyduplicate) {
+                    $return[] = $key . '=' . $keyduplicate;
+                }
+            } else {
+                $return[] = $key . '=' . $value;
+            }
+        }
+        return implode('&', $return);
+    }
+
+    /**
+     * This STRICTLY for testing purposes only...
+     */
+    protected $_testStaticToken = null;
+    final public function setTestStaticToken($token)
+    {
+        $this->_testStaticToken = (string) $token;
     }
 
 }
