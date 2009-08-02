@@ -122,20 +122,29 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         if (!Zend_Uri::check($httpGetData['hub.topic'])) {
             return false;
         }
-        $verifyTokenExists = $this->getStorage()->exists(
-            $httpGetData['hub.mode'],
-            $httpGetData['hub.topic']
-        );
-
+        /**
+         * Attempt to retrieve any Verification Token attached to Callback URL's
+         * path by our Subscriber implementation
+         */
+        $verifyTokenKey = $this->_detectVerifyTokenKey();
+        if (empty($verifyTokenKey)) {
+            return false;
+        }
+        $verifyTokenExists = $this->getStorage()->hasVerifyToken($verifyTokenKey);
         if (!$verifyTokenExists) {
             return false;
         }
-        $verifyToken = $this->getStorage()->get(
-            $httpGetData['hub.mode'],
-            $httpGetData['hub.topic']
-        );
-        if ($verifyToken !== $httpGetData['hub.verify_token']) {
+        $verifyToken = $this->getStorage()->getVerifyToken($verifyTokenKey);
+        if ($verifyToken !== hash('sha256', $httpGetData['hub.verify_token'])) {
             return false;
+        } else {
+            /**
+             * Once token is verified, it's no longer needed.
+             * Point of improvement - should defer deletion to
+             * last possible moment...so we don't delete before any possible
+             * error occurs.
+             */
+            $this->getStorage()->removeVerifyToken($verifyTokenKey);
         }
         return true;
     }
@@ -200,6 +209,23 @@ class Zend_Pubsubhubbub_Subscriber_Callback
             $this->_httpResponse = new Zend_Pubsubhubbub_HttpResponse;
         }
         return $this->_httpResponse;
+    }
+
+    /**
+     * Attempt to detect the verification token key. This would be passed in
+     * the Callback URL (which we are handling with this class!) as a URI
+     * path part (the last part by convention).
+     *
+     * @return string
+     */
+    public function _detectVerifyTokenKey()
+    {
+        $callbackUrl = $_SERVER['REQUEST_URI'];
+        // assume we have it for now - later worry about detection!
+        $path = parse_url($callbackUrl, PHP_URL_PATH);
+        $parts = explode('/', $path);
+        $tokenKey = ltrim('/\\', urldecode(array_pop($parts))); // check urldecode needed?
+        return $tokenKey;
     }
 
 }

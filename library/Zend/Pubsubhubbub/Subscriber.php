@@ -112,20 +112,6 @@ class Zend_Pubsubhubbub_Subscriber
         = Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC;
 
     /**
-     * The verification tokens to accompany any (un)subscribe requests
-     * sent to the Hub Servers. This acts to identify the request, and
-     * subsequent Hub Server response, so they should be a unique value
-     * retained for matching to a later response from a Hub Server.
-     *
-     * Zend_Pubsubhubbub_Subscriber will generate these if none is given and you
-     * MUST retain these until the (un)subscribe request has been verified and
-     * confirmed by the Hub Servers.
-     *
-     * @var string
-     */
-    protected $_verificationTokens = array();
-
-    /**
      * An array of any errors including keys for 'response', 'hubUrl'.
      * The response is the actual Zend_Http_Response object.
      *
@@ -196,9 +182,6 @@ class Zend_Pubsubhubbub_Subscriber
             $this->setPreferredVerificationMode(
                 $config['preferredVerificationMode']
             );
-        }
-        if (array_key_exists('verificationTokens', $config)) {
-            $this->setVerificationTokens($config['verificationTokens']);
         }
     }
 
@@ -315,78 +298,6 @@ class Zend_Pubsubhubbub_Subscriber
     public function getPreferredVerificationMode()
     {
         return $this->_preferredVerificationMode;
-    }
-
-    /**
-     * The verification token to accompany any (un)subscribe requests
-     * sent to a Hub Server. This acts to identify the request, and
-     * subsequent Hub Server response, so it should be a unique value
-     * retained for matching to a later response from the Hub Server.
-     *
-     * Zend_Pubsubhubbub_Subscriber will generate this if none is given and you
-     * MUST retain this until the (un)subscribe request has been verified and
-     * confirmed by the Hub Server.
-     *
-     * @param string $url The Hub Server URL this token applies to
-     * @param string $token
-     */
-    public function setVerificationToken($url, $token)
-    {
-        if (empty($url) || !is_string($url) || !Zend_Uri::check($url)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "url"'
-                .' of "' . $url . '" must be a non-empty string and a valid'
-                .'URL');
-        }
-        if (empty($token) || !is_string($token)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Invalid verification token'
-            . ': "' . $token . '" must be a non-empty string');
-        }
-        $this->_verificationTokens[$url] = $token;
-    }
-
-    /**
-     * Set an array of verification tokens by Hub Server URL
-     *
-     * @param array $tokens Assoc array indexed by Hub Server URL
-     */
-    public function setVerificationTokens(array $tokens)
-    {
-        foreach ($tokens as $hubUrl => $token) {
-            $this->setVerificationToken($hubUrl, $token);
-        }
-    }
-
-    /**
-     * Get/Generate a verification token.
-     *
-     * @param string $hubUrl The Hub Server whose token will be returned
-     * @return string
-     */
-    public function getVerificationToken($hubUrl)
-    {
-        if (!isset($this->_verificationTokens[$hubUrl])
-        || empty($this->_verificationTokens[$hubUrl])) {
-            if (!in_array($hubUrl, $this->getHubUrls())) {
-                require_once 'Zend/Pubsubhubbub/Exception.php';
-                throw new Zend_Pubsubhubbub_Exception('Unable to return a'
-                . ' verification token as the given Hub Server URL "'
-                . $hubUrl . '" is not known');
-            }
-            $this->_verificationToken = $this->_generateToken($hubUrl);
-        }
-        return $this->_verificationTokens[$hubUrl];
-    }
-
-    /**
-     * Get an array of verification tokens by Hub Server URL
-     *
-     * @return array $tokens Assoc array indexed by Hub Server URL
-     */
-    public function getVerificationTokens()
-    {
-        return $this->_verificationTokens;
     }
 
     /**
@@ -683,7 +594,6 @@ class Zend_Pubsubhubbub_Subscriber
         }
         $params = array();
         $params[] = array('hub.mode', $mode);
-        $params[] = array('hub.callback', $this->getCallbackUrl());
         $params[] = array('hub.topic', $this->getTopicUrl());
         if ($this->getPreferredVerificationMode()
         == Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC) {
@@ -696,7 +606,16 @@ class Zend_Pubsubhubbub_Subscriber
         foreach($vmodes as $vmode) {
             $params[] = array('hub.verify', $vmode);
         }
-        $params[] = array('hub.verify_token', $this->getVerificationToken($hubUrl));
+        /**
+         * Establish a persistent verify_token and attach key to callback URL
+         */
+        $key = $this->_generateVerifyTokenKey($mode, $hubUrl);
+        $token = $this->_generateVerifyToken();
+        $this->getStorage()->setVerifyToken($key, hash('sha256', $token));
+        $params[] = array('hub.verify_token', $token);
+        // NOTE: Query String cannot be used per spec
+        $params[] = array('hub.callback',
+            $this->getCallbackUrl() . '/' . urlencode($key));
         if ($mode == 'subscribe') {
             $params[] = array('hub.lease_seconds', $this->getLeaseSeconds());
         }
@@ -713,15 +632,29 @@ class Zend_Pubsubhubbub_Subscriber
 
     /**
      * Simple helper to generate a verification token used in (un)subscribe
+     * requests to a Hub Server. Follows not particular method, which means
+     * it probably ought to be improved/changed in future.
+     *
+     * @param string $hubUrl The Hub Server URL for which this token will apply
+     * @return string
+     */
+    protected function _generateVerifyToken()
+    {
+        return uniqid(rand(), true) . time();
+    }
+
+    /**
+     * Simple helper to generate a verification token used in (un)subscribe
      * requests to a Hub Server
      *
      * @param string $hubUrl The Hub Server URL for which this token will apply
      * @return string
      */
-    protected function _generateToken($hubUrl)
+    protected function _generateVerifyTokenKey($type, $hubUrl)
     {
-        // simple token - impl. can be updated later
-        return uniqid(rand(), true);
+        $keyBase = $type . $hubUrl . $this->getTopicUrl();
+        $key = sha1($keyBase);
+        return $key;
     }
 
 }

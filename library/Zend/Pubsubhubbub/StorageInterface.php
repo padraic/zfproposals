@@ -42,38 +42,36 @@ interface Zend_Pubsubhubbub_StorageInterface
      * include: "subscription", "unsubscription". These Type strings may also
      * be referenced by constants on the Zend_Pubsubhubbub class.
      *
-     * @param string|integer $data
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
+     * @param string $token
      */
-    public function store($data, $type, $topicUrl, $hubUrl = null);
+    public function setVerifyToken($key, $token);
 
     /**
-     * Get data which is associated with the given Hub Server URL and Topic
-     * URL and where that data relates to the given Type. The Types supported
-     * include: "subscription", "unsubscription". These Type strings may also
-     * be referenced by constants on the Zend_Pubsubhubbub class.
+     * Get data associated with the given key
      *
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
      * @return string
      */
-    public function get($type, $topicUrl, $hubUrl = null);
+    public function getVerifyToken($key);
 
     /**
-     * Checks for the existence of a record agreeing with the given parameters
+     * Checks for the existence of a record agreeing with the given key
      *
-     * @param string $hubUrl The Hub Server URL
-     * @param string $topicUrl The Topic (RSS or Atom feed) URL
-     * @param string $type
+     * @param string $key
      * @return bool
      */
-    public function exists($type, $topicUrl, $hubUrl = null);
+    public function hasVerifyToken($key);
 
     /**
-     * If implemented: deletes all records for any given valid Type
+     * Deletes a record with the given key
+     *
+     * @param string $key
+     */
+    public function removeVerifyToken($key);
+
+    /**
+     * If implemented: deletes all records
      *
      * @param string $type
      */

@@ -7,6 +7,8 @@ require_once 'Zend/Pubsubhubbub/StorageInterface.php';
 class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCase
 {
 
+    protected $_originalRequestUri = null;
+
     public function setUp()
     {
         $this->_callback = new Zend_Pubsubhubbub_Subscriber_Callback;
@@ -19,7 +21,22 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
             'hub.mode' => 'subscribe',
             'hub.lease_seconds' => '1234567'
         );
+        if (isset($_SERVER['REQUEST_URI'])) {
+            $this->_originalRequestUri = $_SERVER['REQUEST_URI'];
+        }
+        $_SERVER['REQUEST_URI'] = 'http://www.example.com/some/path/callback/verifytokenkey';
     }
+
+    public function tearDown()
+    {
+        if (isset($_SERVER['REQUEST_URI'])) {
+            unset($_SERVER['REQUEST_URI']);
+        }
+        if (!is_null($this->_originalRequestUri)) {
+            $_SERVER['REQUEST_URI'] = $this->_originalRequestUri;
+        }
+    }
+
 
     public function testCanSetHttpResponseObject()
     {
@@ -123,31 +140,30 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 
 }
 
-
 /**
  * Stubs for storage access
  */
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHas implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function store($data, $type, $topicUrl, $hubUrl = null){}
-    public function get($type, $topicUrl, $hubUrl = null){return 'cba';}
-    public function exists($type, $topicUrl, $hubUrl = null){return true;}
-    public function remove($type, $topicUrl, $hubUrl = null){}
+    public function setVerifyToken($key, $token){}
+    public function getVerifyToken($key){return hash('sha256', 'cba');}
+    public function hasVerifyToken($key){return true;}
+    public function removeVerifyToken($key){}
     public function cleanup($type){}
 }
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHasNot implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function store($data, $type, $topicUrl, $hubUrl = null){}
-    public function get($type, $topicUrl, $hubUrl = null){}
-    public function exists($type, $topicUrl, $hubUrl = null){return false;}
-    public function remove($type, $topicUrl, $hubUrl = null){}
+    public function setVerifyToken($key, $token){}
+    public function getVerifyToken($key){}
+    public function hasVerifyToken($key){return false;}
+    public function removeVerifyToken($key){}
     public function cleanup($type){}
 }
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHasButWrong implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function store($data, $type, $topicUrl, $hubUrl = null){}
-    public function get($type, $topicUrl, $hubUrl = null){return 'wrong';}
-    public function exists($type, $topicUrl, $hubUrl = null){return true;}
-    public function remove($type, $topicUrl, $hubUrl = null){}
+    public function setVerifyToken($key, $token){}
+    public function getVerifyToken($key){return 'wrong';}
+    public function hasVerifyToken($key){return true;}
+    public function removeVerifyToken($key){}
     public function cleanup($type){}
 }

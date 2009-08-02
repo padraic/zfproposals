@@ -15,6 +15,7 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
         $this->_subscriber = new Zend_Pubsubhubbub_Subscriber;
     }
 
+
     public function testAddsHubServerUrl()
     {
         $this->_subscriber->addHubUrl('http://www.example.com/hub');
@@ -256,47 +257,6 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
     public function testPreferredVerificationModeDefaultsToSync()
     {
         $this->assertEquals(Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC, $this->_subscriber->getPreferredVerificationMode());
-    }
-
-    public function testCanSetVerificationToken()
-    {
-        $this->_subscriber->setVerificationToken('http://www.example.com/hub', 'abc');
-        $this->assertEquals('abc', $this->_subscriber->getVerificationToken('http://www.example.com/hub'));
-    }
-
-    public function testCanGetAllVerificationTokensIndexedByHub()
-    {
-        $this->_subscriber->setVerificationToken('http://www.example.com/hub', 'abc');
-        $this->_subscriber->setVerificationToken('http://www.example.com/hub2', 'cba');
-        $this->assertEquals(array(
-            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
-        ), $this->_subscriber->getVerificationTokens());
-    }
-
-    public function testCanSetAllVerificationTokensUsingArrayIndexedByHub()
-    {
-        $this->_subscriber->setVerificationTokens(array(
-            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
-        ));
-        $this->assertEquals(array(
-            'http://www.example.com/hub' => 'abc', 'http://www.example.com/hub2' => 'cba'
-        ), $this->_subscriber->getVerificationTokens());
-    }
-
-    public function testSetsVerificationTokenThrowsExceptionOnSettingBadToken()
-    {
-        try {
-            $this->_subscriber->setVerificationToken('http://www.example.com/hub', '');
-            $this->fail('Should not fail as an Exception would be raised and caught');
-        } catch (Zend_Pubsubhubbub_Exception $e) {}
-    }
-
-    public function testSetsVerificationTokenThrowsExceptionOnSettingBadUrl()
-    {
-        try {
-            $this->_subscriber->setVerificationToken('http://', 'abc');
-            $this->fail('Should not fail as an Exception would be raised and caught');
-        } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
 
     public function testCanSetStorageImplementation()
