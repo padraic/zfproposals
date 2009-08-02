@@ -29,6 +29,11 @@ require_once 'Zend/Pubsubhubbub.php';
 require_once 'Zend/Pubsubhubbub/HttpResponse.php';
 
 /**
+ * @see Zend_Uri
+ */
+require_once 'Zend/Uri.php';
+
+/**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -60,17 +65,14 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * the request prior to taking action on it.
      *
      */
-    public function handle(array $httpGetData = null, $sendResponse = false)
+    public function handle(array $httpGetData, $sendResponseNow = false)
     {
-        if ($httpGetData === null) {
-            $httpGetData = $_GET;
-        }
         if (!$this->isValid($httpGetData)) {
             $this->getHttpResponse()->setHttpResponseCode(404);
         } else {
             $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
         }
-        if ($sendResponse) {
+        if ($sendResponseNow) {
             $this->sendResponse();
         }
     }
@@ -78,7 +80,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     /**
      * Send the response, including all headers.
      * If you wish to handle this via Zend_Controller, use the getter methods
-     * to retrieve any data needed to be set on your HTTP Response object.
+     * to retrieve any data needed to be set on your HTTP Response object, or
+     * simply give this object the HTTP Response instance to work with for you!
      *
      * @return void
      */
@@ -94,11 +97,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * @param array $httpGetData
      * @return bool
      */
-    public function isValid(array $httpGetData = null)
+    public function isValid(array $httpGetData)
     {
-        if ($httpGetData === null) {
-            $httpGetData = $_GET;
-        }
         /**
          * As per the specification, the hub.verify_token is OPTIONAL. This
          * implementation of Pubsubhubbub considers it REQUIRED and will
@@ -111,13 +111,12 @@ class Zend_Pubsubhubbub_Subscriber_Callback
                 return false;
             }
         }
-        if ($httpGetData['hub.mode'] == 'subscribe') {
-            if (!array_key_exists('hub.lease_seconds', $httpGetData)) {
-                return false;
-            }
-        }
         if ($httpGetData['hub.mode'] !== 'subscribe'
         && $httpGetData['hub.mode'] !== 'unsubscribe') {
+            return false;
+        }
+        if ($httpGetData['hub.mode'] == 'subscribe'
+        && !array_key_exists('hub.lease_seconds', $httpGetData)) {
             return false;
         }
         if (!Zend_Uri::check($httpGetData['hub.topic'])) {
@@ -172,7 +171,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     public function setHttpResponse($httpResponse)
     {
         if (!$httpResponse instanceof Zend_Pubsubhubbub_HttpResponse
-        || !$httpResponse instanceof Zend_Controller_Response_Http) {
+        && !$httpResponse instanceof Zend_Controller_Response_Http) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('HTTP Response object must'
             . ' implement one of Zend_Pubsubhubbub_HttpResponse or'
