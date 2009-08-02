@@ -40,44 +40,19 @@ require_once 'Zend/Uri.php';
  * @copyright  Copyright (c) 2009 Padraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageInterface
+class Zend_Pubsubhubbub_Storage_Memory implements Zend_Pubsubhubbub_StorageInterface
 {
 
     /**
-     * The directory to which values will be stored. If left unset, will attempt
-     * to detect and use a valid writable temporary directory.
-     *
-     * @var string
+     * Constructor; checks that apc has been loaded
      */
-    protected $_directory = null;
-
-    /**
-     * Set the directory to which values will be stored.
-     *
-     * @param string $directory
-     */
-    public function setDirectory()
+    public function __construct()
     {
-        if (!file_exists($directory) || !is_writable($directory)) {
+        if (!extension_loaded('apc')) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('The directory "'
-            . $directory . '" is not writable or does not exist and therefore'
-            . ' cannot be used');
+            throw new Zend_Pubsubhubbub_Exception('The apc extension must be'
+            . 'loaded to use this Storage medium');
         }
-        $this->_directory = rtrim($directory, '/\\');
-    }
-
-    /**
-     * Get the directory to which values will be stored.
-     *
-     * @return string
-     */
-    public function getDirectory()
-    {
-        if ($this->_directory === null) {
-            $this->_directory = $this->_getTempDirectory();
-        }
-        return $this->_directory;
     }
 
     /**
@@ -116,9 +91,8 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
                 .' of "' . $hubUrl . '" must be a non-empty string and a valid'
                 .'URL');
         }
-        $filename = $this->_getFilename($type, $topicUrl, $hubUrl);
-        $path = $this->getDirectory() . '/' . $filename;
-        file_put_contents($path, $data);
+        $key = $this->_getKey($type, $topicUrl, $hubUrl);
+        apc_store($key, $data);
     }
 
     /**
@@ -152,12 +126,8 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
                 .' of "' . $type . '" must be a non-empty string and a valid'
                 . ' type for storage');
         }
-        $filename = $this->_getFilename($type, $topicUrl, $hubUrl);
-        $path = $this->getDirectory() . '/' . $filename;
-        if (!file_exists($path) || !is_readable($path)) {
-            return false;
-        }
-        return file_get_contents($path);
+        $key = $this->_getKey($type, $topicUrl, $hubUrl);
+        return apc_fetch($key);
     }
 
     /**
@@ -188,12 +158,11 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
                 .' of "' . $type . '" must be a non-empty string and a valid'
                 . ' type for storage');
         }
-        $filename = $this->_getFilename($type, $topicUrl, $hubUrl);
-        $path = $this->getDirectory() . '/' . $filename;
-        if (!file_exists($path) || !is_readable($path)) {
-            return false;
+        $key = $this->_getKey($type, $topicUrl, $hubUrl);
+        if (apc_fetch($key)) {
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -208,7 +177,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
     }
 
     /**
-     * Based on parameters, generate a valid one-way hashed filename for a
+     * Based on parameters, generate a valid one-way hashed key for a
      * store entry
      *
      * @param string $hubUrl The Hub Server URL
@@ -216,78 +185,13 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $type
      * @return string
      */
-    protected function _getFilename($type, $topicUrl, $hubUrl = null)
+    protected function _getKey($type, $topicUrl, $hubUrl = null)
     {
         if ($hubUrl === null) {
             $hubUrl = '';
         }
         return preg_replace(array("/+/", "/\//", "/=/"),
             array('_', '.', ''), base64_encode(sha1($type . $topicUrl . $hubUrl)));
-    }
-
-    /**
-     * Detect and return the path to a writable temporary directory.
-     * Harder than it looks!
-     *
-     * @see Zend_File_Transfer_Adapter_Abstract for the original impl.
-     *
-     * @return string
-     * @throws Zend_Pubsubhubbub_Exception if unable to determine directory
-     */
-    protected function _getTempDirectory()
-    {
-        $tmpdir = array();
-        foreach (array($_ENV, $_SERVER) as $tab) {
-            foreach (array('TMPDIR', 'TEMP', 'TMP', 'windir', 'SystemRoot') as $key) {
-                if (isset($tab[$key])) {
-                    if (($key == 'windir') or ($key == 'SystemRoot')) {
-                        $dir = realpath($tab[$key] . '\\temp');
-                    } else {
-                        $dir = realpath($tab[$key]);
-                    }
-                    if ($this->_isGoodTmpDir($dir)) {
-                        return $dir;
-                    }
-                }
-            }
-        }
-        if (function_exists('sys_get_temp_dir')) {
-            $dir = sys_get_temp_dir();
-            if ($this->_isGoodTmpDir($dir)) {
-        	    return $dir;
-            }
-        }
-        $tempFile = tempnam(md5(uniqid(rand(), TRUE)), '');
-        if ($tempFile) {
-            $dir = realpath(dirname($tempFile));
-            unlink($tempFile);
-            if ($this->_isGoodTmpDir($dir)) {
-                return $dir;
-            }
-        }
-        if ($this->_isGoodTmpDir('/tmp')) {
-            return '/tmp';
-        }
-        if ($this->_isGoodTmpDir('\\temp')) {
-            return '\\temp';
-        }
-        require_once 'Zend/Pubsubhubbub/Exception.php';
-        throw new Zend_Pubsubhubbub_Exception('Could not determine temp'
-        . ' directory, please specify a cache_dir manually');
-    }
-
-    /**
-     * Verify if the given temporary directory is readable and writable
-     *
-     * @param $dir temporary directory
-     * @return boolean true if the directory is ok
-     */
-    protected function _isGoodTmpDir($dir)
-    {
-        if (is_readable($dir) && is_writable($dir)) {
-            return true;
-        }
-    	return false;
     }
 
 }

@@ -124,11 +124,17 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         }
         $verifyTokenExists = $this->getStorage()->exists(
             $httpGetData['hub.mode'],
-            $httpGetData['hub.topic'],
-            null,
-            $httpGetData['hub.verify_token']
+            $httpGetData['hub.topic']
         );
+
         if (!$verifyTokenExists) {
+            return false;
+        }
+        $verifyToken = $this->getStorage()->get(
+            $httpGetData['hub.mode'],
+            $httpGetData['hub.topic']
+        );
+        if ($verifyToken !== $httpGetData['hub.verify_token']) {
             return false;
         }
         return true;
@@ -170,8 +176,9 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     public function setHttpResponse($httpResponse)
     {
-        if (!$httpResponse instanceof Zend_Pubsubhubbub_HttpResponse
-        && !$httpResponse instanceof Zend_Controller_Response_Http) {
+        if (!is_object($httpResponse)
+        || (!$httpResponse instanceof Zend_Pubsubhubbub_HttpResponse
+        && !$httpResponse instanceof Zend_Controller_Response_Http)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('HTTP Response object must'
             . ' implement one of Zend_Pubsubhubbub_HttpResponse or'
