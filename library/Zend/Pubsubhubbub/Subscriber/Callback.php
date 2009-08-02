@@ -55,6 +55,13 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     protected $_httpResponse = null;
 
     /**
+     * The number of Subscribers for which any updates are on behalf of.
+     *
+     * @var int
+     */
+    protected $_subscriberCount = 1;
+
+    /**
      * Handle any callback from a Hub Server responding to a subscription or
      * unsubscription request. This should be the Hub Server confirming the
      * the request prior to taking action on it.
@@ -62,10 +69,10 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     public function handle(array $httpGetData, $sendResponseNow = false)
     {
-        if (!$this->isValid($httpGetData)) {
-            $this->getHttpResponse()->setHttpResponseCode(404);
-        } else {
+        if ($this->isValidHubVerification($httpGetData)) {
             $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
+        } else {
+            $this->getHttpResponse()->setHttpResponseCode(404);
         }
         if ($sendResponseNow) {
             $this->sendResponse();
@@ -92,7 +99,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * @param array $httpGetData
      * @return bool
      */
-    public function isValid(array $httpGetData)
+    public function isValidHubVerification(array $httpGetData)
     {
         /**
          * As per the specification, the hub.verify_token is OPTIONAL. This
@@ -100,7 +107,11 @@ class Zend_Pubsubhubbub_Subscriber_Callback
          * always send a hub.verify_token parameter to be echoed back
          * by the Hub Server. Therefore, its absence is considered invalid.
          */
-        $required = array('hub.mode', 'hub.topic', 'hub.challenge', 'hub.verify_token');
+        if (strtolower($_SERVER['REQUEST_METHOD']) !== 'get') {
+            return false;
+        }
+        $required = array('hub.mode', 'hub.topic',
+            'hub.challenge', 'hub.verify_token');
         foreach ($required as $key) {
             if (!array_key_exists($key, $httpGetData)) {
                 return false;
@@ -207,6 +218,35 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     }
 
     /**
+     * Sets the number of Subscribers for which any updates are on behalf of.
+     * In other words, is this class serving one or more subscribers? How many?
+     * Defaults to 1 if left unchanged.
+     *
+     * @param string|int $count
+     */
+    public function setSubscriberCount($count)
+    {
+        $count = intval($count);
+        if ($count <= 0) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Subscriber count must be'
+            . ' greater than zero');
+        }
+        $this->_subscriberCount = $count;
+    }
+
+    /**
+     * Gets the number of Subscribers for which any updates are on behalf of.
+     * In other words, is this class serving one or more subscribers? How many?
+     *
+     * @return int
+     */
+    public function getSubscriberCount()
+    {
+        return $this->_subscriberCount;
+    }
+
+    /**
      * Attempt to detect the verification token key. This would be passed in
      * the Callback URL (which we are handling with this class!) as a URI
      * path part (the last part by convention).
@@ -268,7 +308,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         }
         $name = $_SERVER['SERVER_NAME'];
         $port = $_SERVER['SERVER_PORT'];
-        if (($scheme == 'http' && $port == 80) || ($scheme == 'https' && $port == 443)) {
+        if (($scheme == 'http' && $port == 80)
+        || ($scheme == 'https' && $port == 443)) {
             return $name;
         } else {
             return $name . ':' . $port;
