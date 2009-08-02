@@ -29,11 +29,6 @@ require_once 'Zend/Pubsubhubbub.php';
 require_once 'Zend/Pubsubhubbub/HttpResponse.php';
 
 /**
- * @see Zend_Uri
- */
-require_once 'Zend/Uri.php';
-
-/**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
  * @copyright  Copyright (c) 2009 Padraic Brady
@@ -123,8 +118,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
             return false;
         }
         /**
-         * Attempt to retrieve any Verification Token attached to Callback URL's
-         * path by our Subscriber implementation
+         * Attempt to retrieve any Verification Token Key attached to Callback
+         * URL's path by our Subscriber implementation
          */
         $verifyTokenKey = $this->_detectVerifyTokenKey();
         if (empty($verifyTokenKey)) {
@@ -226,12 +221,12 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         $callbackUrl = $this->_detectCallbackUrl();
         $path = parse_url($callbackUrl, PHP_URL_PATH);
         $parts = explode('/', $path);
-        $tokenKey = urldecode(ltrim(array_pop($parts), '/\\')); // check urldecode needed?
+        $tokenKey = urldecode(ltrim(array_pop($parts), '/\\'));
         return $tokenKey;
     }
 
     /**
-     * Attempt to detect the callback URL
+     * Attempt to detect the callback URL (specifically the path forward)
      */
     protected function _detectCallbackUrl()
     {

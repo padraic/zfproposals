@@ -456,38 +456,7 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function subscribeAll()
     {
-        $client = $this->_getHttpClient();
-        $hubs = $this->getHubUrls();
-        if (empty($hubs)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('No Hub Server URLs'
-            . ' have been set so no subscriptions can be attempted');
-        }
-        $this->_errors = array();
-        $this->_asyncHubs = array();
-        foreach ($hubs as $url) {
-            $client->setUri($url);
-            $client->setRawData($this->_getRequestParameters($url, 'subscribe'));
-            $response = $client->request();
-            if ($response->getStatus() !== '204'
-            && $response->getStatus() !== '202') {
-                $this->_errors[] = array(
-                    'response' => $response,
-                    'hubUrl' => $url
-                );
-            /**
-             * At first I thought it was needed, but the backend storage will
-             * allow tracking async without any user interference. It's left
-             * here in case the user is interested in knowing what Hubs
-             * are using async verification modes
-             */
-            } elseif ($response->getStatus() == '202') {
-                $this->_asyncHubs[] = array(
-                    'response' => $response,
-                    'hubUrl' => $url
-                );
-            }
-        }
+        return $this->_doRequest('subscribe');
     }
 
     /**
@@ -497,32 +466,7 @@ class Zend_Pubsubhubbub_Subscriber
      */
     public function unsubscribeAll()
     {
-        $client = $this->_getHttpClient();
-        $hubs = $this->getHubUrls();
-        if (empty($hubs)) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('No Hub Server URLs'
-            . ' have been set so no subscriptions can be attempted');
-        }
-        $this->_errors = array();
-        $this->_asyncHubs = array();
-        foreach ($hubs as $url) {
-            $client->setUri($url);
-            $client->setRawData($this->_getRequestParameters($url, 'unsubscribe'));
-            $response = $client->request();
-            if ($response->getStatus() !== '204'
-            && $response->getStatus() !== '202') {
-                $this->_errors[] = array(
-                    'response' => $response,
-                    'hubUrl' => $url
-                );
-            } elseif ($response->getStatus() == '202') {
-                $this->_asyncHubs[] = array(
-                    'response' => $response,
-                    'hubUrl' => $url
-                );
-            }
-        }
+        return $this->_doRequest('unsubscribe');
     }
 
     /**
@@ -562,6 +506,46 @@ class Zend_Pubsubhubbub_Subscriber
     public function getAsyncHubs()
     {
         return $this->_asyncHubs;
+    }
+
+    /**
+     * Executes an (un)subscribe request
+     *
+     */
+    protected function _doRequest($mode)
+    {
+        $client = $this->_getHttpClient();
+        $hubs = $this->getHubUrls();
+        if (empty($hubs)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('No Hub Server URLs'
+            . ' have been set so no subscriptions can be attempted');
+        }
+        $this->_errors = array();
+        $this->_asyncHubs = array();
+        foreach ($hubs as $url) {
+            $client->setUri($url);
+            $client->setRawData($this->_getRequestParameters($url, $mode));
+            $response = $client->request();
+            if ($response->getStatus() !== '204'
+            && $response->getStatus() !== '202') {
+                $this->_errors[] = array(
+                    'response' => $response,
+                    'hubUrl' => $url
+                );
+            /**
+             * At first I thought it was needed, but the backend storage will
+             * allow tracking async without any user interference. It's left
+             * here in case the user is interested in knowing what Hubs
+             * are using async verification modes
+             */
+            } elseif ($response->getStatus() == '202') {
+                $this->_asyncHubs[] = array(
+                    'response' => $response,
+                    'hubUrl' => $url
+                );
+            }
+        }
     }
 
     /**
@@ -607,7 +591,8 @@ class Zend_Pubsubhubbub_Subscriber
             $params[] = array('hub.verify', $vmode);
         }
         /**
-         * Establish a persistent verify_token and attach key to callback URL
+         * Establish a persistent verify_token and attach key to callback
+         * URL's path
          */
         $key = $this->_generateVerifyTokenKey($mode, $hubUrl);
         $token = $this->_generateVerifyToken();
@@ -632,7 +617,7 @@ class Zend_Pubsubhubbub_Subscriber
 
     /**
      * Simple helper to generate a verification token used in (un)subscribe
-     * requests to a Hub Server. Follows not particular method, which means
+     * requests to a Hub Server. Follows no particular method, which means
      * it probably ought to be improved/changed in future.
      *
      * @param string $hubUrl The Hub Server URL for which this token will apply

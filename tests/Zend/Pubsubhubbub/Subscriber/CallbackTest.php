@@ -135,7 +135,24 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
         $this->assertFalse($this->_callback->isValid($this->_get));
     }
 
+    public function testRespondsToInvalidConfirmationWith404Response()
+    {
+        unset($this->_get['hub.mode']);
+        $this->_callback->handle($this->_get);
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
+    }
 
+    public function testRespondsToValidConfirmationWith200Response()
+    {
+        $this->_callback->handle($this->_get);
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 200);
+    }
+
+    public function testRespondsToValidConfirmationWithBodyContainingHubChallenge()
+    {
+        $this->_callback->handle($this->_get);
+        $this->assertTrue($this->_callback->getHttpResponse()->getBody() == 'abc');
+    }
 
 }
 
