@@ -28,6 +28,12 @@ require_once 'Zend/Pubsubhubbub.php';
  */
 require_once 'Zend/Pubsubhubbub/HttpResponse.php';
 
+
+/**
+ * @see Zend_Feed_Reader My baby!
+ */
+require_once 'Zend/Feed/Reader.php';
+
 /**
  * @category   Zend
  * @package    Zend_Pubsubhubbub
@@ -62,6 +68,13 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     protected $_subscriberCount = 1;
 
     /**
+     * Contains the content of any feeds sent as updates to the Callback URL
+     *
+     * @var string
+     */
+    protected $_feedUpdate = null;
+
+    /**
      * Handle any callback from a Hub Server responding to a subscription or
      * unsubscription request. This should be the Hub Server confirming the
      * the request prior to taking action on it.
@@ -69,7 +82,20 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     public function handle(array $httpGetData, $sendResponseNow = false)
     {
-        if ($this->isValidHubVerification($httpGetData)) {
+        /**
+         * For now this accepts Atom. Give me a few days I'll update to support
+         * RSS (presumably application/rss+xml and application/rdf+xml)
+         */
+        if ($this->_getHeader('Content-Type') == 'application/atom+xml') {
+            $feedType = Zend_Feed_Reader::detectType($this->_getRawBody());
+            if (substr($feedType, 0, 4) == 'atom') {
+                $this->setFeedUpdate($this->_getRawBody());
+                $this->getHttpResponse()->setHeader('X-Hub-On-Behalf-Of',
+                    $this->getSubscriberCount());
+            } else {
+                $this->getHttpResponse()->setHttpResponseCode(404); // better code signalling an invalid req?
+            }
+        } elseif ($this->isValidHubVerification($httpGetData)) {
             $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
         } else {
             $this->getHttpResponse()->setHttpResponseCode(404);
@@ -247,6 +273,39 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     }
 
     /**
+     * Sets a newly received feed (Atom/RSS) sent by a Hub as an update to a
+     * Topic we've subscribed to.
+     *
+     * @param string $feed
+     */
+    public function setFeedUpdate($feed)
+    {
+        $this->_feedUpdate = $feed;
+    }
+
+    /**
+     * Check if any newly received feed (Atom/RSS) update was received
+     */
+    public function hasFeedUpdate()
+    {
+        if (is_null($this->_feedUpdate)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets a newly received feed (Atom/RSS) sent by a Hub as an update to a
+     * Topic we've subscribed to.
+     *
+     * @param string $feed
+     */
+    public function getFeedUpdate()
+    {
+        return $this->_feedUpdate;
+    }
+
+    /**
      * Attempt to detect the verification token key. This would be passed in
      * the Callback URL (which we are handling with this class!) as a URI
      * path part (the last part by convention).
@@ -256,7 +315,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      *
      * @return string
      */
-    public function _detectVerifyTokenKey()
+    protected function _detectVerifyTokenKey()
     {
         $callbackUrl = $this->_detectCallbackUrl();
         $path = parse_url($callbackUrl, PHP_URL_PATH);
@@ -314,6 +373,40 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         } else {
             return $name . ':' . $port;
         }
+    }
+
+    /**
+     * Retrieve a Header value from either $_SERVER or Apache
+     *
+     * @param string $header
+     */
+    protected function _getHeader($header)
+    {
+        $temp = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
+        if (!empty($_SERVER[$temp])) {
+            return $_SERVER[$temp];
+        }
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            if (!empty($headers[$header])) {
+                return $headers[$header];
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the raw body of the request
+     *
+     * @return string|false Raw body, or false if not present
+     */
+    protected function _getRawBody()
+    {
+        $body = file_get_contents('php://input');
+        if (strlen(trim($body)) > 0) {
+            return $body;
+        }
+        return false;
     }
 
 }
