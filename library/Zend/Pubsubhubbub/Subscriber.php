@@ -245,7 +245,7 @@ class Zend_Pubsubhubbub_Subscriber
     }
 
     /**
-     * Get the callback URL to be used by Hub Servers when communicating with
+     * Set the callback URL to be used by Hub Servers when communicating with
      * this Subscriber
      *
      * @param string $url

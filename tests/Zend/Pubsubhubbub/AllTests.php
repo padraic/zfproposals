@@ -38,6 +38,7 @@ require_once 'Zend/Pubsubhubbub/SubscriberTest.php';
 require_once 'Zend/Pubsubhubbub/SubscriberHttpTest.php';
 require_once 'Zend/Pubsubhubbub/Subscriber/CallbackTest.php';
 require_once 'Zend/Pubsubhubbub/Storage/FilesystemTest.php';
+require_once 'Zend/Pubsubhubbub/HubServerTest.php';
 
 
 class Zend_Pubsubhubbub_AllTests
@@ -57,6 +58,7 @@ class Zend_Pubsubhubbub_AllTests
         $suite->addTestSuite('Zend_Pubsubhubbub_SubscriberHttpTest');
         $suite->addTestSuite('Zend_Pubsubhubbub_Subscriber_CallbackTest');
         $suite->addTestSuite('Zend_Pubsubhubbub_Storage_FilesystemTest');
+        $suite->addTestSuite('Zend_Pubsubhubbub_HubServerTest');
 
         return $suite;
     }
