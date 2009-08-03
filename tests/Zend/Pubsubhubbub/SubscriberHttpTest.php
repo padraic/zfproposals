@@ -69,8 +69,8 @@ class Zend_Pubsubhubbub_SubscriberHttpTest extends PHPUnit_Framework_TestCase
         $this->_subscriber->setTestStaticToken('abc'); // override for testing
         $this->_subscriber->subscribeAll();
         $this->assertEquals(
-            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F8c01a802e4a'
-            .'c9beebccc36b71f240e4b89f273d4&hub.lease_seconds=2592000&hub.mode='
+            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5d'
+            .'cb966edab3a4c4d56213c16a8184b&hub.lease_seconds=2592000&hub.mode='
             .'subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.veri'
             .'fy=sync&hub.verify=async&hub.verify_token=abc',
             $this->_client->getLastResponse()->getBody());
@@ -84,8 +84,8 @@ class Zend_Pubsubhubbub_SubscriberHttpTest extends PHPUnit_Framework_TestCase
         $this->_subscriber->setTestStaticToken('abc'); //override for testing
         $this->_subscriber->unsubscribeAll();
         $this->assertEquals(
-            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2Ff92d0e925da'
-            .'366ac8ee5efc6a01b90e2672111f1&hub.mode=unsubscribe&hub.topic=http'
+            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5d'
+            .'cb966edab3a4c4d56213c16a8184b&hub.mode=unsubscribe&hub.topic=http'
             .'%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async'
             .'&hub.verify_token=abc',
             $this->_client->getLastResponse()->getBody());

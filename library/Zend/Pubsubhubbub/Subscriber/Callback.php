@@ -88,9 +88,16 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * the request prior to taking action on it.
      *
      */
-    public function handle(array $httpGetData, $sendResponseNow = false)
+    public function handle(array $httpGetData = null, $sendResponseNow = false)
     {
+        if ($httpGetData === null) {
+            $httpGetData = $_GET;
+        }
+        /**
+         * Handle any feed updates (sorry for the mess :P)
+         */
         if (strtolower($_SERVER['REQUEST_METHOD']) == 'post'
+        && $this->_hasValidVerifyToken(null, false)
         && ($this->_getHeader('Content-Type') == 'application/atom+xml'
         || $this->_getHeader('Content-Type') == 'application/rss+xml'
         || $this->_getHeader('Content-Type') == 'application/rdf+xml')) {
@@ -108,8 +115,14 @@ class Zend_Pubsubhubbub_Subscriber_Callback
             } else {
                 $this->getHttpResponse()->setHttpResponseCode(404);
             }
+        /**
+         * Handle any (un)subscribe confirmation requests
+         */
         } elseif ($this->isValidHubVerification($httpGetData)) {
             $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
+        /**
+         * Hey, C'mon! We tried everything else!
+         */
         } else {
             $this->getHttpResponse()->setHttpResponseCode(404);
         }
@@ -171,25 +184,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
          * Attempt to retrieve any Verification Token Key attached to Callback
          * URL's path by our Subscriber implementation
          */
-        $verifyTokenKey = $this->_detectVerifyTokenKey();
-        if (empty($verifyTokenKey)) {
+        if (!$this->_hasValidVerifyToken($httpGetData)) {
             return false;
-        }
-        $verifyTokenExists = $this->getStorage()->hasVerifyToken($verifyTokenKey);
-        if (!$verifyTokenExists) {
-            return false;
-        }
-        $verifyToken = $this->getStorage()->getVerifyToken($verifyTokenKey);
-        if ($verifyToken !== hash('sha256', $httpGetData['hub.verify_token'])) {
-            return false;
-        } else {
-            /**
-             * Once token is verified, it's no longer needed.
-             * Point of improvement - should defer deletion to
-             * last possible moment...so we don't delete before any possible
-             * error occurs.
-             */
-            $this->getStorage()->removeVerifyToken($verifyTokenKey);
         }
         return true;
     }
@@ -338,6 +334,25 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     public function getFeedUpdateObject()
     {
         return $this->_feedObject;
+    }
+
+    protected function _hasValidVerifyToken(array $httpGetData = null, $checkValue = true)
+    {
+        $verifyTokenKey = $this->_detectVerifyTokenKey();
+        if (empty($verifyTokenKey)) {
+            return false;
+        }
+        $verifyTokenExists = $this->getStorage()->hasVerifyToken($verifyTokenKey);
+        if (!$verifyTokenExists) {
+            return false;
+        }
+        if ($checkValue) {
+            $verifyToken = $this->getStorage()->getVerifyToken($verifyTokenKey);
+            if ($verifyToken !== hash('sha256', $httpGetData['hub.verify_token'])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

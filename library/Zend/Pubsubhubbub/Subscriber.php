@@ -45,6 +45,20 @@
  */
 
 /**
+ * NOTE: Verification Token Values are a simple base string hashed to SHA256.
+ * These are used to add context to the Path element of the Subscriber's
+ * Callback URL which is recorded by the Hub Server (i.e. these tokens
+ * must be stored persistently).
+ * The same Callback URL (with token appended) is called for any feed updates.
+ * This allows the Subscriber_Callback implementation to verify that any
+ * update arrives at a Callback URL whose token element matches an active
+ * Subscription. Workflow in this regard is considered uncertain and is
+ * being queried on the mailing list for resolution...
+ * The token DOES NOT verify the source of the update - only that the source
+ * has an active subscription key
+ */
+
+/**
  * @see Zend_Pubsubhubbub
  */
 require_once 'Zend/Pubsubhubbub.php';
@@ -641,14 +655,14 @@ class Zend_Pubsubhubbub_Subscriber
 
     /**
      * Simple helper to generate a verification token used in (un)subscribe
-     * requests to a Hub Server
+     * requests to a Hub Server.
      *
      * @param string $hubUrl The Hub Server URL for which this token will apply
      * @return string
      */
     protected function _generateVerifyTokenKey($type, $hubUrl)
     {
-        $keyBase = $type . $hubUrl . $this->getTopicUrl();
+        $keyBase = $hubUrl . $this->getTopicUrl();
         $key = sha1($keyBase);
         return $key;
     }
