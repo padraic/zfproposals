@@ -121,6 +121,21 @@ class Zend_Pubsubhubbub_HttpResponse
     }
 
     /**
+     * Check if a specific Header is set and return its value
+     *
+     * @param string $name
+     */
+    public function getHeader($name)
+    {
+        $name = $this->_normalizeHeader($name);
+        foreach ($this->_headers as $header) {
+            if ($header['name'] == $name) {
+                return $header['value'];
+            }
+        }
+    }
+
+    /**
      * Return array of headers; see {@link $_headers} for format
      *
      * @return array

@@ -205,6 +205,17 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
         $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
     }
 
+    public function testRespondsToValidFeedUpdateWithXHubOnBehalfOfHeader()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['CONTENT_TYPE'] = 'application/atom+xml';
+        $feedXml = file_get_contents(dirname(__FILE__) . '/_files/atom10.xml');
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $feedXml;
+        $this->_callback->handle(array());
+        $this->assertTrue($this->_callback->getHttpResponse()->getHeader('X-Hub-On-Behalf-Of') == 1);
+    }
+
 }
 
 /**
