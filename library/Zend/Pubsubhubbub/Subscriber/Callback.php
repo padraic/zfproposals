@@ -75,6 +75,14 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     protected $_feedUpdate = null;
 
     /**
+     * Contains an instance of Zend_Feed_Reader_FeedAbstract containing the
+     * feed update
+     *
+     * @var Zend_Feed_Reader_FeedAbstract
+     */
+    protected $_feedObject = null;
+
+    /**
      * Handle any callback from a Hub Server responding to a subscription or
      * unsubscription request. This should be the Hub Server confirming the
      * the request prior to taking action on it.
@@ -82,18 +90,23 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     public function handle(array $httpGetData, $sendResponseNow = false)
     {
-        /**
-         * For now this accepts Atom. Give me a few days I'll update to support
-         * RSS (presumably application/rss+xml and application/rdf+xml)
-         */
-        if ($this->_getHeader('Content-Type') == 'application/atom+xml') {
-            $feedType = Zend_Feed_Reader::detectType($this->_getRawBody());
-            if (substr($feedType, 0, 4) == 'atom') {
+        if (strtolower($_SERVER['REQUEST_METHOD']) == 'post'
+        && ($this->_getHeader('Content-Type') == 'application/atom+xml'
+        || $this->_getHeader('Content-Type') == 'application/rss+xml'
+        || $this->_getHeader('Content-Type') == 'application/rdf+xml')) {
+            $feed = Zend_Feed_Reader::importString($this->_getRawBody());
+            $feedType = Zend_Feed_Reader::detectType($feed);
+            if ((substr($feedType, 0, 4) == 'atom'
+            && $this->_getHeader('Content-Type') == 'application/atom+xml')
+            || (substr($feedType, 0, 3) == 'rss'
+            && ($this->_getHeader('Content-Type') == 'application/rss+xml'
+            || $this->_getHeader('Content-Type') == 'application/rdf+xml'))) {
                 $this->setFeedUpdate($this->_getRawBody());
+                $this->setFeedUpdateObject($feed);
                 $this->getHttpResponse()->setHeader('X-Hub-On-Behalf-Of',
                     $this->getSubscriberCount());
             } else {
-                $this->getHttpResponse()->setHttpResponseCode(404); // better code signalling an invalid req?
+                $this->getHttpResponse()->setHttpResponseCode(404);
             }
         } elseif ($this->isValidHubVerification($httpGetData)) {
             $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
@@ -298,11 +311,33 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      * Gets a newly received feed (Atom/RSS) sent by a Hub as an update to a
      * Topic we've subscribed to.
      *
-     * @param string $feed
+     * @return string
      */
     public function getFeedUpdate()
     {
         return $this->_feedUpdate;
+    }
+
+    /**
+     * Sets a newly received feed (Atom/RSS) sent by a Hub as an update to a
+     * Topic we've subscribed to.
+     *
+     * @param string $feed
+     */
+    public function setFeedUpdateObject(Zend_Feed_Reader_FeedAbstract $feed)
+    {
+        $this->_feedObject = $feed;
+    }
+
+    /**
+     * Gets a newly received feed (Atom/RSS) sent by a Hub as an update to a
+     * Topic we've subscribed to.
+     *
+     * @return Zend_Feed_Reader_FeedAbstract
+     */
+    public function getFeedUpdateObject()
+    {
+        return $this->_feedObject;
     }
 
     /**
@@ -382,6 +417,10 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     protected function _getHeader($header)
     {
+        $temp = strtoupper(str_replace('-', '_', $header));
+        if (!empty($_SERVER[$temp])) {
+            return $_SERVER[$temp];
+        }
         $temp = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
         if (!empty($_SERVER[$temp])) {
             return $_SERVER[$temp];
@@ -403,6 +442,9 @@ class Zend_Pubsubhubbub_Subscriber_Callback
     protected function _getRawBody()
     {
         $body = file_get_contents('php://input');
+        if (strlen(trim($body)) == 0 && isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+            $body = $GLOBALS['HTTP_RAW_POST_DATA'];
+        }
         if (strlen(trim($body)) > 0) {
             return $body;
         }

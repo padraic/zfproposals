@@ -161,6 +161,50 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
         $this->assertTrue($this->_callback->getHttpResponse()->getBody() == 'abc');
     }
 
+    public function testRespondsToValidFeedUpdateRequestWith200Response()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['CONTENT_TYPE'] = 'application/atom+xml';
+        $feedXml = file_get_contents(dirname(__FILE__) . '/_files/atom10.xml');
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $feedXml; // dirty  alternative to php://input
+        $this->_callback->handle(array());
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 200);
+    }
+
+    public function testRespondsToInvalidFeedUpdateNotPostWith404Response()
+    {   // yes, this example makes no sense for GET - I know!!!
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['CONTENT_TYPE'] = 'application/atom+xml';
+        $feedXml = file_get_contents(dirname(__FILE__) . '/_files/atom10.xml');
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $feedXml;
+        $this->_callback->handle(array());
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
+    }
+
+    public function testRespondsToInvalidFeedUpdateWrongMimeWith404Response()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['CONTENT_TYPE'] = 'application/kml+xml';
+        $feedXml = file_get_contents(dirname(__FILE__) . '/_files/atom10.xml');
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $feedXml;
+        $this->_callback->handle(array());
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
+    }
+
+    public function testRespondsToInvalidFeedUpdateWrongFeedTypeForMimeWith404Response()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
+        $_SERVER['CONTENT_TYPE'] = 'application/rss+xml';
+        $feedXml = file_get_contents(dirname(__FILE__) . '/_files/atom10.xml');
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $feedXml;
+        $this->_callback->handle(array());
+        $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
+    }
+
 }
 
 /**
