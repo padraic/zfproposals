@@ -103,8 +103,9 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 
     public function testCanSetStorageImplementation()
     {
-        $this->_callback->setStorage(new Zend_Pubsubhubbub_Storage_Filesystem);
-        $this->assertTrue($this->_callback->getStorage() instanceof Zend_Pubsubhubbub_Storage_Filesystem);
+	$storage = $this->getMock('Zend_Pubsubhubbub_StorageInterface');
+        $this->_callback->setStorage($storage);
+        $this->assertThat($this->_callback->getStorage(), $this->identicalTo($storage));
     }
 
     public function testValidatesValidHttpGetData()

@@ -277,8 +277,9 @@ class Zend_Pubsubhubbub_SubscriberTest extends PHPUnit_Framework_TestCase
 
     public function testCanSetStorageImplementation()
     {
-        $this->_subscriber->setStorage(new Zend_Pubsubhubbub_Storage_Filesystem);
-        $this->assertTrue($this->_subscriber->getStorage() instanceof Zend_Pubsubhubbub_Storage_Filesystem);
+	$storage = $this->getMock('Zend_Pubsubhubbub_StorageInterface');
+        $this->_subscriber->setStorage($storage);
+        $this->assertThat($this->_subscriber->getStorage(), $this->identicalTo($storage));
     }
 
     public function testGetStorageThrowsExceptionIfNoneSet()
