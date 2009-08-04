@@ -65,6 +65,42 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
         } catch (Zend_Pubsubhubbub_Exception $e) {}
     }
 
+    public function testCanSetSubscriberCount()
+    {
+        $this->_callback->setSubscriberCount('10000');
+        $this->assertEquals(10000, $this->_callback->getSubscriberCount());
+    }
+
+    public function testDefaultSubscriberCountIsOne()
+    {
+        $this->assertEquals(1, $this->_callback->getSubscriberCount());
+    }
+
+    public function testThrowsExceptionOnSettingZeroAsSubscriberCount()
+    {
+        try {
+            $this->_callback->setSubscriberCount(0);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testThrowsExceptionOnSettingLessThanZeroAsSubscriberCount()
+    {
+        try {
+            $this->_callback->setSubscriberCount(-1);
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+    public function testThrowsExceptionOnSettingAnyScalarTypeCastToAZeroOrLessIntegerAsSubscriberCount()
+    {
+        try {
+            $this->_callback->setSubscriberCount('0aa');
+            $this->fail('Should not fail as an Exception would be raised and caught');
+        } catch (Zend_Pubsubhubbub_Exception $e) {}
+    }
+
+
     public function testCanSetStorageImplementation()
     {
         $this->_callback->setStorage(new Zend_Pubsubhubbub_Storage_Filesystem);

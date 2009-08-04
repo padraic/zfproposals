@@ -56,6 +56,13 @@ abstract class Zend_Pubsubhubbub_CallbackAbstract
     protected $_httpResponse = null;
 
     /**
+     * The number of Subscribers for which any updates are on behalf of.
+     *
+     * @var int
+     */
+    protected $_subscriberCount = 1;
+
+    /**
      * Send the response, including all headers.
      * If you wish to handle this via Zend_Controller, use the getter methods
      * to retrieve any data needed to be set on your HTTP Response object, or
@@ -128,6 +135,35 @@ abstract class Zend_Pubsubhubbub_CallbackAbstract
             $this->_httpResponse = new Zend_Pubsubhubbub_HttpResponse;
         }
         return $this->_httpResponse;
+    }
+
+    /**
+     * Sets the number of Subscribers for which any updates are on behalf of.
+     * In other words, is this class serving one or more subscribers? How many?
+     * Defaults to 1 if left unchanged.
+     *
+     * @param string|int $count
+     */
+    public function setSubscriberCount($count)
+    {
+        $count = intval($count);
+        if ($count <= 0) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Subscriber count must be'
+            . ' greater than zero');
+        }
+        $this->_subscriberCount = $count;
+    }
+
+    /**
+     * Gets the number of Subscribers for which any updates are on behalf of.
+     * In other words, is this class serving one or more subscribers? How many?
+     *
+     * @return int
+     */
+    public function getSubscriberCount()
+    {
+        return $this->_subscriberCount;
     }
 
     /**

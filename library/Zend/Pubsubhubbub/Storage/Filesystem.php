@@ -80,6 +80,63 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
         return $this->_directory;
     }
 
+    public function storeSubscription($key, array $data)
+    {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "key"'
+                .' of "' . $key . '" must be a non-empty string');
+        }
+        $filename = $this->_getFilename($key);
+        $path = $this->getDirectory() . '/' . $filename;
+        file_put_contents($path, serialize($data));
+    }
+
+    public function getSubscription($key)
+    {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
+        }
+        $filename = $this->_getFilename($key);
+        $path = $this->getDirectory() . '/' . $filename;
+        if (!file_exists($path) || !is_readable($path)) {
+            return false;
+        }
+        return unserialize(file_get_contents($path));
+    }
+
+    public function hasSubscription($key)
+    {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
+        }
+        $filename = $this->_getFilename($key);
+        $path = $this->getDirectory() . '/' . $filename;
+        if (!file_exists($path) || !is_readable($path)) {
+            return false;
+        }
+        return true;
+    }
+
+    public function removeSubscription($key)
+    {
+        if (empty($key) || !is_string($key)) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid parameter "data"'
+                .' of "' . $data . '" must be a non-empty string');
+        }
+        $filename = $this->_getFilename($key);
+        $path = $this->getDirectory() . '/' . $filename;
+        if (!file_exists($path) || !is_readable($path)) {
+            return;
+        }
+        unlink($path);
+    }
+
     /**
      * Store data which is associated with the given Hub Server URL and Topic
      * URL and where that data relates to the given Type. The Types supported

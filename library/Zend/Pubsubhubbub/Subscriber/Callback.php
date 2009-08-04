@@ -44,13 +44,6 @@ class Zend_Pubsubhubbub_Subscriber_Callback
 {
 
     /**
-     * The number of Subscribers for which any updates are on behalf of.
-     *
-     * @var int
-     */
-    protected $_subscriberCount = 1;
-
-    /**
      * Contains the content of any feeds sent as updates to the Callback URL
      *
      * @var string
@@ -160,35 +153,6 @@ class Zend_Pubsubhubbub_Subscriber_Callback
             return false;
         }
         return true;
-    }
-
-    /**
-     * Sets the number of Subscribers for which any updates are on behalf of.
-     * In other words, is this class serving one or more subscribers? How many?
-     * Defaults to 1 if left unchanged.
-     *
-     * @param string|int $count
-     */
-    public function setSubscriberCount($count)
-    {
-        $count = intval($count);
-        if ($count <= 0) {
-            require_once 'Zend/Pubsubhubbub/Exception.php';
-            throw new Zend_Pubsubhubbub_Exception('Subscriber count must be'
-            . ' greater than zero');
-        }
-        $this->_subscriberCount = $count;
-    }
-
-    /**
-     * Gets the number of Subscribers for which any updates are on behalf of.
-     * In other words, is this class serving one or more subscribers? How many?
-     *
-     * @return int
-     */
-    public function getSubscriberCount()
-    {
-        return $this->_subscriberCount;
     }
 
     /**
