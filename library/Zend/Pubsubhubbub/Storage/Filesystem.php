@@ -80,7 +80,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
         return $this->_directory;
     }
 
-    public function storeSubscription($key, array $data)
+    public function setSubscription($key, array $data)
     {
         if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';

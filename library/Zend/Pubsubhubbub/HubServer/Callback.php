@@ -98,8 +98,14 @@ class Zend_Pubsubhubbub_HubServer_Callback
             $this->setHttpResponseCode(404);
         } elseif ($this->isValidSubscription()) {
             $this->_handleSubscription('subscribe');
+            if ($this->isSuccess()) {
+                $this->setHttpResponseCode(204);
+            }
         } elseif ($this->isValidUnsubscription()) {
             $this->_handleSubscription('unsubscribe');
+            if ($this->isSuccess()) {
+                $this->setHttpResponseCode(204);
+            }
         } else {
             $this->setHttpResponseCode(404);
         }
@@ -234,6 +240,9 @@ class Zend_Pubsubhubbub_HubServer_Callback
         if (!$this->_hasValidSubscriptionOpParameters()) {
             return false;
         }
+        if (!$this->getStorage()->hasSubscription($this->_getTokenKey())) {
+            return false;
+        }
     }
 
     /**
@@ -273,13 +282,31 @@ class Zend_Pubsubhubbub_HubServer_Callback
         $client->setUri($this->_postData['hub.callback']);
         $client->setRawData($this->_getRequestParameters($type));
         $response = $client->request();
-        if ($response->getStatus() < 200 && $response->getStatus() > 299) {
+        if ($response->getStatus() < 200 && $response->getStatus() > 299
+        && $response->getBody() !== $this->getStorage()->getToken($this->_getTokenKey())) {
             $this->_errors[] = array(
                 'response' => $response,
-                'hubUrl' => $url
+                'callback' => $this->_postData['hub.callback'],
+                'topic' => $this->_postData['hub.topic']
             );
-        } else {
-            // store/delete the subscription based on type...
+        } elseif ($type == 'subscribe') {
+            $data = array(
+                'callback' => $this->_postData['hub.callback'],
+                'topic' => $this->_postData['hub.topic'],
+                'created_date' => time(),
+                'modified_date' => time(),
+                'lease_seconds' => $this->getLeaseSeconds(), // for now :P
+                'expiration_date' => time() + $this->getLeaseSeconds(),
+                'subscription_state' => 'verified',
+                'verify_token' => $this->_postData['verify_token']
+            );
+            if ($this->getStorage()->hasSubscription($this->_getTokenKey())) {
+                $origData = $this->getStorage()->getSubscription($this->_getTokenKey());
+                $data['created_date'] = $origData['created_date'];
+            }
+            $this->getStorage()->setSubscription($this->_getTokenKey(), $data);
+        } elseif ($type == 'unsubscribe') {
+            $this->getStorage()->removeSubscription($this->_getTokenKey());
         }
     }
 
