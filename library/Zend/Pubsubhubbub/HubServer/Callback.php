@@ -94,20 +94,24 @@ class Zend_Pubsubhubbub_HubServer_Callback
     public function handle(array $httpGetData = null, $sendResponseNow = false)
     {
         $this->_postData = $this->_parseParameters();
-        if (strtolower($SERVER['REQUEST_METHOD']) !== 'post') {
-            $this->setHttpResponseCode(404);
+        if (strtolower($_SERVER['REQUEST_METHOD']) !== 'post') {
+            $this->getHttpResponse()->setHttpResponseCode(404);
         } elseif ($this->isValidSubscription()) {
             $this->_handleSubscription('subscribe');
             if ($this->isSuccess()) {
-                $this->setHttpResponseCode(204);
+                $this->getHttpResponse()->setHttpResponseCode(204);
+            } else {
+                $this->getHttpResponse()->setHttpResponseCode(404);
             }
         } elseif ($this->isValidUnsubscription()) {
             $this->_handleSubscription('unsubscribe');
             if ($this->isSuccess()) {
-                $this->setHttpResponseCode(204);
+                $this->getHttpResponse()->setHttpResponseCode(204);
+            } else {
+                $this->getHttpResponse()->setHttpResponseCode(404);
             }
         } else {
-            $this->setHttpResponseCode(404);
+            $this->getHttpResponse()->setHttpResponseCode(404);
         }
         if ($sendResponseNow) {
             $this->sendResponse();
@@ -212,7 +216,8 @@ class Zend_Pubsubhubbub_HubServer_Callback
      */
     public function isValidSubscription()
     {
-        if ($postData['hub.mode'] !== 'subscribe') {
+        if (isset($this->_postData['hub.mode'])
+        && $this->_postData['hub.mode'] !== 'subscribe') {
             return false;
         }
         if (!$this->_hasValidSubscriptionOpParameters()) {
@@ -234,7 +239,8 @@ class Zend_Pubsubhubbub_HubServer_Callback
      */
     public function isValidUnsubscription()
     {
-        if ($postData['hub.mode'] !== 'unsubscribe') {
+        if (isset($this->_postData['hub.mode'])
+        && $this->_postData['hub.mode'] !== 'unsubscribe') {
             return false;
         }
         if (!$this->_hasValidSubscriptionOpParameters()) {
