@@ -77,8 +77,16 @@ class Zend_Pubsubhubbub_HubServer_Callback
         = Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC;
 
     /**
+     * An array of any errors including keys for 'response', 'hubUrl'.
+     * The response is the actual Zend_Http_Response object.
+     *
+     * @var array
+     */
+    protected $_errors = array();
+
+    /**
      * Handle any callback related to a subscription, unsubscription or
-     * publisher notification of new feed updates.
+     * publisher notification of new feed updates. [PUBLISHER OUTSTANDING]
      *
      * @param array $httpGetData GET data if available (NOT USED BY HUB)
      * @param bool $sendResponseNow Whether to send response now or when asked
@@ -89,9 +97,9 @@ class Zend_Pubsubhubbub_HubServer_Callback
         if (strtolower($SERVER['REQUEST_METHOD']) !== 'post') {
             $this->setHttpResponseCode(404);
         } elseif ($this->isValidSubscription()) {
-
+            $this->_handleSubscription('subscribe');
         } elseif ($this->isValidUnsubscription()) {
-
+            $this->_handleSubscription('unsubscribe');
         } else {
             $this->setHttpResponseCode(404);
         }
@@ -229,6 +237,103 @@ class Zend_Pubsubhubbub_HubServer_Callback
     }
 
     /**
+     * Returns a boolean indicator of whether the notifications to a
+     * Subscriber was successful. If it failed, FALSE is returned.
+     *
+     * @return bool
+     */
+    public function isSuccess()
+    {
+        if (count($this->_errors) > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Return an array of errors met from any failures, including keys:
+     * 'response' => the Zend_Http_Response object from the failure
+     * 'callbackUrl' => the URL of the Subscriber whose confirmation failed
+     *
+     * @return array
+     */
+    public function getErrors()
+    {
+        return $this->_errors;
+    }
+
+    /**
+     * Handle a (Un)subscription request (currently synchronous only)
+     *
+     * @return void
+     */
+    protected function _handleSubscription($type)
+    {
+        $client = $this->_getHttpClient($type);
+        $client->setUri($this->_postData['hub.callback']);
+        $client->setRawData($this->_getRequestParameters($type));
+        $response = $client->request();
+        if ($response->getStatus() < 200 && $response->getStatus() > 299) {
+            $this->_errors[] = array(
+                'response' => $response,
+                'hubUrl' => $url
+            );
+        } else {
+            // store/delete the subscription based on type...
+        }
+    }
+
+    /**
+     * Get a basic prepared HTTP client for use
+     *
+     * @param string $mode Must be "subscribe" or "unsubscribe"
+     * @return Zend_Http_Client
+     */
+    protected function _getHttpClient()
+    {
+        $client = Zend_Pubsubhubbub::getHttpClient();
+        $client->setMethod(Zend_Http_Client::GET);
+        $client->setConfig(array('useragent' => 'Zend_Pubsubhubbub_HubServer/'
+            . Zend_Version::VERSION));
+        return $client;
+    }
+
+    /**
+     * Return a list of standard protocol/optional parameters for addition to
+     * client's POST body that are specific to the current Hub Server URL
+     *
+     * @param string $hubUrl
+     */
+    protected function _getRequestParameters($mode)
+    {
+        if (!in_array($mode, array('subscribe', 'unsubscribe'))) {
+            require_once 'Zend/Pubsubhubbub/Exception.php';
+            throw new Zend_Pubsubhubbub_Exception('Invalid mode specified: "'
+            . $mode . '" which should have been "subscribe" or "unsubscribe"');
+        }
+        $params = array();
+        $params['hub.callback'] = $this->getCallbackUrl();
+        $params['hub.mode'] = $mode;
+        $params['hub.topic'] = $this->_postData['hub.topic'];
+        if (isset($this->_postData['hub.verify_token'])) {
+            $params['hub.verify_token'] = $this->_postData['hub.verify_token'];
+        }
+        /**
+         * Establish a persistent Hub challenge and add to parameters
+         */
+        $key = $this->_generateTokenKey($mode, $this->_postData['hub.callback']);
+        $token = $this->_generateToken();
+        $this->getStorage()->setToken($key, hash('sha256', $token));
+        $params['hub.challenge'] = $token;
+        if ($mode == 'subscribe') {
+            $params['hub.lease_seconds'] = $this->getLeaseSeconds(); //for now! :P
+        }
+        return $this->_toByteValueOrderedString(
+            $this->_urlEncode($params)
+        );
+    }
+
+    /**
      * Check validity of request omitting the hub.mode for a subscription or
      * unsubscription POST request
      *
@@ -243,6 +348,9 @@ class Zend_Pubsubhubbub_HubServer_Callback
             }
         }
         if (!Zend_Uri::check($httpGetData['hub.topic'])) {
+            return false;
+        }
+        if (!Zend_Uri::check($httpGetData['hub.callback'])) {
             return false;
         }
         return true;
@@ -277,6 +385,96 @@ class Zend_Pubsubhubbub_HubServer_Callback
             }
         }
         return $params;
+    }
+
+    /**
+     * Simple helper to generate a verification token used in (un)subscribe
+     * requests to a Hub Server. Follows no particular method, which means
+     * it might be improved/changed in future.
+     *
+     * @param string $hubUrl The Hub Server URL for which this token will apply
+     * @return string
+     */
+    protected function _generateToken()
+    {
+        if (!empty($this->_testStaticToken)) {
+            return $this->_testStaticToken;
+        }
+        return uniqid(rand(), true) . time();
+    }
+
+    /**
+     * Simple helper to generate a verification token used in (un)subscribe
+     * requests to a Hub Server.
+     *
+     * @param string $hubUrl The Hub Server URL for which this token will apply
+     * @return string
+     */
+    protected function _generateTokenKey($type, $subscriberUrl)
+    {
+        $keyBase = $subscriberUrl . $this->getTopicUrl();
+        $key = sha1($keyBase);
+        return $key;
+    }
+
+    /**
+     * URL Encode an array of parameters
+     *
+     * @param array $params
+     * @return array
+     */
+    protected function _urlEncode(array $params)
+    {
+        $encoded = array();
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                $ekey = urlencode($key);
+                $encoded[$ekey] = array();
+                foreach ($value as $duplicateKey) {
+                    $encoded[$ekey][] = urlencode($duplicateKey);
+                }
+            } else {
+                $encoded[urlencode($key)] = urlencode($value);
+            }
+        }
+        return $encoded;
+    }
+
+    /**
+     * Order outgoing parameters
+     *
+     * @param array $params
+     * @return array
+     */
+    protected function _toByteValueOrderedString(array $params)
+    {
+        $return = array();
+        uksort($params, 'strnatcmp');
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                /**
+                 * We skip sorting values simply because per spec, the order
+                 * of these values imposes an order of preference we should
+                 * not interfere with.
+                 */
+                //natsort($value);
+                foreach ($value as $keyduplicate) {
+                    $return[] = $key . '=' . $keyduplicate;
+                }
+            } else {
+                $return[] = $key . '=' . $value;
+            }
+        }
+        return implode('&', $return);
+    }
+
+    /**
+     * This STRICTLY for testing purposes only...
+     */
+    protected $_testStaticToken = null;
+    final public function setTestStaticToken($token)
+    {
+        $this->_testStaticToken = (string) $token;
     }
 
 }

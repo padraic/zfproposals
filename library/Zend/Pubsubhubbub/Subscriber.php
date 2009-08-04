@@ -621,7 +621,7 @@ class Zend_Pubsubhubbub_Subscriber
          */
         $key = $this->_generateVerifyTokenKey($mode, $hubUrl);
         $token = $this->_generateVerifyToken();
-        $this->getStorage()->setVerifyToken($key, hash('sha256', $token));
+        $this->getStorage()->setToken($key, hash('sha256', $token));
         $params['hub.verify_token'] = $token;
         // NOTE: Query String cannot be used per spec
         $params['hub.callback'] = $this->getCallbackUrl() . '/' . urlencode($key);

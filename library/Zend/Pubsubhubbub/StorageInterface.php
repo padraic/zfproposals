@@ -45,7 +45,7 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $key
      * @param string $token
      */
-    public function setVerifyToken($key, $token);
+    public function setToken($key, $token);
 
     /**
      * Get data associated with the given key
@@ -53,7 +53,7 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $key
      * @return string
      */
-    public function getVerifyToken($key);
+    public function getToken($key);
 
     /**
      * Checks for the existence of a record agreeing with the given key
@@ -61,14 +61,14 @@ interface Zend_Pubsubhubbub_StorageInterface
      * @param string $key
      * @return bool
      */
-    public function hasVerifyToken($key);
+    public function hasToken($key);
 
     /**
      * Deletes a record with the given key
      *
      * @param string $key
      */
-    public function removeVerifyToken($key);
+    public function removeToken($key);
 
     /**
      * If implemented: deletes all records

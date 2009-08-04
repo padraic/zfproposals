@@ -146,7 +146,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $key
      * @param string $token
      */
-    public function setVerifyToken($key, $token)
+    public function setToken($key, $token)
     {
         if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
@@ -169,7 +169,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $key
      * @return string
      */
-    public function getVerifyToken($key)
+    public function getToken($key)
     {
         if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
@@ -190,7 +190,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      * @param string $key
      * @return bool
      */
-    public function hasVerifyToken($key)
+    public function hasToken($key)
     {
         if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
@@ -210,7 +210,7 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
      *
      * @param string $key
      */
-    public function removeVerifyToken($key)
+    public function removeToken($key)
     {
         if (empty($key) || !is_string($key)) {
             require_once 'Zend/Pubsubhubbub/Exception.php';

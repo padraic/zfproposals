@@ -259,27 +259,27 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
  */
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHas implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function setVerifyToken($key, $token){}
-    public function getVerifyToken($key){
+    public function setToken($key, $token){}
+    public function getToken($key){
         if ($key == 'verifytokenkey') return hash('sha256', 'cba');
     }
-    public function hasVerifyToken($key){return true;}
-    public function removeVerifyToken($key){}
+    public function hasToken($key){return true;}
+    public function removeToken($key){}
     public function cleanup($type){}
 }
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHasNot implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function setVerifyToken($key, $token){}
-    public function getVerifyToken($key){}
-    public function hasVerifyToken($key){return false;}
-    public function removeVerifyToken($key){}
+    public function setToken($key, $token){}
+    public function getToken($key){}
+    public function hasToken($key){return false;}
+    public function removeToken($key){}
     public function cleanup($type){}
 }
 class Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHasButWrong implements Zend_Pubsubhubbub_StorageInterface
 {
-    public function setVerifyToken($key, $token){}
-    public function getVerifyToken($key){return 'wrong';}
-    public function hasVerifyToken($key){return true;}
-    public function removeVerifyToken($key){}
+    public function setToken($key, $token){}
+    public function getToken($key){return 'wrong';}
+    public function hasToken($key){return true;}
+    public function removeToken($key){}
     public function cleanup($type){}
 }

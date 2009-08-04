@@ -224,12 +224,12 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         if (empty($verifyTokenKey)) {
             return false;
         }
-        $verifyTokenExists = $this->getStorage()->hasVerifyToken($verifyTokenKey);
+        $verifyTokenExists = $this->getStorage()->hasToken($verifyTokenKey);
         if (!$verifyTokenExists) {
             return false;
         }
         if ($checkValue) {
-            $verifyToken = $this->getStorage()->getVerifyToken($verifyTokenKey);
+            $verifyToken = $this->getStorage()->getToken($verifyTokenKey);
             if ($verifyToken !== hash('sha256', $httpGetData['hub.verify_token'])) {
                 return false;
             }

@@ -9,6 +9,8 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
 
     public function setUp()
     {
+        $client = new Zend_Http_Client;
+        Zend_Pubsubhubbub::setHttpClient($client);
         $this->_callback = new Zend_Pubsubhubbub_HubServer_Callback;
     }
 
