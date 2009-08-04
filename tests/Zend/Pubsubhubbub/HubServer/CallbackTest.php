@@ -9,6 +9,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
 {
 
     protected $_adapter = null;
+    protected $_storage = null;
     protected $_originalServer = null;
 
     protected $_subRequest =
@@ -17,11 +18,12 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
     public function setUp()
     {
         $this->_adapter = new Zend_Http_Client_Adapter_Test;
+        $this->_storage = new Zend_Pubsubhubbub_Storage_Filesystem;
         $client = new Zend_Http_Client;
         $client->setAdapter($this->_adapter);
         Zend_Pubsubhubbub::setHttpClient($client);
         $this->_callback = new Zend_Pubsubhubbub_HubServer_Callback;
-        $this->_callback->setStorage(new Zend_Pubsubhubbub_Storage_Filesystem);
+        $this->_callback->setStorage($this->_storage);
         $this->_originalServer = $_SERVER;
         $_SERVER['REQUEST_METHOD'] = 'POST';
     }
@@ -188,41 +190,20 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
         $this->assertEquals(Zend_Pubsubhubbub::VERIFICATION_MODE_SYNC, $this->_callback->getPreferredVerificationMode());
     }
 
-    public function testRespondsToSubscriptionRequestMissingCallbackWith404()
+    public function testRespondsToValidSubscriptionRequestWith200()
     {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5dcb966edab3a4c4d56213c16a8184b&hub.lease_seconds=2592000&hub.mode=subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n" .
+            'cba'
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
         $this->_callback->handle();
-        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+        $this->assertEquals(204, $this->_callback->getHttpResponse()->getHttpResponseCode());
     }
-
-    /*public function testRespondsToSubscriptionRequestMissingModeWith404()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $GLOBALS['HTTP_RAW_POST_DATA'] =
-            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5d'
-            .'cb966edab3a4c4d56213c16a8184b&hub.lease_seconds=2592000'
-            .'&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.veri'
-            .'fy=sync&hub.verify=async&hub.verify_token=abc';
-    }
-
-    public function testRespondsToSubscriptionRequestMissingTopicWith404()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $GLOBALS['HTTP_RAW_POST_DATA'] =
-            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5d'
-            .'cb966edab3a4c4d56213c16a8184b&hub.lease_seconds=2592000&hub.mode='
-            .'subscribe&hub.veri'
-            .'fy=sync&hub.verify=async&hub.verify_token=abc';
-    }
-
-    public function testRespondsToSubscriptionRequestMissingVerifyWith404()
-    {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $GLOBALS['HTTP_RAW_POST_DATA'] =
-            'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback%2F5536df06b5d'
-            .'cb966edab3a4c4d56213c16a8184b&hub.lease_seconds=2592000&hub.mode='
-            .'subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic'
-            .'&hub.verify_token=abc';
-    }*/
 
 }
 

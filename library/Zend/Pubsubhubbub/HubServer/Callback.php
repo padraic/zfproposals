@@ -228,6 +228,7 @@ class Zend_Pubsubhubbub_HubServer_Callback
                 return false;
             }
         }
+        return true;
     }
 
     /**
@@ -246,9 +247,12 @@ class Zend_Pubsubhubbub_HubServer_Callback
         if (!$this->_hasValidSubscriptionOpParameters()) {
             return false;
         }
-        if (!$this->getStorage()->hasSubscription($this->_getTokenKey())) {
+        if (!$this->getStorage()->hasSubscription($this->_getTokenKey(
+            $this->_postData['hub.callback'], $this->_postData['hub.topic'], 'subscription'
+        ))) {
             return false;
         }
+        return true;
     }
 
     /**
@@ -288,8 +292,14 @@ class Zend_Pubsubhubbub_HubServer_Callback
         $client->setUri($this->_postData['hub.callback']);
         $client->setRawData($this->_getRequestParameters($type));
         $response = $client->request();
+        $subscriptionKey = $this->_getTokenKey(
+            $this->_postData['hub.callback'], $this->_postData['hub.topic'], 'subscription'
+        );
+        $tokenKey = $this->_getTokenKey(
+            $this->_postData['hub.callback'], $this->_postData['hub.topic'], 'challenge'
+        );
         if ($response->getStatus() < 200 && $response->getStatus() > 299
-        && $response->getBody() !== $this->getStorage()->getToken($this->_getTokenKey())) {
+        && $response->getBody() !== $this->getStorage()->getToken($tokenKey)) {
             $this->_errors[] = array(
                 'response' => $response,
                 'callback' => $this->_postData['hub.callback'],
@@ -303,16 +313,15 @@ class Zend_Pubsubhubbub_HubServer_Callback
                 'modified_date' => time(),
                 'lease_seconds' => $this->getLeaseSeconds(), // for now :P
                 'expiration_date' => time() + $this->getLeaseSeconds(),
-                'subscription_state' => 'verified',
-                'verify_token' => $this->_postData['verify_token']
+                'subscription_state' => 'verified'
             );
-            if ($this->getStorage()->hasSubscription($this->_getTokenKey())) {
-                $origData = $this->getStorage()->getSubscription($this->_getTokenKey());
+            if ($this->getStorage()->hasSubscription($subscriptionKey)) {
+                $origData = $this->getStorage()->getSubscription($subscriptionKey);
                 $data['created_date'] = $origData['created_date'];
             }
-            $this->getStorage()->setSubscription($this->_getTokenKey(), $data);
+            $this->getStorage()->setSubscription($subscriptionKey, $data);
         } elseif ($type == 'unsubscribe') {
-            $this->getStorage()->removeSubscription($this->_getTokenKey());
+            $this->getStorage()->removeSubscription($subscriptionKey);
         }
     }
 
@@ -354,8 +363,10 @@ class Zend_Pubsubhubbub_HubServer_Callback
         /**
          * Establish a persistent Hub challenge and add to parameters
          */
-        $key = $this->_generateTokenKey($mode, $this->_postData['hub.callback']);
-        $token = $this->_generateToken();
+        $key = $this->_getTokenKey(
+            $this->_postData['hub.callback'], $this->_postData['hub.topic'], 'challenge'
+        );
+        $token = $this->_getToken();
         $this->getStorage()->setToken($key, hash('sha256', $token));
         $params['hub.challenge'] = $token;
         if ($mode == 'subscribe') {
@@ -380,10 +391,10 @@ class Zend_Pubsubhubbub_HubServer_Callback
                 return false;
             }
         }
-        if (!Zend_Uri::check($httpGetData['hub.topic'])) {
+        if (!Zend_Uri::check($this->_postData['hub.topic'])) {
             return false;
         }
-        if (!Zend_Uri::check($httpGetData['hub.callback'])) {
+        if (!Zend_Uri::check($this->_postData['hub.callback'])) {
             return false;
         }
         return true;
@@ -411,7 +422,7 @@ class Zend_Pubsubhubbub_HubServer_Callback
                 if (is_array($params[$key])) {
                     $params[$key][] = $value;
                 } else {
-                    $params[$key] = array($value);
+                    $params[$key] = array($params[$key], $value);
                 }
             } else {
                 $params[$key] = $value;
@@ -428,7 +439,7 @@ class Zend_Pubsubhubbub_HubServer_Callback
      * @param string $hubUrl The Hub Server URL for which this token will apply
      * @return string
      */
-    protected function _generateToken()
+    protected function _getToken()
     {
         if (!empty($this->_testStaticToken)) {
             return $this->_testStaticToken;
@@ -443,9 +454,9 @@ class Zend_Pubsubhubbub_HubServer_Callback
      * @param string $hubUrl The Hub Server URL for which this token will apply
      * @return string
      */
-    protected function _generateTokenKey($type, $subscriberUrl)
+    protected function _getTokenKey($subscriberUrl, $topicUrl, $type = null)
     {
-        $keyBase = $subscriberUrl . $this->getTopicUrl();
+        $keyBase = $subscriberUrl . $topicUrl . $type;
         $key = sha1($keyBase);
         return $key;
     }

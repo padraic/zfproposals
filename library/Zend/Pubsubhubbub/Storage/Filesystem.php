@@ -104,7 +104,15 @@ class Zend_Pubsubhubbub_Storage_Filesystem implements Zend_Pubsubhubbub_StorageI
         if (!file_exists($path) || !is_readable($path)) {
             return false;
         }
-        return unserialize(file_get_contents($path));
+        $serialized = file_get_contents($path);
+        if (empty($serialized)) {
+            return false;
+        }
+        $data = unserialize($serialized);
+        //if (empty($data)) {
+        //    return false;
+        //}
+        return $data;
     }
 
     public function hasSubscription($key)
