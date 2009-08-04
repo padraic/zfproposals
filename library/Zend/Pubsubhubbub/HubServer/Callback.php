@@ -298,8 +298,8 @@ class Zend_Pubsubhubbub_HubServer_Callback
         $tokenKey = $this->_getTokenKey(
             $this->_postData['hub.callback'], $this->_postData['hub.topic'], 'challenge'
         );
-        if ($response->getStatus() < 200 && $response->getStatus() > 299
-        && $response->getBody() !== $this->getStorage()->getToken($tokenKey)) {
+        if ($response->getStatus() < 200 || $response->getStatus() > 299
+        || $response->getBody() !== $this->getStorage()->getToken($tokenKey)) {
             $this->_errors[] = array(
                 'response' => $response,
                 'callback' => $this->_postData['hub.callback'],

@@ -204,7 +204,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -214,12 +214,13 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
 
     public function testRespondsToValidSubscriptionRequestWith204_Synchronous()
     {
+
         $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
         $this->_adapter->setResponse(
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -234,7 +235,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -244,12 +245,12 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
 
     public function testRespondsToInvalidSubscriptionRequestMissingCallbackWith404_Synchnronous()
     {
-        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.lease_seconds=2592000&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.lease_seconds=2592000&hub.mode=subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
         $this->_adapter->setResponse(
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -264,7 +265,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -279,7 +280,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -294,7 +295,7 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
             "HTTP/1.1 200 OK"        . "\r\n" .
             "Content-type: text/html" . "\r\n" .
                                        "\r\n" .
-            'cba'
+            hash('sha256', 'abc')
         );
         $this->_callback->setTestStaticToken('abc');
         $this->_callback->setCallbackUrl('http://www.example.com/hub');
@@ -302,34 +303,112 @@ class Zend_Pubsubhubbub_HubServer_CallbackTest extends PHPUnit_Framework_TestCas
         $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
     }
 
-}
-
-/**
- * Stubs for storage access
- */
-class Zend_Pubsubhubbub_HubServer_CallbackTestStorageHas implements Zend_Pubsubhubbub_StorageInterface
-{
-    public function setToken($key, $token){}
-    public function getToken($key){
-        if ($key == 'verifytokenkey') return hash('sha256', 'cba');
+    public function testRespondsToInvalidUnsubscriptionRequestMissingCallbackWith404_Synchnronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.lease_seconds=2592000&hub.mode=unsubscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n" .
+            hash('sha256', 'abc')
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
     }
-    public function hasToken($key){return true;}
-    public function removeToken($key){}
-    public function cleanup($type){}
-}
-class Zend_Pubsubhubbub_HubServer_CallbackTestStorageHasNot implements Zend_Pubsubhubbub_StorageInterface
-{
-    public function setToken($key, $token){}
-    public function getToken($key){}
-    public function hasToken($key){return false;}
-    public function removeToken($key){}
-    public function cleanup($type){}
-}
-class Zend_Pubsubhubbub_HubServer_CallbackTestStorageHasButWrong implements Zend_Pubsubhubbub_StorageInterface
-{
-    public function setToken($key, $token){}
-    public function getToken($key){return 'wrong';}
-    public function hasToken($key){return true;}
-    public function removeToken($key){}
-    public function cleanup($type){}
+
+    public function testRespondsToInvalidunsubscriptionRequestMissingInvalidLeaseSecondsWith404_Synchronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=0&hub.mode=unsubscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n" .
+            hash('sha256', 'abc')
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToInvalidUnsubscriptionRequestMissingMissingTopicWith404_Synchronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=unsubscribe&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n" .
+            hash('sha256', 'abc')
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToInvalidUnsubscriptionRequestMissingVerifyModeWith404_Synchronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=unsubscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n" .
+            hash('sha256', 'abc')
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToFailedUnsubscriptionConfirmationWithSubscriberWith404_Synchronous()
+    {
+        $this->_storage->setSubscription($this->_skey, array()); // fake existing sub
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=unsubscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToFailedSubscriptionConfirmationWithSubscriberWith404_Synchronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToSuccessfulUnsubscriptionConfirmationWithSubscriberMissingChallengeWith404_Synchronous()
+    {
+        $this->_storage->setSubscription($this->_skey, array()); // fake existing sub
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=unsubscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n"
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
+    public function testRespondsToSuccessfulSubscriptionConfirmationWithSubscriberMissingChallengeWith404_Synchronous()
+    {
+        $GLOBALS['HTTP_RAW_POST_DATA'] = 'hub.callback=http%3A%2F%2Fwww.example.com%2Fcallback&hub.lease_seconds=2592000&hub.mode=subscribe&hub.topic=http%3A%2F%2Fwww.example.com%2Ftopic&hub.verify=sync&hub.verify=async&hub.verify_token=abc';
+        $this->_adapter->setResponse(
+            "HTTP/1.1 200 OK"        . "\r\n" .
+            "Content-type: text/html" . "\r\n" .
+                                       "\r\n"
+        );
+        $this->_callback->setTestStaticToken('abc');
+        $this->_callback->setCallbackUrl('http://www.example.com/hub');
+        $this->_callback->handle();
+        $this->assertEquals(404, $this->_callback->getHttpResponse()->getHttpResponseCode());
+    }
+
 }
