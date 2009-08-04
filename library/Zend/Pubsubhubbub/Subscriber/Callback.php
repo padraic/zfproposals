@@ -97,7 +97,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
          * Handle any (un)subscribe confirmation requests
          */
         } elseif ($this->isValidHubVerification($httpGetData)) {
-            $this->getHttpResponse()->setBody($httpGetData['hub.challenge']);
+            $this->getHttpResponse()->setBody($httpGetData['hub_challenge']);
         /**
          * Hey, C'mon! We tried everything else!
          */
@@ -127,22 +127,22 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         if (strtolower($_SERVER['REQUEST_METHOD']) !== 'get') {
             return false;
         }
-        $required = array('hub.mode', 'hub.topic',
-            'hub.challenge', 'hub.verify_token');
+        $required = array('hub_mode', 'hub_topic',
+            'hub_challenge', 'hub_verify_token');
         foreach ($required as $key) {
             if (!array_key_exists($key, $httpGetData)) {
                 return false;
             }
         }
-        if ($httpGetData['hub.mode'] !== 'subscribe'
-        && $httpGetData['hub.mode'] !== 'unsubscribe') {
+        if ($httpGetData['hub_mode'] !== 'subscribe'
+        && $httpGetData['hub_mode'] !== 'unsubscribe') {
             return false;
         }
-        if ($httpGetData['hub.mode'] == 'subscribe'
-        && !array_key_exists('hub.lease_seconds', $httpGetData)) {
+        if ($httpGetData['hub_mode'] == 'subscribe'
+        && !array_key_exists('hub_lease_seconds', $httpGetData)) {
             return false;
         }
-        if (!Zend_Uri::check($httpGetData['hub.topic'])) {
+        if (!Zend_Uri::check($httpGetData['hub_topic'])) {
             return false;
         }
         /**
@@ -230,7 +230,7 @@ class Zend_Pubsubhubbub_Subscriber_Callback
         }
         if ($checkValue) {
             $verifyToken = $this->getStorage()->getToken($verifyTokenKey);
-            if ($verifyToken !== hash('sha256', $httpGetData['hub.verify_token'])) {
+            if ($verifyToken !== hash('sha256', $httpGetData['hub_verify_token'])) {
                 return false;
             }
         }

@@ -15,12 +15,12 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
         $this->_callback->setStorage(new Zend_Pubsubhubbub_Subscriber_CallbackTestStorageHas);
 
         $this->_get = array(
-            'hub.mode' => 'subscribe',
-            'hub.topic' => 'http://www.example.com/topic',
-            'hub.challenge' => 'abc',
-            'hub.verify_token' => 'cba',
-            'hub.mode' => 'subscribe',
-            'hub.lease_seconds' => '1234567'
+            'hub_mode' => 'subscribe',
+            'hub_topic' => 'http://www.example.com/topic',
+            'hub_challenge' => 'abc',
+            'hub_verify_token' => 'cba',
+            'hub_mode' => 'subscribe',
+            'hub_lease_seconds' => '1234567'
         );
 
         $this->_originalServer = $_SERVER;
@@ -121,49 +121,49 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 
     public function testReturnsFalseIfModeMissingFromHttpGetData()
     {
-        unset($this->_get['hub.mode']);
+        unset($this->_get['hub_mode']);
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfTopicMissingFromHttpGetData()
     {
-        unset($this->_get['hub.topic']);
+        unset($this->_get['hub_topic']);
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfChallengeMissingFromHttpGetData()
     {
-        unset($this->_get['hub.challenge']);
+        unset($this->_get['hub_challenge']);
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfVerifyTokenMissingFromHttpGetData()
     {
-        unset($this->_get['hub.verify_token']);
+        unset($this->_get['hub_verify_token']);
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsTrueIfModeSetAsUnsubscribeFromHttpGetData()
     {
-        $this->_get['hub.mode'] = 'unsubscribe';
+        $this->_get['hub_mode'] = 'unsubscribe';
         $this->assertTrue($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfModeNotRecognisedFromHttpGetData()
     {
-        $this->_get['hub.mode'] = 'abc';
+        $this->_get['hub_mode'] = 'abc';
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfLeaseSecondsMissedWhenModeIsSubscribeFromHttpGetData()
     {
-        unset($this->_get['hub.lease_seconds']);
+        unset($this->_get['hub_lease_seconds']);
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
     public function testReturnsFalseIfHubTopicInvalidFromHttpGetData()
     {
-        $this->_get['hub.topic'] = 'http://';
+        $this->_get['hub_topic'] = 'http://';
         $this->assertFalse($this->_callback->isValidHubVerification($this->_get));
     }
 
@@ -181,7 +181,7 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 
     public function testRespondsToInvalidConfirmationWith404Response()
     {
-        unset($this->_get['hub.mode']);
+        unset($this->_get['hub_mode']);
         $this->_callback->handle($this->_get);
         $this->assertTrue($this->_callback->getHttpResponse()->getHttpResponseCode() == 404);
     }
