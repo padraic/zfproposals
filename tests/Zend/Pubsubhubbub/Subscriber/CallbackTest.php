@@ -25,11 +25,7 @@ class Zend_Pubsubhubbub_Subscriber_CallbackTest extends PHPUnit_Framework_TestCa
 
         $this->_originalServer = $_SERVER;
         $_SERVER['REQUEST_METHOD'] = 'get';
-        $_SERVER['REQUEST_URI'] = '/some/path/callback/verifytokenkey';
-        $_SERVER['HTTPS'] = '';
-        $_SERVER['HTTP_HOST'] = 'www.example.com';
-        $_SERVER['SERVER_NAME'] = 'www.example.com';
-        $_SERVER['SERVER_PORT'] = '80';
+        $_SERVER['QUERY_STRING'] = 'xhub.subscription=verifytokenkey';
     }
 
     public function tearDown()

@@ -72,7 +72,8 @@ class Zend_Pubsubhubbub_Subscriber_Callback
             $httpGetData = $_GET;
         }
         /**
-         * Handle any feed updates (sorry for the mess :P)
+         * Handle any feed updates (sorry for the mess :P) This MUST change to ignore feed validity ASAP
+         * This should remove Zend_Feed_Reader as an immediate dependency
          */
         if (strtolower($_SERVER['REQUEST_METHOD']) == 'post'
         && $this->_hasValidVerifyToken(null, false)
@@ -249,11 +250,47 @@ class Zend_Pubsubhubbub_Subscriber_Callback
      */
     protected function _detectVerifyTokenKey()
     {
-        $callbackUrl = $this->_detectCallbackUrl();
-        $path = parse_url($callbackUrl, PHP_URL_PATH);
-        $parts = explode('/', $path);
-        $tokenKey = urldecode(ltrim(array_pop($parts), '/\\'));
-        return $tokenKey;
+        $params = $this->_parseQueryString();
+        if (isset($params['xhub.subscription'])) {
+            return $params['xhub.subscription'];
+        }
+        return false;
     }
+
+    /**
+     * Build an array of Query String parameters.
+     * This bypasses $_GET which munges parameter names and cannot accept
+     * multiple parameters with the same key.
+     *
+     * @return array|void
+     */
+    protected function _parseQueryString()
+    {
+        $params = array();
+        $queryString = '';
+        if (isset($_SERVER['QUERY_STRING'])) {
+            $queryString = $_SERVER['QUERY_STRING'];
+        }
+        if (empty($queryString)) {
+            return array();
+        }
+        $parts = explode('&', $queryString);
+        foreach ($parts as $kvpair) {
+            $pair = explode('=', $kvpair);
+            $key = rawurldecode($pair[0]);
+            $value = rawurldecode($pair[1]);
+            if (isset($params[$key])) {
+                if (is_array($params[$key])) {
+                    $params[$key][] = $value;
+                } else {
+                    $params[$key] = array($params[$key], $value);
+                }
+            } else {
+                $params[$key] = $value;
+            }
+        }
+        return $params;
+    }
+
 
 }

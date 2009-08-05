@@ -561,7 +561,8 @@ class Zend_Pubsubhubbub_Subscriber
              * At first I thought it was needed, but the backend storage will
              * allow tracking async without any user interference. It's left
              * here in case the user is interested in knowing what Hubs
-             * are using async verification modes
+             * are using async verification modes so they may update Models and
+             * move these to asynchronous processes.
              */
             } elseif ($response->getStatus() == '202') {
                 $this->_asyncHubs[] = array(
@@ -623,8 +624,8 @@ class Zend_Pubsubhubbub_Subscriber
         $token = $this->_generateVerifyToken();
         $this->getStorage()->setToken($key, hash('sha256', $token));
         $params['hub.verify_token'] = $token;
-        // NOTE: Query String cannot be used per spec
-        $params['hub.callback'] = $this->getCallbackUrl() . '/' . urlencode($key);
+        // NOTE: Query String now supported by reference hub
+        $params['hub.callback'] = $this->getCallbackUrl() . '?xhub.subscription=' . urlencode($key);
         if ($mode == 'subscribe') {
             $params['hub.lease_seconds'] = $this->getLeaseSeconds();
         }

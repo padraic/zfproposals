@@ -416,8 +416,8 @@ class Zend_Pubsubhubbub_HubServer_Callback
         $parts = explode('&', $body);
         foreach ($parts as $kvpair) {
             $pair = explode('=', $kvpair);
-            $key = urldecode($pair[0]);
-            $value = urldecode($pair[1]);
+            $key = rawurldecode($pair[0]);
+            $value = rawurldecode($pair[1]);
             if (isset($params[$key])) {
                 if (is_array($params[$key])) {
                     $params[$key][] = $value;
