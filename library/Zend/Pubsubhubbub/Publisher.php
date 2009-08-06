@@ -226,7 +226,7 @@ class Zend_Pubsubhubbub_Publisher
         $client = $this->_getHttpClient();
         $client->setUri($url);
         $response = $client->request();
-        if ($response->getStatus() !== '204') {
+        if ($response->getStatus() !== 204) {
             require_once 'Zend/Pubsubhubbub/Exception.php';
             throw new Zend_Pubsubhubbub_Exception('Notification to Hub Server '
             . 'at "' . $url . '" appears to have failed with a status code of "'
@@ -256,7 +256,7 @@ class Zend_Pubsubhubbub_Publisher
         foreach ($hubs as $url) {
             $client->setUri($url);
             $response = $client->request();
-            if ($response->getStatus() !== '204') {
+            if ($response->getStatus() !== 204) {
                 $this->_errors[] = array(
                     'response' => $response,
                     'hubUrl' => $url

@@ -287,9 +287,9 @@ class Zend_Pubsubhubbub_PublisherTest_ClientFail extends Zend_Http_Client
 }
 class Zend_Pubsubhubbub_PublisherTest_ResponseSuccess
 {
-    public function getStatus(){return '204';}
+    public function getStatus(){return 204;}
 }
 class Zend_Pubsubhubbub_PublisherTest_ResponseFail
 {
-    public function getStatus(){return '404';}
+    public function getStatus(){return 404;}
 }

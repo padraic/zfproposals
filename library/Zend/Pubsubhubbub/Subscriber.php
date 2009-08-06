@@ -551,8 +551,8 @@ class Zend_Pubsubhubbub_Subscriber
             $client->setUri($url);
             $client->setRawData($this->_getRequestParameters($url, $mode));
             $response = $client->request();
-            if ($response->getStatus() !== '204'
-            && $response->getStatus() !== '202') {
+            if ($response->getStatus() !== 204
+            && $response->getStatus() !== 202) {
                 $this->_errors[] = array(
                     'response' => $response,
                     'hubUrl' => $url
@@ -564,7 +564,7 @@ class Zend_Pubsubhubbub_Subscriber
              * are using async verification modes so they may update Models and
              * move these to asynchronous processes.
              */
-            } elseif ($response->getStatus() == '202') {
+            } elseif ($response->getStatus() == 202) {
                 $this->_asyncHubs[] = array(
                     'response' => $response,
                     'hubUrl' => $url
