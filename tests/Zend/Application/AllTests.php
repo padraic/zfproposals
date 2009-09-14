@@ -32,7 +32,7 @@ require_once dirname(__FILE__) . '/../../TestHelper.php';
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
-//require_once 'Zend/Application/Module/ConfiguratorTest.php';
+require_once 'Zend/Application/Module/ConfiguratorTest.php';
 require_once 'Zend/Application/Module/Configurator/LayoutTest.php';
 
 
@@ -47,7 +47,7 @@ class Zend_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend');
 
-        //$suite->addTestSuite('Zend_Application_Module_ConfiguratorTest');
+        $suite->addTestSuite('Zend_Application_Module_ConfiguratorTest');
         $suite->addTestSuite('Zend_Application_Module_Configurator_LayoutTest');
 
         return $suite;

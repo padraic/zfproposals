@@ -1,26 +1,11 @@
 <?php
 
-require_once 'Zend/Application/Resource/ResourceAbstract.php';
+require_once 'Zend/Application/Module/Configurator/ConfiguratorAbstract.php';
 
 class Zend_Application_Module_Configurator_Layout
-    extends Zend_Application_Resource_ResourceAbstract
+    extends Zend_Application_Module_Configurator_ConfiguratorAbstract
 {
 
-    public function init()
-    {
-        $bootstrap = $this->getBootstrap();
-        if (!$bootstrap->hasResource('Layout')) {
-            $options = array(
-                'resources' => array(
-                    'layout' => $this->getOptions()
-                )
-            );
-            $bootstrap->setOptions($options);
-            $bootstrap->bootstrap('Layout');
-        } else {
-            $layout = $bootstrap->getResource('Layout');
-            $layout->setOptions($this->getOptions());
-        }
-    }
+    protected $_resourceName = 'Layout';
 
 }
