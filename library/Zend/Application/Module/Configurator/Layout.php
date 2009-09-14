@@ -9,7 +9,7 @@ class Zend_Application_Module_Configurator_Layout
     public function init()
     {
         $bootstrap = $this->getBootstrap();
-        if (!$this->getBootstrap()->hasResource('Layout')) {
+        if (!$bootstrap->hasResource('Layout')) {
             $options = array(
                 'resources' => array(
                     'layout' => $this->getOptions()
